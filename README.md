@@ -1,12 +1,12 @@
-# Plainly Videos Examples
+# Video Automation Examples
 
-Welcome to the [Plainly Videos](https://www.plainlyvideos.com) examples repository. This collection provides practical code samples and integration patterns to help you get started with the [Plainly Videos REST API](https://app.plainlyvideos.com/api-reference.html).
+A collection of code examples for automating video creation with [Plainly Videos](https://plainlyvideos.com), a video automation platform that renders Adobe After Effects projects natively in the cloud. Each example shows a practical way to use the [Plainly REST API](https://app.plainlyvideos.com/api-reference.html).
 
-## What is Plainly Videos?
+### What is Plainly Videos?
 
-Plainly Videos is a cloud-based video rendering platform that enables developers to render Adobe After Effects projects natively in the cloud using Plainly's powerful REST API.
+Plainly Videos is a cloud-based video automation platform that enables developers to render Adobe After Effects templates natively in the cloud using Plainly's powerful REST API, web app, or native integrations.
 
-## Who is this repository for?
+### Who is this repository for?
 
 - **Developers** looking to integrate video generation into their applications and workflows.
 - **Product teams** wanting to add automated video creation features.
@@ -22,10 +22,10 @@ Before diving into the examples, we recommend checking out these resources:
 
 ## Examples
 
-Simply choose an example that matches your use case and follow `README.md` file provided for setup instructions. Currently, following examples are available:
+Simply choose an example that matches your use case and follow the `README.md` file provided for setup instructions. Currently, the following examples are available:
 
 1. **[Render and webhook](plainly-render-and-webhook/)**
-   * **Purpose**: Demonstrates a complete end-to-end video rendering workflow with webhook handling.
+   * **Purpose**: Demonstrates a complete video rendering workflow, from creating render jobs via the Plainly API to receiving webhook notifications and tracking render status in a database. Renders are triggered from a web form, so this also works as a form-to-video example.
    * **What it shows**:
       - Creating video render jobs via the Plainly API.
       - Setting up webhook endpoints to receive render completion notifications.
@@ -57,4 +57,10 @@ Need help? Here's how to get support:
 
 ---
 
-Happy video creating! 🎬
+<div align="center">
+
+**If you find this project helpful, please consider giving it a ⭐!**
+
+[![Star on GitHub](https://img.shields.io/github/stars/plainly-videos/examples?style=for-the-badge&logo=github&label=Star%20this%20repo&color=FFD700)](https://github.com/plainly-videos/examples/stargazers)
+
+</div>
