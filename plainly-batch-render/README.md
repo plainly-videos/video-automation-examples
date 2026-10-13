@@ -1,0 +1,221 @@
+# Batch render example
+
+This example demonstrates how to render multiple After Effects videos in a single request using the [Plainly Videos](https://www.plainlyvideos.com/) Batch Renders API.
+
+## What this App does?
+
+**Non-technical view:**
+Pick tonight's games from a list, click one button, and get a matchup video for every game. Videos appear in a grid as soon as they are ready.
+
+**Technical view:**
+A TanStack Start app that sends one `POST /api/v2/batch` request containing a batch data entry per selected matchup. The batch id is kept in the URL, and the page polls `GET /api/v2/batch/{batchId}/renders` until every render is finished. No database and no webhooks are needed.
+
+## What you'll learn
+
+- **📦 Batch rendering**: Create many renders with a single Plainly API request.
+- **🔁 Polling**: Track a batch's progress without webhooks or a database.
+- **🔐 Server functions**: Keep your Plainly API key on the server with TanStack Start server functions.
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) (v22 or later)
+- [pnpm](https://pnpm.io/) package manager
+
+## Getting Started
+
+1. Clone the repository:
+
+    ```bash
+    git clone https://github.com/plainly-videos/examples.git
+    cd examples/plainly-batch-render
+    ```
+2. Install dependencies:
+
+    ```bash
+    pnpm install --frozen-lockfile
+    ```
+3. Upload the After Effects project used in this example to Plainly:
+   - Download the example project from [here](../plainly-render-and-webhook/after-effects/Sports%20Matchup.zip).
+   - Go to [Upload form](https://app.plainlyvideos.com/dashboard/projects/create) and upload the project.
+   - Once the upload is done, auto-generate a template with prefix option:
+      - Set the target composition to `editRender`.
+      - Click on "Generate".
+      - This will generate a template with few parameters from layers.
+
+   <p align="center">
+     <img src="../plainly-render-and-webhook/.assets/auto-generate-template.png" alt="Plainly auto-generate template" width="500" />
+   </p>
+
+4. Set up environment variables:
+
+    ```bash
+    cp .env.example .env
+    ```
+
+    Update `.env` with your API key from [Plainly settings](https://app.plainlyvideos.com/dashboard/user/settings/general) and the project `ID` from the project you just uploaded.
+
+    ```properties
+    # Plainly API key, from https://app.plainlyvideos.com/dashboard/user/settings/general
+    PLAINLY_API_KEY=your_plainly_api_key
+
+    # ID of the Sports Matchup project you uploaded to Plainly
+    PLAINLY_PROJECT_ID=your_plainly_project_id
+    ```
+5. Start the development server:
+
+    ```bash
+    pnpm dev
+    ```
+
+    The app is available at http://localhost:3000.
+
+## Usage
+
+Open your browser and navigate to http://localhost:3000. Select one or more games from the list and click the button to create a batch. The page then shows a grid with one card per game, and each card turns into a video preview once its render is finished.
+
+The batch id is stored in the URL (`/?batch=<id>`), so you can refresh the page or share the link and still see the same batch.
+
+<p align="center"><img src=".assets/app.png" alt="Plainly batch render example UI" width="500" /></p>
+
+### Create a batch
+
+A batch request has a `projectId` and a `batchData` array. Every entry in `batchData` holds the `parameters` for one render, so two selected matchups produce two renders.
+
+Batch creation is synchronous and all-or-nothing: the API responds only after all renders are created, and if the request fails, no renders are created. The response contains the batch `id`.
+
+The `createBatch` server function runs on the server, so your API key never reaches the browser:
+
+```ts
+// ./src/lib/plainly.ts
+export const createBatch = createServerFn({ method: "POST" })
+  .validator((fixtureIds: string[]) => pickFixtures(fixtureIds))
+  .handler(async ({ data: selected }) => {
+    const projectId = process.env.PLAINLY_PROJECT_ID;
+    if (!projectId) {
+      throw new Error(
+        "PLAINLY_PROJECT_ID is not set. Copy .env.example to .env and add your project ID.",
+      );
+    }
+
+    // Batch creation is synchronous and all-or-nothing:
+    // either every render is created, or none of them are
+    const res = await plainlyFetch("/batch", {
+      method: "POST",
+      body: JSON.stringify({
+        projectId,
+        batchData: toBatchData(selected),
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Plainly API error ${res.status}: ${await res.text()}`);
+    }
+
+    const batch: { id: string } = await res.json();
+    return { id: batch.id };
+  });
+```
+
+Each selected matchup is mapped to one batch data entry:
+
+```ts
+// ./src/lib/batch.ts
+export const toBatchData = (selected: Fixture[]) =>
+  selected.map((fixture) => ({
+    parameters: {
+      plainlyEditTeam1: fixture.home.name,
+      plainlyEditLogo1: fixture.home.logo,
+      plainlyEditTeam2: fixture.away.name,
+      plainlyEditLogo2: fixture.away.logo,
+    },
+  }));
+```
+
+For two matchups, the request body sent to `POST /api/v2/batch` looks like this:
+
+```json
+{
+  "projectId": "your-project-id",
+  "batchData": [
+    {
+      "parameters": {
+        "plainlyEditTeam1": "NUGGETS",
+        "plainlyEditLogo1": "https://content.sportslogos.net/logos/6/229/full/8926_denver_nuggets-primary-2019.png",
+        "plainlyEditTeam2": "LAKERS",
+        "plainlyEditLogo2": "https://content.sportslogos.net/logos/6/237/full/los_angeles_lakers_logo_primary_2024_sportslogosnet-7324.png"
+      }
+    },
+    {
+      "parameters": {
+        "plainlyEditTeam1": "BULLS",
+        "plainlyEditLogo1": "https://content.sportslogos.net/logos/6/221/full/zdrycpc7mh5teihl10gko8sgf.png",
+        "plainlyEditTeam2": "CELTICS",
+        "plainlyEditLogo2": "https://content.sportslogos.net/logos/6/213/full/boston_celtics_logo_primary_dark_19978753.png"
+      }
+    }
+  ]
+}
+```
+
+### Poll the batch
+
+Once the batch is created, the app navigates to `/?batch=<id>`. The route reads the batch id from the URL and its loader calls `GET /api/v2/batch/{batchId}/renders`, which returns every render in the batch with its current state.
+
+```ts
+// ./src/routes/index.tsx
+export const Route = createFileRoute("/")({
+  // The batch id lives in the URL (/?batch=<id>), so a refresh keeps the view
+  validateSearch: (search: Record<string, unknown>): { batch?: string } => ({
+    batch:
+      typeof search.batch === "string" && search.batch
+        ? search.batch
+        : undefined,
+  }),
+  loaderDeps: ({ search }) => ({ batch: search.batch }),
+  loader: ({ deps }) =>
+    deps.batch ? getBatchRenders({ data: deps.batch }) : null,
+  // ...
+});
+```
+
+The `getBatchRenders` server function in `./src/lib/plainly.ts` performs the API call. While the batch is not finished, the page re-runs the loader every 5 seconds:
+
+```tsx
+// ./src/routes/index.tsx
+const polling = renders !== null && !isBatchFinished(renders);
+
+// Re-run the loader until every render in the batch is finished
+useEffect(() => {
+  if (!polling) return;
+  const timer = setInterval(() => router.invalidate(), POLL_INTERVAL_MS);
+  return () => clearInterval(timer);
+}, [polling, router]);
+```
+
+Polling stops when every render is in a final state (`DONE`, `FAILED` or `INVALID`):
+
+```ts
+// ./src/lib/batch.ts
+const FINISHED_STATES = ["DONE", "FAILED", "INVALID"];
+
+export const isFinished = (render: Pick<Render, "state">) =>
+  FINISHED_STATES.includes(render.state);
+
+// An empty list means Plainly has not returned the renders yet, so keep polling
+export const isBatchFinished = (renders: Pick<Render, "state">[]) =>
+  renders.length > 0 && renders.every(isFinished);
+```
+
+### Good to know
+
+- Batch creation is synchronous. For large batches, increase your HTTP client timeout.
+- If the request fails, no renders are created.
+- For very large data sets, see the Open Batch API in the [Batch Renders API docs](https://help.plainlyvideos.com/docs/developer-guide/batch-renders-api).
+- Prefer webhooks over polling in production. See the [Render and webhook example](../plainly-render-and-webhook/).
+
+## Useful commands
+
+- `pnpm dev` - Starts the app in development mode.
+- `pnpm build` and `pnpm preview` - Builds the app and serves the production build.
+- `pnpm test` - Runs the unit tests.
+- `pnpm lint` - Checks the code with Biome.

@@ -41,6 +41,14 @@ Simply choose an example that matches your use case and follow the `README.md` f
       - Automating the entire video creation process from content generation to rendering.
    * **Tech Stack**: Node.js, TypeScript
 
+3. **[Batch render](plainly-batch-render/)**
+   * **Purpose**: Demonstrates rendering multiple After Effects videos in a single request using Plainly's batch render API.
+   * **What it shows**:
+      - Creating many renders with one Batch Renders API request.
+      - Polling a batch's renders until they are finished, without webhooks or a database.
+      - Showing finished videos in a grid.
+   * **Tech Stack**: TanStack Start, TypeScript, Tailwind CSS, shadcn/ui
+
 ## Contributing
 
 Found an issue or want to contribute a new example? We welcome contributions! Please feel free to:
