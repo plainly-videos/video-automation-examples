@@ -29,7 +29,6 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
-    "@tanstack/router-cli": "^1.167.39",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",

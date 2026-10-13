@@ -79,7 +79,7 @@ The batch id is stored in the URL (`/?batch=<id>`), so you can refresh the page 
 
 ### Create a batch
 
-A batch request has a `projectId` and a `batchData` array. Every entry in `batchData` holds the `parameters` for one render, so two selected matchups produce two renders.
+A batch request has a `projectId` and a `batchData` array. Every entry in `batchData` holds the `parameters` for one render, so two selected matchups produce two renders. Each entry also carries custom `attributes`: Plainly echoes them back on every render in the batch, which is how the app matches a render to its matchup.
 
 Batch creation is synchronous and all-or-nothing: the API responds only after all renders are created, and if the request fails, no renders are created. The response contains the batch `id`.
 
@@ -108,7 +108,7 @@ export const createBatch = createServerFn({ method: "POST" })
     });
 
     if (!res.ok) {
-      throw new Error(`Plainly API error ${res.status}: ${await res.text()}`);
+      throw await apiError(res);
     }
 
     const batch: { id: string } = await res.json();
@@ -122,6 +122,9 @@ Each selected matchup is mapped to one batch data entry:
 // ./src/lib/batch.ts
 export const toBatchData = (selected: Fixture[]) =>
   selected.map((fixture) => ({
+    // Custom attributes come back on every render in the batch,
+    // so we can tell which matchup a render belongs to
+    attributes: { fixtureId: fixture.id },
     parameters: {
       plainlyEditTeam1: fixture.home.name,
       plainlyEditLogo1: fixture.home.logo,
@@ -138,6 +141,7 @@ For two matchups, the request body sent to `POST /api/v2/batch` looks like this:
   "projectId": "your-project-id",
   "batchData": [
     {
+      "attributes": { "fixtureId": "nuggets-lakers" },
       "parameters": {
         "plainlyEditTeam1": "NUGGETS",
         "plainlyEditLogo1": "https://content.sportslogos.net/logos/6/229/full/8926_denver_nuggets-primary-2019.png",
@@ -146,6 +150,7 @@ For two matchups, the request body sent to `POST /api/v2/batch` looks like this:
       }
     },
     {
+      "attributes": { "fixtureId": "bulls-celtics" },
       "parameters": {
         "plainlyEditTeam1": "BULLS",
         "plainlyEditLogo1": "https://content.sportslogos.net/logos/6/221/full/zdrycpc7mh5teihl10gko8sgf.png",
@@ -192,14 +197,15 @@ useEffect(() => {
 }, [polling, router]);
 ```
 
-Polling stops when every render is in a final state (`DONE`, `FAILED` or `INVALID`):
+Polling stops when every render is in a final state, which is any state except `PENDING`, `THROTTLED`, `QUEUED` and `IN_PROGRESS`:
 
 ```ts
 // ./src/lib/batch.ts
-const FINISHED_STATES = ["DONE", "FAILED", "INVALID"];
+const IN_PROGRESS_STATES = ["PENDING", "THROTTLED", "QUEUED", "IN_PROGRESS"];
 
+// Anything else (DONE, INVALID, FAILED, CANCELLED) is final
 export const isFinished = (render: Pick<Render, "state">) =>
-  FINISHED_STATES.includes(render.state);
+  !IN_PROGRESS_STATES.includes(render.state);
 
 // An empty list means Plainly has not returned the renders yet, so keep polling
 export const isBatchFinished = (renders: Pick<Render, "state">[]) =>

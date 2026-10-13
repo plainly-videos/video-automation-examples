@@ -2,17 +2,25 @@ import { expect, test } from "vitest";
 import { fixtures } from "@/fixtures";
 import {
   isBatchFinished,
+  isBatchId,
   isFinished,
   pickFixtures,
   toBatchData,
 } from "@/lib/batch";
 
-test("isFinished treats DONE, FAILED and INVALID as final", () => {
-  for (const state of ["DONE", "FAILED", "INVALID"]) {
+test("isFinished treats every state except the in-progress ones as final", () => {
+  for (const state of ["DONE", "INVALID", "FAILED", "CANCELLED"]) {
     expect(isFinished({ state }), state).toBe(true);
   }
   for (const state of ["PENDING", "THROTTLED", "QUEUED", "IN_PROGRESS"]) {
     expect(isFinished({ state }), state).toBe(false);
+  }
+});
+
+test("isBatchId only accepts UUIDs", () => {
+  expect(isBatchId("97226b64-8b8a-437d-a76e-f014d3845c42")).toBe(true);
+  for (const id of ["..", "", "a/b", "abc"]) {
+    expect(isBatchId(id), id).toBe(false);
   }
 });
 
@@ -37,6 +45,7 @@ test("pickFixtures rejects empty and unknown ids", () => {
 test("toBatchData maps a fixture to the template parameters", () => {
   const [entry] = toBatchData([fixtures[0]]);
   expect(entry).toEqual({
+    attributes: { fixtureId: fixtures[0].id },
     parameters: {
       plainlyEditTeam1: fixtures[0].home.name,
       plainlyEditLogo1: fixtures[0].home.logo,

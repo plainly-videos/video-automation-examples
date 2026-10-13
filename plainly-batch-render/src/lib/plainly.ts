@@ -1,6 +1,6 @@
 import { notFound } from "@tanstack/react-router";
 import { createServerFn, createServerOnlyFn } from "@tanstack/react-start";
-import { pickFixtures, type Render, toBatchData } from "@/lib/batch";
+import { isBatchId, pickFixtures, type Render, toBatchData } from "@/lib/batch";
 
 const PLAINLY_API = "https://api.plainlyvideos.com/api/v2";
 
@@ -25,6 +25,16 @@ const plainlyFetch = createServerOnlyFn(
   },
 );
 
+// Plainly error bodies are JSON with a `message`, fall back to the raw text
+async function apiError(res: Response) {
+  const text = await res.text();
+  let message = text;
+  try {
+    message = JSON.parse(text).message ?? text;
+  } catch {}
+  return new Error(`Plainly API error ${res.status}: ${message}`);
+}
+
 // Creates all renders in a single request
 // https://help.plainlyvideos.com/docs/developer-guide/batch-renders-api
 export const createBatch = createServerFn({ method: "POST" })
@@ -48,7 +58,7 @@ export const createBatch = createServerFn({ method: "POST" })
     });
 
     if (!res.ok) {
-      throw new Error(`Plainly API error ${res.status}: ${await res.text()}`);
+      throw await apiError(res);
     }
 
     const batch: { id: string } = await res.json();
@@ -57,7 +67,11 @@ export const createBatch = createServerFn({ method: "POST" })
 
 // Lists every render created by the batch, with its current state
 export const getBatchRenders = createServerFn({ method: "GET" })
-  .validator((batchId: string) => batchId)
+  .validator((batchId: string) => {
+    // Rejects ids like ".." that would change the request path
+    if (!isBatchId(batchId)) throw notFound();
+    return batchId;
+  })
   .handler(async ({ data: batchId }) => {
     const res = await plainlyFetch(
       `/batch/${encodeURIComponent(batchId)}/renders`,
@@ -66,7 +80,7 @@ export const getBatchRenders = createServerFn({ method: "GET" })
     // Plainly answers 400 for malformed ids and 404 for unknown ones
     if (res.status === 400 || res.status === 404) throw notFound();
     if (!res.ok) {
-      throw new Error(`Plainly API error ${res.status}: ${await res.text()}`);
+      throw await apiError(res);
     }
 
     const renders: Render[] = await res.json();

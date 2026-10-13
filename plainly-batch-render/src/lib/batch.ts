@@ -4,17 +4,21 @@ import { type Fixture, fixtures } from "@/fixtures";
 export type Render = {
   id: string;
   state: string;
-  parameters: Record<string, string>;
+  attributes: { fixtureId?: string };
   output?: string;
   thumbnailUris?: string[];
   expired?: boolean;
-  error?: { message?: string };
 };
 
-const FINISHED_STATES = ["DONE", "FAILED", "INVALID"];
+const IN_PROGRESS_STATES = ["PENDING", "THROTTLED", "QUEUED", "IN_PROGRESS"];
 
+// Anything else (DONE, INVALID, FAILED, CANCELLED) is final
 export const isFinished = (render: Pick<Render, "state">) =>
-  FINISHED_STATES.includes(render.state);
+  !IN_PROGRESS_STATES.includes(render.state);
+
+// Plainly batch ids are UUIDs, anything else never reaches the API
+export const isBatchId = (id: string) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
 // An empty list means Plainly has not returned the renders yet, so keep polling
 export const isBatchFinished = (renders: Pick<Render, "state">[]) =>
@@ -32,6 +36,9 @@ export function pickFixtures(ids: string[]): Fixture[] {
 // One batch data entry per fixture, each entry becomes its own render
 export const toBatchData = (selected: Fixture[]) =>
   selected.map((fixture) => ({
+    // Custom attributes come back on every render in the batch,
+    // so we can tell which matchup a render belongs to
+    attributes: { fixtureId: fixture.id },
     parameters: {
       plainlyEditTeam1: fixture.home.name,
       plainlyEditLogo1: fixture.home.logo,

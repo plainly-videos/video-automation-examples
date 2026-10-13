@@ -2,12 +2,13 @@ import { LoaderCircle } from "lucide-react";
 import { Matchup } from "@/components/matchup";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { fixtures } from "@/fixtures";
 import { isFinished, type Render } from "@/lib/batch";
 
 function stateVariant(state: string) {
   if (state === "DONE") return "default";
-  if (state === "FAILED" || state === "INVALID") return "destructive";
-  return "secondary";
+  if (!isFinished({ state })) return "secondary";
+  return "destructive";
 }
 
 function RenderPreview({ render }: { render: Render }) {
@@ -27,13 +28,15 @@ function RenderPreview({ render }: { render: Render }) {
     );
   }
   if (isFinished(render)) {
-    return (
-      <p className="text-sm text-destructive">
-        {render.error?.message ?? "Render failed"}
-      </p>
-    );
+    return <p className="text-sm text-destructive">Render failed</p>;
   }
-  return <LoaderCircle className="size-6 animate-spin text-muted-foreground" />;
+  return (
+    <LoaderCircle
+      role="status"
+      aria-label="Rendering"
+      className="size-6 animate-spin text-muted-foreground"
+    />
+  );
 }
 
 export function RenderGrid({
@@ -52,28 +55,30 @@ export function RenderGrid({
         {finished}/{renders.length} finished
       </h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {renders.map((render) => (
-          <Card key={render.id}>
-            <CardHeader className="flex flex-row items-center justify-between gap-2">
-              <Matchup
-                home={{
-                  name: render.parameters.plainlyEditTeam1,
-                  logo: render.parameters.plainlyEditLogo1,
-                }}
-                away={{
-                  name: render.parameters.plainlyEditTeam2,
-                  logo: render.parameters.plainlyEditLogo2,
-                }}
-              />
-              <Badge variant={stateVariant(render.state)}>{render.state}</Badge>
-            </CardHeader>
-            <CardContent>
-              <div className="flex aspect-video items-center justify-center rounded-md bg-muted">
-                <RenderPreview render={render} />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+        {renders.map((render) => {
+          const fixture = fixtures.find(
+            (f) => f.id === render.attributes.fixtureId,
+          );
+          return (
+            <Card key={render.id}>
+              <CardHeader className="flex flex-row items-center justify-between gap-2">
+                {fixture ? (
+                  <Matchup home={fixture.home} away={fixture.away} />
+                ) : (
+                  <code className="text-sm">{render.id.slice(0, 8)}</code>
+                )}
+                <Badge variant={stateVariant(render.state)}>
+                  {render.state}
+                </Badge>
+              </CardHeader>
+              <CardContent>
+                <div className="flex aspect-video items-center justify-center rounded-md bg-muted">
+                  <RenderPreview render={render} />
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </section>
   );
