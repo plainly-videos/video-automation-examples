@@ -144,18 +144,18 @@ For two matchups, the request body sent to `POST /api/v2/batch` looks like this:
       "attributes": { "fixtureId": "nuggets-lakers" },
       "parameters": {
         "plainlyEditTeam1": "NUGGETS",
-        "plainlyEditLogo1": "https://content.sportslogos.net/logos/6/229/full/8926_denver_nuggets-primary-2019.png",
+        "plainlyEditLogo1": "https://a.espncdn.com/i/teamlogos/nba/500/den.png",
         "plainlyEditTeam2": "LAKERS",
-        "plainlyEditLogo2": "https://content.sportslogos.net/logos/6/237/full/los_angeles_lakers_logo_primary_2024_sportslogosnet-7324.png"
+        "plainlyEditLogo2": "https://a.espncdn.com/i/teamlogos/nba/500/lal.png"
       }
     },
     {
       "attributes": { "fixtureId": "bulls-celtics" },
       "parameters": {
         "plainlyEditTeam1": "BULLS",
-        "plainlyEditLogo1": "https://content.sportslogos.net/logos/6/221/full/zdrycpc7mh5teihl10gko8sgf.png",
+        "plainlyEditLogo1": "https://a.espncdn.com/i/teamlogos/nba/500/chi.png",
         "plainlyEditTeam2": "CELTICS",
-        "plainlyEditLogo2": "https://content.sportslogos.net/logos/6/213/full/boston_celtics_logo_primary_dark_19978753.png"
+        "plainlyEditLogo2": "https://a.espncdn.com/i/teamlogos/nba/500/bos.png"
       }
     }
   ]
