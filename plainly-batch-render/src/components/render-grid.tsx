@@ -61,18 +61,21 @@ export function RenderGrid({
           );
           return (
             <Card key={render.id}>
-              <CardHeader className="flex flex-row items-center justify-between gap-2">
+              <CardHeader className="flex flex-row items-center">
                 {fixture ? (
                   <Matchup home={fixture.home} away={fixture.away} />
                 ) : (
                   <code className="text-sm">{render.id.slice(0, 8)}</code>
                 )}
-                <Badge variant={stateVariant(render.state)}>
-                  {render.state}
-                </Badge>
               </CardHeader>
               <CardContent>
-                <div className="flex aspect-video items-center justify-center rounded-md bg-muted">
+                <div className="relative flex aspect-video items-center justify-center rounded-md bg-muted">
+                  <Badge
+                    variant={stateVariant(render.state)}
+                    className="absolute top-2 right-2 z-10"
+                  >
+                    {render.state}
+                  </Badge>
                   <RenderPreview render={render} />
                 </div>
               </CardContent>

@@ -74,7 +74,7 @@ export function FixturePicker() {
                   checked={selected.includes(fixture.id)}
                   onCheckedChange={() => toggle(fixture.id)}
                 />
-                <Label htmlFor={fixture.id} className="cursor-pointer">
+                <Label htmlFor={fixture.id} className="flex-1 cursor-pointer">
                   <Matchup home={fixture.home} away={fixture.away} />
                 </Label>
               </div>
