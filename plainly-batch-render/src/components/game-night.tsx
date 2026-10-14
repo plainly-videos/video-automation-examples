@@ -103,7 +103,7 @@ export function GameNight() {
                   )}
                 </div>
               </CardContent>
-              <CardFooter className="justify-end gap-2 *:flex-1 sm:*:flex-none">
+              <CardFooter className="flex-col-reverse gap-2 *:w-full sm:flex-row sm:justify-end sm:*:w-auto">
                 <Button
                   type="button"
                   variant="outline"
