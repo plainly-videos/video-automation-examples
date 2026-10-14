@@ -16,6 +16,10 @@ const IN_PROGRESS_STATES = ["PENDING", "THROTTLED", "QUEUED", "IN_PROGRESS"];
 export const isFinished = (render: Pick<Render, "state">) =>
   !IN_PROGRESS_STATES.includes(render.state);
 
+// IN_PROGRESS -> "In progress", for people instead of the API
+export const stateLabel = (state: string) =>
+  state.charAt(0) + state.slice(1).toLowerCase().replaceAll("_", " ");
+
 // Plainly batch ids are UUIDs, anything else never reaches the API
 export const isBatchId = (id: string) =>
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);

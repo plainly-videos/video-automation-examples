@@ -4,6 +4,7 @@ import {
   isBatchId,
   isFinished,
   pickGames,
+  stateLabel,
   toBatchData,
 } from "@/lib/batch";
 
@@ -70,4 +71,9 @@ test("toBatchData maps a game to the template parameters", () => {
       plainlyEditLogo2: "https://a.espncdn.com/i/teamlogos/nba/500/lal.png",
     },
   });
+});
+
+test("stateLabel turns API states into readable text", () => {
+  expect(stateLabel("DONE")).toBe("Done");
+  expect(stateLabel("IN_PROGRESS")).toBe("In progress");
 });

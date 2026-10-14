@@ -10,7 +10,6 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { createBatch } from "@/lib/plainly";
 import {
@@ -67,66 +66,71 @@ export function GameNight() {
         place(source.id, target.data as Slot);
       }}
     >
-      <div className="grid gap-4 lg:grid-cols-[13rem_1fr_13rem]">
+      <div className="grid gap-4 lg:grid-cols-[18rem_1fr_18rem]">
         <ConferenceList
           title="Western Conference"
           conference="west"
           playing={playing}
           onPick={place}
         />
-        <Card className="order-first lg:order-none lg:self-start">
-          <CardHeader>
-            <CardTitle>Game night</CardTitle>
-            <CardDescription>
-              Drag teams in (or tap them) to set up tonight's games. All games
-              are sent in a single batch request.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form className="grid gap-4" onSubmit={handleSubmit}>
-              {error && (
-                <Alert variant="destructive">
-                  <AlertTitle>Failed to create batch</AlertTitle>
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-              <div className="grid gap-2">
-                {games.map((game, index) => (
-                  <GameRow
-                    // Games only get added at the end or removed, so the index is stable enough
-                    // biome-ignore lint/suspicious/noArrayIndexKey: games have no id of their own
-                    key={index}
-                    game={game}
-                    index={index}
-                    onRemove={remove}
-                  />
-                ))}
-                {/* Everyone plays once, so 30 teams make at most 15 games */}
-                {playing.size < teamIds.length && (
-                  <GameRow game={{}} index={games.length} onRemove={remove} />
+        {/* Same heading row as the conferences, so all three cards line up */}
+        <section className="order-first grid content-start gap-2 lg:order-none">
+          <h2 className="text-center text-sm font-medium text-muted-foreground">
+            Game night
+          </h2>
+          <Card>
+            <CardHeader>
+              <CardDescription>
+                Drag teams in (or tap them) to set up tonight's games. All games
+                are sent in a single batch request.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form className="grid gap-4" onSubmit={handleSubmit}>
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertTitle>Failed to create batch</AlertTitle>
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
                 )}
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={games.length === 0}
-                  onClick={() => setGames([])}
-                >
-                  Clear
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={complete.length === 0 || submitting}
-                >
-                  {submitting
-                    ? "Creating batch…"
-                    : `Render ${complete.length} video${complete.length === 1 ? "" : "s"}`}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+                <div className="grid gap-2">
+                  {games.map((game, index) => (
+                    <GameRow
+                      // Games only get added at the end or removed, so the index is stable enough
+                      // biome-ignore lint/suspicious/noArrayIndexKey: games have no id of their own
+                      key={index}
+                      game={game}
+                      index={index}
+                      onRemove={remove}
+                    />
+                  ))}
+                  {/* Everyone plays once, so 30 teams make at most 15 games */}
+                  {playing.size < teamIds.length && (
+                    <GameRow game={{}} index={games.length} onRemove={remove} />
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={games.length === 0}
+                    onClick={() => setGames([])}
+                  >
+                    Clear
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={complete.length === 0 || submitting}
+                  >
+                    {submitting
+                      ? "Creating batch…"
+                      : `Render ${complete.length} video${complete.length === 1 ? "" : "s"}`}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </section>
         <ConferenceList
           title="Eastern Conference"
           conference="east"
@@ -152,7 +156,7 @@ function ConferenceList({
   return (
     <section className="grid content-start gap-2">
       <h2 className="text-sm font-medium text-muted-foreground">{title}</h2>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-1">
+      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-2">
         {teamIds
           .filter((id) => teams[id].conference === conference)
           .map((id) => (
@@ -186,7 +190,7 @@ function TeamTile({
       disabled={playing}
       onClick={onPick}
       className={cn(
-        "flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-left text-sm font-medium",
+        "flex min-w-0 items-center gap-2 rounded-lg border bg-card px-2 py-1.5 text-left text-sm font-medium",
         playing
           ? "opacity-30"
           : "cursor-grab hover:bg-muted active:cursor-grabbing",

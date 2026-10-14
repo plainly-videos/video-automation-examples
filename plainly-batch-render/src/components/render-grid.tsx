@@ -2,7 +2,7 @@ import { LoaderCircle } from "lucide-react";
 import { Matchup } from "@/components/matchup";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { isFinished, type Render } from "@/lib/batch";
+import { isFinished, type Render, stateLabel } from "@/lib/batch";
 import { isTeamId, teams } from "@/teams";
 
 function stateVariant(state: string) {
@@ -73,7 +73,7 @@ export function RenderGrid({
                     variant={stateVariant(render.state)}
                     className="absolute top-2 right-2 z-10"
                   >
-                    {render.state}
+                    {stateLabel(render.state)}
                   </Badge>
                   <RenderPreview render={render} />
                 </div>
