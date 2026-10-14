@@ -9,17 +9,27 @@ export type Slot = { game: number; side: Side };
 // Without a slot, the team takes the first open one.
 export function placeTeam(games: Draft[], team: TeamId, slot?: Slot): Draft[] {
   // Each team plays only once per night, so free it from any other slot
-  const next = games.map(({ home, away }) => ({
-    home: home === team ? undefined : home,
-    away: away === team ? undefined : away,
-  }));
+  const next = free(games, team);
 
   const target = slot ?? openSlot(next);
   // Whoever held the slot before goes back to their conference
   next[target.game] = { ...next[target.game], [target.side]: team };
 
-  return next.filter((game) => game.home || game.away);
+  return dropEmpty(next);
 }
+
+// Sends a team back to its conference, a game with no teams left disappears
+export const removeTeam = (games: Draft[], team: TeamId) =>
+  dropEmpty(free(games, team));
+
+const free = (games: Draft[], team: TeamId) =>
+  games.map(({ home, away }) => ({
+    home: home === team ? undefined : home,
+    away: away === team ? undefined : away,
+  }));
+
+const dropEmpty = (games: Draft[]) =>
+  games.filter((game) => game.home || game.away);
 
 function openSlot(games: Draft[]): Slot {
   const game = games.findIndex((g) => !g.home || !g.away);

@@ -17,6 +17,7 @@ import {
   type Draft,
   isComplete,
   placeTeam,
+  removeTeam,
   type Side,
   type Slot,
 } from "@/lib/schedule";
@@ -40,6 +41,7 @@ export function GameNight() {
   const complete = games.filter(isComplete);
   const place = (team: TeamId, slot?: Slot) =>
     setGames((prev) => placeTeam(prev, team, slot));
+  const remove = (team: TeamId) => setGames((prev) => removeTeam(prev, team));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,7 +67,7 @@ export function GameNight() {
         place(source.id, target.data as Slot);
       }}
     >
-      <div className="grid gap-4 lg:grid-cols-[1fr_1.6fr_1fr]">
+      <div className="grid gap-4 lg:grid-cols-[13rem_1fr_13rem]">
         <ConferenceList
           title="Western Conference"
           conference="west"
@@ -96,14 +98,12 @@ export function GameNight() {
                     key={index}
                     game={game}
                     index={index}
-                    onRemove={() =>
-                      setGames((prev) => prev.filter((_, i) => i !== index))
-                    }
+                    onRemove={remove}
                   />
                 ))}
                 {/* Everyone plays once, so 30 teams make at most 15 games */}
                 {playing.size < teamIds.length && (
-                  <GameRow game={{}} index={games.length} />
+                  <GameRow game={{}} index={games.length} onRemove={remove} />
                 )}
               </div>
               <div className="flex gap-2">
@@ -205,34 +205,35 @@ function GameRow({
 }: {
   game: Draft;
   index: number;
-  onRemove?: () => void;
+  onRemove: (team: TeamId) => void;
 }) {
   return (
-    <div className="flex items-center gap-2">
-      <div className="grid flex-1 grid-cols-[1fr_auto_1fr] items-center gap-2">
-        <GameSlot team={game.home} slot={{ game: index, side: "home" }} />
-        <span className="text-sm text-muted-foreground">vs</span>
-        <GameSlot team={game.away} slot={{ game: index, side: "away" }} />
-      </div>
-      {onRemove ? (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          aria-label="Remove game"
-          onClick={onRemove}
-        >
-          <X />
-        </Button>
-      ) : (
-        // Keeps the empty row aligned with the ones above
-        <span className="size-7" />
-      )}
+    // "vs" sits in the middle, both teams get the same width on each side
+    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+      <GameSlot
+        team={game.home}
+        slot={{ game: index, side: "home" }}
+        onRemove={onRemove}
+      />
+      <span className="text-sm text-muted-foreground">vs</span>
+      <GameSlot
+        team={game.away}
+        slot={{ game: index, side: "away" }}
+        onRemove={onRemove}
+      />
     </div>
   );
 }
 
-function GameSlot({ team, slot }: { team?: TeamId; slot: Slot }) {
+function GameSlot({
+  team,
+  slot,
+  onRemove,
+}: {
+  team?: TeamId;
+  slot: Slot;
+  onRemove: (team: TeamId) => void;
+}) {
   const { ref, isDropTarget } = useDroppable({
     id: `${slot.game}-${slot.side}`,
     data: slot,
@@ -242,14 +243,25 @@ function GameSlot({ team, slot }: { team?: TeamId; slot: Slot }) {
     <div
       ref={ref}
       className={cn(
-        "flex h-11 min-w-0 items-center gap-2 rounded-lg border px-3 text-sm font-medium",
-        slot.side === "away" && "flex-row-reverse",
-        !team && "border-dashed text-muted-foreground",
+        "flex h-11 min-w-0 items-center justify-between gap-2 rounded-lg border pr-1 pl-3 text-sm font-medium",
+        slot.side === "away" && "flex-row-reverse pr-3 pl-1",
+        !team && "border-dashed px-3 text-muted-foreground",
         isDropTarget && "border-primary bg-muted",
       )}
     >
       {team ? (
-        <TeamLabel team={team} reverse={slot.side === "away"} />
+        <>
+          <TeamLabel team={team} reverse={slot.side === "away"} />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            aria-label={`Remove ${teams[team].name}`}
+            onClick={() => onRemove(team)}
+          >
+            <X />
+          </Button>
+        </>
       ) : (
         <span className="truncate">{sideLabel[slot.side]}</span>
       )}
