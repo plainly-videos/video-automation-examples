@@ -1,6 +1,4 @@
-import { useDraggable } from "@dnd-kit/react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { type Conference, type TeamId, teamIds, teams } from "@/teams";
 
 export function ConferenceList({
@@ -42,20 +40,14 @@ function TeamTile({
   playing: boolean;
   onPick: () => void;
 }) {
-  const { ref, isDragging } = useDraggable({ id: team, disabled: playing });
-
   return (
     <Button
-      ref={ref}
       type="button"
       variant="outline"
       size="lg"
       disabled={playing}
       onClick={onPick}
-      className={cn(
-        "min-w-0 cursor-grab justify-start active:cursor-grabbing",
-        isDragging && "shadow-lg",
-      )}
+      className="min-w-0 justify-start"
     >
       <img
         src={teams[team].logo}

@@ -7,7 +7,7 @@ import {
   removeTeam,
 } from "@/lib/game";
 
-test("placeTeam without a slot fills the first open side, then starts a new game", () => {
+test("placeTeam fills the first open side, then starts a new game", () => {
   let games = placeTeam([], "lakers");
   games = placeTeam(games, "celtics");
   games = placeTeam(games, "heat");
@@ -17,26 +17,9 @@ test("placeTeam without a slot fills the first open side, then starts a new game
   ]);
 });
 
-test("placeTeam without a slot fills a missing home team first", () => {
+test("placeTeam fills a missing home team first", () => {
   const games = placeTeam([{ away: "celtics" }], "lakers");
   expect(games).toEqual([{ home: "lakers", away: "celtics" }]);
-});
-
-test("placeTeam into an occupied slot replaces that team", () => {
-  const games = placeTeam([{ home: "lakers", away: "celtics" }], "heat", {
-    game: 0,
-    side: "away",
-  });
-  expect(games).toEqual([{ home: "lakers", away: "heat" }]);
-});
-
-test("placeTeam moves a team that already plays and drops emptied games", () => {
-  const games = placeTeam(
-    [{ home: "lakers", away: "celtics" }, { home: "heat" }],
-    "heat",
-    { game: 0, side: "home" },
-  );
-  expect(games).toEqual([{ home: "heat", away: "celtics" }]);
 });
 
 test("removeTeam frees the slot and drops games with no teams left", () => {
