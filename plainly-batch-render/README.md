@@ -72,9 +72,11 @@ A TanStack Start app that sends one `POST /api/v2/batch` request to `https://api
 
 ## Usage
 
-Open your browser and navigate to http://localhost:3000. Drag teams from the conference lists on the left and right into the game night slots in the middle (or tap a team to put it in the next open slot). Any two teams can play each other, but every team plays only once per night. Click the button to create a batch from all complete games. The page then shows a grid with one card per game, and each card turns into a video preview once its render is finished.
+Open your browser and navigate to http://localhost:3000. Click teams in the conference lists on the left and right to put them into the next open game night slot in the middle, and click a placed team to send it back. Any two teams can play each other, but every team plays only once per night. Click the button to create a batch from all complete games. The page then shows a grid with one card per game, and each card turns into a video preview once its render is finished.
 
 The batch id is stored in the URL (`/batch/<id>`), so you can refresh the page or share the link and still see the same batch.
+
+Every batch you create is also saved in your browser's localStorage and listed under **Recent batches**, so you can reopen an earlier batch with one click.
 
 <p align="center"><img src=".assets/app.png" alt="Plainly Videos batch render example UI" width="500" /></p>
 
