@@ -1,10 +1,9 @@
 import { expect, test } from "vitest";
-import { fixtures } from "@/fixtures";
 import {
   isBatchFinished,
   isBatchId,
   isFinished,
-  pickFixtures,
+  pickGames,
   toBatchData,
 } from "@/lib/batch";
 
@@ -30,27 +29,45 @@ test("isBatchFinished needs at least one render and all of them final", () => {
   expect(isBatchFinished([{ state: "DONE" }, { state: "FAILED" }])).toBe(true);
 });
 
-test("pickFixtures returns fixtures in the requested order", () => {
-  const picked = pickFixtures(["bulls-celtics", "nuggets-lakers"]);
-  expect(picked.map((f) => f.id)).toEqual(["bulls-celtics", "nuggets-lakers"]);
+test("pickGames keeps the games in order", () => {
+  const games = [
+    { home: "bulls", away: "celtics" },
+    { home: "nuggets", away: "lakers" },
+  ];
+  expect(pickGames(games)).toEqual(games);
 });
 
-test("pickFixtures rejects empty and unknown ids", () => {
-  expect(() => pickFixtures([])).toThrow("Select at least one matchup");
-  expect(() => pickFixtures(["nuggets-lakers", "nope"])).toThrow(
-    "Unknown matchup: nope",
+test("pickGames rejects empty, unknown and half-filled games", () => {
+  expect(() => pickGames([])).toThrow("Schedule at least one game");
+  expect(() => pickGames([{ home: "lakers", away: "nope" }])).toThrow(
+    "Unknown team: nope",
+  );
+  expect(() => pickGames([{ home: "lakers" }])).toThrow(
+    "Unknown team: undefined",
   );
 });
 
-test("toBatchData maps a fixture to the template parameters", () => {
-  const [entry] = toBatchData([fixtures[0]]);
+test("pickGames lets each team play only once", () => {
+  expect(() => pickGames([{ home: "lakers", away: "lakers" }])).toThrow(
+    "The LAKERS already play tonight",
+  );
+  expect(() =>
+    pickGames([
+      { home: "lakers", away: "celtics" },
+      { home: "heat", away: "celtics" },
+    ]),
+  ).toThrow("The CELTICS already play tonight");
+});
+
+test("toBatchData maps a game to the template parameters", () => {
+  const [entry] = toBatchData([{ home: "nuggets", away: "lakers" }]);
   expect(entry).toEqual({
-    attributes: { fixtureId: fixtures[0].id },
+    attributes: { home: "nuggets", away: "lakers" },
     parameters: {
-      plainlyEditTeam1: fixtures[0].home.name,
-      plainlyEditLogo1: fixtures[0].home.logo,
-      plainlyEditTeam2: fixtures[0].away.name,
-      plainlyEditLogo2: fixtures[0].away.logo,
+      plainlyEditTeam1: "NUGGETS",
+      plainlyEditLogo1: "https://a.espncdn.com/i/teamlogos/nba/500/den.png",
+      plainlyEditTeam2: "LAKERS",
+      plainlyEditLogo2: "https://a.espncdn.com/i/teamlogos/nba/500/lal.png",
     },
   });
 });

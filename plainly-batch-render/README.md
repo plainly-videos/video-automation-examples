@@ -5,10 +5,10 @@ This example demonstrates how to render multiple After Effects videos in a singl
 ## What this App does?
 
 **Non-technical view:**
-Pick tonight's games from a list, click one button, and get a matchup video for every game. Videos appear in a grid as soon as they are ready.
+Drag NBA teams from the Western and Eastern Conference lists into tonight's game night, click one button, and get a matchup video for every game. Videos appear in a grid as soon as they are ready.
 
 **Technical view:**
-A TanStack Start app that sends one `POST /api/v2/batch` request containing a batch data entry per selected matchup. The batch id is kept in the URL, and the page polls `GET /api/v2/batch/{batchId}/renders` until every render is finished. No database and no webhooks are needed.
+A TanStack Start app that sends one `POST /api/v2/batch` request containing a batch data entry per scheduled game. The batch id is kept in the URL, and the page polls `GET /api/v2/batch/{batchId}/renders` until every render is finished. No database and no webhooks are needed.
 
 ## What you'll learn
 
@@ -71,7 +71,7 @@ A TanStack Start app that sends one `POST /api/v2/batch` request containing a ba
 
 ## Usage
 
-Open your browser and navigate to http://localhost:3000. Select one or more games from the list and click the button to create a batch. The page then shows a grid with one card per game, and each card turns into a video preview once its render is finished.
+Open your browser and navigate to http://localhost:3000. Drag teams from the conference lists on the left and right into the game night slots in the middle (or tap a team to put it in the next open slot). Any two teams can play each other, but every team plays only once per night. Click the button to create a batch from all complete games. The page then shows a grid with one card per game, and each card turns into a video preview once its render is finished.
 
 The batch id is stored in the URL (`/?batch=<id>`), so you can refresh the page or share the link and still see the same batch.
 
@@ -79,7 +79,7 @@ The batch id is stored in the URL (`/?batch=<id>`), so you can refresh the page 
 
 ### Create a batch
 
-A batch request has a `projectId` and a `batchData` array. Every entry in `batchData` holds the `parameters` for one render, so two selected matchups produce two renders. Each entry also carries custom `attributes`: Plainly echoes them back on every render in the batch, which is how the app matches a render to its matchup.
+A batch request has a `projectId` and a `batchData` array. Every entry in `batchData` holds the `parameters` for one render, so two games produce two renders. Each entry also carries custom `attributes`: Plainly echoes them back on every render in the batch, which is how the app matches a render to its game.
 
 Batch creation is synchronous and all-or-nothing: the API responds only after all renders are created, and if the request fails, no renders are created. The response contains the batch `id`.
 
@@ -88,8 +88,8 @@ The `createBatch` server function runs on the server, so your API key never reac
 ```ts
 // ./src/lib/plainly.ts
 export const createBatch = createServerFn({ method: "POST" })
-  .validator((fixtureIds: string[]) => pickFixtures(fixtureIds))
-  .handler(async ({ data: selected }) => {
+  .validator((games: { home: string; away: string }[]) => pickGames(games))
+  .handler(async ({ data: games }) => {
     const projectId = process.env.PLAINLY_PROJECT_ID;
     if (!projectId) {
       throw new Error(
@@ -103,7 +103,7 @@ export const createBatch = createServerFn({ method: "POST" })
       method: "POST",
       body: JSON.stringify({
         projectId,
-        batchData: toBatchData(selected),
+        batchData: toBatchData(games),
       }),
     });
 
@@ -116,32 +116,32 @@ export const createBatch = createServerFn({ method: "POST" })
   });
 ```
 
-Each selected matchup is mapped to one batch data entry:
+The browser only sends team ids. `pickGames` checks them on the server (every team must exist and play only once), and each game is mapped to one batch data entry:
 
 ```ts
 // ./src/lib/batch.ts
-export const toBatchData = (selected: Fixture[]) =>
-  selected.map((fixture) => ({
+export const toBatchData = (games: Game[]) =>
+  games.map(({ home, away }) => ({
     // Custom attributes come back on every render in the batch,
-    // so we can tell which matchup a render belongs to
-    attributes: { fixtureId: fixture.id },
+    // so we can tell which game a render belongs to
+    attributes: { home, away },
     parameters: {
-      plainlyEditTeam1: fixture.home.name,
-      plainlyEditLogo1: fixture.home.logo,
-      plainlyEditTeam2: fixture.away.name,
-      plainlyEditLogo2: fixture.away.logo,
+      plainlyEditTeam1: teams[home].name,
+      plainlyEditLogo1: teams[home].logo,
+      plainlyEditTeam2: teams[away].name,
+      plainlyEditLogo2: teams[away].logo,
     },
   }));
 ```
 
-For two matchups, the request body sent to `POST /api/v2/batch` looks like this:
+For two games, the request body sent to `POST /api/v2/batch` looks like this:
 
 ```json
 {
   "projectId": "your-project-id",
   "batchData": [
     {
-      "attributes": { "fixtureId": "nuggets-lakers" },
+      "attributes": { "home": "nuggets", "away": "lakers" },
       "parameters": {
         "plainlyEditTeam1": "NUGGETS",
         "plainlyEditLogo1": "https://a.espncdn.com/i/teamlogos/nba/500/den.png",
@@ -150,7 +150,7 @@ For two matchups, the request body sent to `POST /api/v2/batch` looks like this:
       }
     },
     {
-      "attributes": { "fixtureId": "bulls-celtics" },
+      "attributes": { "home": "bulls", "away": "celtics" },
       "parameters": {
         "plainlyEditTeam1": "BULLS",
         "plainlyEditLogo1": "https://a.espncdn.com/i/teamlogos/nba/500/chi.png",

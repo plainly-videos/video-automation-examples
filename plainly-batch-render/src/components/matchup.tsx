@@ -1,4 +1,4 @@
-import type { Team } from "@/fixtures";
+import type { Team } from "@/teams";
 
 // Broadcast-style row: [LOGO] HOME   vs   AWAY [LOGO], with "vs" always centered
 export function Matchup({ home, away }: { home: Team; away: Team }) {

@@ -1,6 +1,6 @@
 import { notFound } from "@tanstack/react-router";
 import { createServerFn, createServerOnlyFn } from "@tanstack/react-start";
-import { isBatchId, pickFixtures, type Render, toBatchData } from "@/lib/batch";
+import { isBatchId, pickGames, type Render, toBatchData } from "@/lib/batch";
 
 const PLAINLY_API = "https://api.plainlyvideos.com/api/v2";
 
@@ -38,8 +38,8 @@ async function apiError(res: Response) {
 // Creates all renders in a single request
 // https://help.plainlyvideos.com/docs/developer-guide/batch-renders-api
 export const createBatch = createServerFn({ method: "POST" })
-  .validator((fixtureIds: string[]) => pickFixtures(fixtureIds))
-  .handler(async ({ data: selected }) => {
+  .validator((games: { home: string; away: string }[]) => pickGames(games))
+  .handler(async ({ data: games }) => {
     const projectId = process.env.PLAINLY_PROJECT_ID;
     if (!projectId) {
       throw new Error(
@@ -53,7 +53,7 @@ export const createBatch = createServerFn({ method: "POST" })
       method: "POST",
       body: JSON.stringify({
         projectId,
-        batchData: toBatchData(selected),
+        batchData: toBatchData(games),
       }),
     });
 

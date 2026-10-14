@@ -39,7 +39,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="font-sans antialiased">
-        <div className="mx-auto flex min-h-svh max-w-5xl flex-col items-center gap-10 px-4 py-12">
+        <div className="mx-auto flex min-h-svh max-w-6xl flex-col items-center gap-10 px-4 py-12">
           <img
             src="/plainly-logo-black.png"
             alt="Plainly Videos logo"

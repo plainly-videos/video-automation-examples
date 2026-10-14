@@ -2,8 +2,8 @@ import { LoaderCircle } from "lucide-react";
 import { Matchup } from "@/components/matchup";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { fixtures } from "@/fixtures";
 import { isFinished, type Render } from "@/lib/batch";
+import { isTeamId, teams } from "@/teams";
 
 function stateVariant(state: string) {
   if (state === "DONE") return "default";
@@ -56,14 +56,13 @@ export function RenderGrid({
       </h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {renders.map((render) => {
-          const fixture = fixtures.find(
-            (f) => f.id === render.attributes.fixtureId,
-          );
+          // The game's teams come back in the custom attributes
+          const { home, away } = render.attributes;
           return (
             <Card key={render.id}>
               <CardHeader className="flex flex-row items-center">
-                {fixture ? (
-                  <Matchup home={fixture.home} away={fixture.away} />
+                {isTeamId(home) && isTeamId(away) ? (
+                  <Matchup home={teams[home]} away={teams[away]} />
                 ) : (
                   <code className="text-sm">{render.id.slice(0, 8)}</code>
                 )}

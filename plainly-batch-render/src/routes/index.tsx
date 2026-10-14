@@ -5,7 +5,7 @@ import {
   useRouter,
 } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { FixturePicker } from "@/components/fixture-picker";
+import { GameNight } from "@/components/game-night";
 import { RenderGrid } from "@/components/render-grid";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -45,7 +45,7 @@ function Home() {
 
   return (
     <>
-      <FixturePicker />
+      <GameNight />
       {batch && renders && <RenderGrid batchId={batch} renders={renders} />}
     </>
   );
