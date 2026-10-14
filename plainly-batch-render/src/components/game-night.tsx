@@ -103,7 +103,7 @@ export function GameNight() {
                   )}
                 </div>
               </CardContent>
-              <CardFooter className="gap-2">
+              <CardFooter className="justify-end gap-2 *:flex-1 sm:*:flex-none">
                 <Button
                   type="button"
                   variant="outline"
