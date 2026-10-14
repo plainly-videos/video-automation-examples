@@ -21,7 +21,7 @@ By working through this example, you'll understand how to:
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) (v18 or later)
+- [Node.js](https://nodejs.org/) (v24 or later)
 - [pnpm](https://pnpm.io/) package manager (v12 or later)
 - [Docker](https://www.docker.com/), including [Docker Compose](https://docs.docker.com/compose/), for running a local PostgreSQL instance
 
