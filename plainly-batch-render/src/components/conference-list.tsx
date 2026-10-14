@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { type Conference, type TeamId, teamIds, teams } from "@/teams";
 
 export function ConferenceList({
@@ -14,7 +15,15 @@ export function ConferenceList({
 }) {
   return (
     <section className="grid content-start gap-2">
-      <h2 className="text-sm font-medium text-muted-foreground">{title}</h2>
+      {/* East is the right column on desktop, so its title hugs the right edge */}
+      <h2
+        className={cn(
+          "text-sm font-medium text-muted-foreground",
+          conference === "east" && "lg:text-right",
+        )}
+      >
+        {title}
+      </h2>
       <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-2">
         {teamIds
           .filter((id) => teams[id].conference === conference)
