@@ -1,12 +1,13 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import type { Matchup } from "@/app/generated/prisma";
+import type { Matchup } from "@/app/generated/prisma/client";
 import { cn } from "@/lib/utils";
 import RefreshButton from "../refresh-button";
 import { Badge } from "../ui/badge";
+import type { features } from "./data-table";
 
-export const columns: ColumnDef<Matchup>[] = [
+export const columns: ColumnDef<typeof features, Matchup>[] = [
   {
     accessorKey: "createdAt",
     header: "Date",
