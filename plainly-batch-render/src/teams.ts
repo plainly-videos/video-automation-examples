@@ -6,7 +6,6 @@ const logo = (abbr: string) =>
   `https://a.espncdn.com/i/teamlogos/nba/500/${abbr}.png`;
 
 export const teams = {
-  // Western Conference
   mavericks: { name: "MAVERICKS", logo: logo("dal"), conference: "west" },
   nuggets: { name: "NUGGETS", logo: logo("den"), conference: "west" },
   warriors: { name: "WARRIORS", logo: logo("gs"), conference: "west" },
@@ -22,7 +21,6 @@ export const teams = {
   kings: { name: "KINGS", logo: logo("sac"), conference: "west" },
   spurs: { name: "SPURS", logo: logo("sa"), conference: "west" },
   jazz: { name: "JAZZ", logo: logo("utah"), conference: "west" },
-  // Eastern Conference
   hawks: { name: "HAWKS", logo: logo("atl"), conference: "east" },
   celtics: { name: "CELTICS", logo: logo("bos"), conference: "east" },
   nets: { name: "NETS", logo: logo("bkn"), conference: "east" },
@@ -42,7 +40,7 @@ export const teams = {
 
 export type TeamId = keyof typeof teams;
 
-export const teamIds = Object.keys(teams) as TeamId[];
-
 export const isTeamId = (id: unknown): id is TeamId =>
   typeof id === "string" && Object.hasOwn(teams, id);
+
+export const teamIds = Object.keys(teams).filter(isTeamId);

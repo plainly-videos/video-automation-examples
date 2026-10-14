@@ -1,6 +1,7 @@
 import { notFound } from "@tanstack/react-router";
 import { createServerFn, createServerOnlyFn } from "@tanstack/react-start";
-import { isBatchId, pickGames, type Render, toBatchData } from "@/lib/batch";
+import { isBatchId, type Render, toBatchData } from "@/lib/batch";
+import { pickGames } from "@/lib/game";
 
 const PLAINLY_API = "https://api.plainlyvideos.com/api/v2";
 

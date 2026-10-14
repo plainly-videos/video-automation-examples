@@ -18,8 +18,8 @@ A TanStack Start app that sends one `POST /api/v2/batch` request containing a ba
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) (v22 or later)
-- [pnpm](https://pnpm.io/) package manager
+- [Node.js](https://nodejs.org/) (v24 or later)
+- [pnpm](https://pnpm.io/) package manager (v12 or later)
 
 ## Getting Started
 
@@ -35,7 +35,7 @@ A TanStack Start app that sends one `POST /api/v2/batch` request containing a ba
     pnpm install --frozen-lockfile
     ```
 3. Upload the After Effects project used in this example to Plainly:
-   - Download the example project from [here](../plainly-render-and-webhook/after-effects/Sports%20Matchup.zip).
+   - Download the example project from [here](../ae-projects/Sports%20Matchup.zip).
    - Go to [Upload form](https://app.plainlyvideos.com/dashboard/projects/create) and upload the project.
    - Once the upload is done, auto-generate a template with prefix option:
       - Set the target composition to `editRender`.
@@ -116,7 +116,7 @@ export const createBatch = createServerFn({ method: "POST" })
   });
 ```
 
-The browser only sends team ids. `pickGames` checks them on the server (every team must exist and play only once), and each game is mapped to one batch data entry:
+The browser only sends team ids. `pickGames` in `./src/lib/game.ts` checks them on the server (every team must exist and play only once), and each game is mapped to one batch data entry:
 
 ```ts
 // ./src/lib/batch.ts
@@ -169,7 +169,6 @@ Once the batch is created, the app navigates to `/?batch=<id>`. The route reads 
 ```ts
 // ./src/routes/index.tsx
 export const Route = createFileRoute("/")({
-  // The batch id lives in the URL (/?batch=<id>), so a refresh keeps the view
   validateSearch: (search: Record<string, unknown>): { batch?: string } => ({
     batch:
       typeof search.batch === "string" && search.batch
@@ -224,4 +223,5 @@ export const isBatchFinished = (renders: Pick<Render, "state">[]) =>
 - `pnpm dev` - Starts the app in development mode.
 - `pnpm build` and `pnpm preview` - Builds the app and serves the production build.
 - `pnpm test` - Runs the unit tests.
+- `pnpm coverage` - Runs the unit tests with a coverage report.
 - `pnpm lint` - Checks the code with Biome.

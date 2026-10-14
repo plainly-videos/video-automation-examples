@@ -39,7 +39,7 @@ By working through this example, you'll understand how to:
     pnpm install --frozen-lockfile
     ```
 3. Upload the After Effects project used in this example to Plainly:
-   - Download the example project from [here](./after-effects/Sports%20Matchup.zip).
+   - Download the example project from [here](../ae-projects/Sports%20Matchup.zip).
    - Go to [Upload form](https://app.plainlyvideos.com/dashboard/projects/create) and upload the project.
    - Once the upload is done, auto-generate a template with prefix option:
       - Set the target composition to `editRender`.

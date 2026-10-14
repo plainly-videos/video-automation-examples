@@ -15,7 +15,6 @@ import { getBatchRenders } from "@/lib/plainly";
 const POLL_INTERVAL_MS = 5000;
 
 export const Route = createFileRoute("/")({
-  // The batch id lives in the URL (/?batch=<id>), so a refresh keeps the view
   validateSearch: (search: Record<string, unknown>): { batch?: string } => ({
     batch:
       typeof search.batch === "string" && search.batch

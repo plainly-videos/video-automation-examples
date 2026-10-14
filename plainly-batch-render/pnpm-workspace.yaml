@@ -1,5 +1,8 @@
 packages: []
 
+# Only install versions published at least 2 days ago (in minutes)
+minimumReleaseAge: 2880
+
 allowBuilds:
   esbuild: true
   lightningcss: true

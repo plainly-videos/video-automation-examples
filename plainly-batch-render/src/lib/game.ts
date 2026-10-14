@@ -1,5 +1,6 @@
-import type { TeamId } from "@/teams";
+import { isTeamId, type TeamId, teams } from "@/teams";
 
+export type Game = { home: TeamId; away: TeamId };
 // A game on the board, either side can still be waiting for a team
 export type Draft = { home?: TeamId; away?: TeamId };
 export type Side = "home" | "away";
@@ -37,5 +38,26 @@ function openSlot(games: Draft[]): Slot {
   return { game, side: games[game].home ? "away" : "home" };
 }
 
-export const isComplete = (game: Draft): game is Required<Draft> =>
+export const isComplete = (game: Draft): game is Game =>
   Boolean(game.home && game.away);
+
+// Runs on the server: the browser can send anything, so check every team
+export function pickGames(games: { home?: unknown; away?: unknown }[]): Game[] {
+  if (!Array.isArray(games) || games.length === 0) {
+    throw new Error("Schedule at least one game");
+  }
+  const playing = new Set<TeamId>();
+  const pick = (team: unknown) => {
+    if (!isTeamId(team)) throw new Error(`Unknown team: ${team}`);
+    // Each team plays only once per night
+    if (playing.has(team)) {
+      throw new Error(`The ${teams[team].name} already play tonight`);
+    }
+    playing.add(team);
+    return team;
+  };
+  return games.map((game) => ({
+    home: pick(game?.home),
+    away: pick(game?.away),
+  }));
+}

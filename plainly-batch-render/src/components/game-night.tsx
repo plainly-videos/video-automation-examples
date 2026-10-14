@@ -1,17 +1,18 @@
-import { DragDropProvider, useDraggable, useDroppable } from "@dnd-kit/react";
+import { DragDropProvider, useDroppable } from "@dnd-kit/react";
 import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { X } from "lucide-react";
 import { useState } from "react";
+import { ConferenceList } from "@/components/conference-list";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { createBatch } from "@/lib/plainly";
 import {
   type Draft,
   isComplete,
@@ -19,15 +20,10 @@ import {
   removeTeam,
   type Side,
   type Slot,
-} from "@/lib/schedule";
+} from "@/lib/game";
+import { createBatch } from "@/lib/plainly";
 import { cn } from "@/lib/utils";
-import {
-  type Conference,
-  isTeamId,
-  type TeamId,
-  teamIds,
-  teams,
-} from "@/teams";
+import { isTeamId, type TeamId, teamIds, teams } from "@/teams";
 
 export function GameNight() {
   const [games, setGames] = useState<Draft[]>([]);
@@ -48,22 +44,22 @@ export function GameNight() {
     setSubmitting(true);
 
     try {
-      // One request creates a render for every complete game
       const { id } = await createBatchFn({ data: complete });
       setGames([]);
       await navigate({ to: "/", search: { batch: id } });
     } catch (err) {
-      setError((err as Error).message);
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <DragDropProvider
+    // Game slots are the only drop targets, so every target carries a Slot
+    <DragDropProvider<Slot>
       onDragEnd={({ canceled, operation: { source, target } }) => {
         if (canceled || !target || !isTeamId(source?.id)) return;
-        place(source.id, target.data as Slot);
+        place(source.id, target.data);
       }}
     >
       <div className="grid gap-4 lg:grid-cols-[18rem_1fr_18rem]">
@@ -73,8 +69,7 @@ export function GameNight() {
           playing={playing}
           onPick={place}
         />
-        {/* Same heading row as the conferences, so all three cards line up */}
-        <section className="order-first grid content-start gap-2 lg:order-none">
+        <section className="order-first grid grid-rows-[auto_1fr] gap-2 lg:order-none">
           <h2 className="text-center text-sm font-medium text-muted-foreground">
             Game night
           </h2>
@@ -85,8 +80,8 @@ export function GameNight() {
                 are sent in a single batch request.
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <form className="grid gap-4" onSubmit={handleSubmit}>
+            <form className="contents" onSubmit={handleSubmit}>
+              <CardContent className="grid flex-1 content-start gap-4">
                 {error && (
                   <Alert variant="destructive">
                     <AlertTitle>Failed to create batch</AlertTitle>
@@ -96,7 +91,6 @@ export function GameNight() {
                 <div className="grid gap-2">
                   {games.map((game, index) => (
                     <GameRow
-                      // Games only get added at the end or removed, so the index is stable enough
                       // biome-ignore lint/suspicious/noArrayIndexKey: games have no id of their own
                       key={index}
                       game={game}
@@ -104,31 +98,30 @@ export function GameNight() {
                       onRemove={remove}
                     />
                   ))}
-                  {/* Everyone plays once, so 30 teams make at most 15 games */}
                   {playing.size < teamIds.length && (
                     <GameRow game={{}} index={games.length} onRemove={remove} />
                   )}
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={games.length === 0}
-                    onClick={() => setGames([])}
-                  >
-                    Clear
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={complete.length === 0 || submitting}
-                  >
-                    {submitting
-                      ? "Creating batch…"
-                      : `Render ${complete.length} video${complete.length === 1 ? "" : "s"}`}
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
+              </CardContent>
+              <CardFooter className="gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={games.length === 0}
+                  onClick={() => setGames([])}
+                >
+                  Clear
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={complete.length === 0 || submitting}
+                >
+                  {submitting
+                    ? "Creating batch…"
+                    : `Render ${complete.length} video${complete.length === 1 ? "" : "s"}`}
+                </Button>
+              </CardFooter>
+            </form>
           </Card>
         </section>
         <ConferenceList
@@ -142,66 +135,6 @@ export function GameNight() {
   );
 }
 
-function ConferenceList({
-  title,
-  conference,
-  playing,
-  onPick,
-}: {
-  title: string;
-  conference: Conference;
-  playing: Set<TeamId | undefined>;
-  onPick: (team: TeamId) => void;
-}) {
-  return (
-    <section className="grid content-start gap-2">
-      <h2 className="text-sm font-medium text-muted-foreground">{title}</h2>
-      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-2">
-        {teamIds
-          .filter((id) => teams[id].conference === conference)
-          .map((id) => (
-            <TeamTile
-              key={id}
-              team={id}
-              playing={playing.has(id)}
-              onPick={() => onPick(id)}
-            />
-          ))}
-      </div>
-    </section>
-  );
-}
-
-function TeamTile({
-  team,
-  playing,
-  onPick,
-}: {
-  team: TeamId;
-  playing: boolean;
-  onPick: () => void;
-}) {
-  const { ref, isDragging } = useDraggable({ id: team, disabled: playing });
-
-  return (
-    <button
-      ref={ref}
-      type="button"
-      disabled={playing}
-      onClick={onPick}
-      className={cn(
-        "flex min-w-0 items-center gap-2 rounded-lg border bg-card px-2 py-1.5 text-left text-sm font-medium",
-        playing
-          ? "opacity-30"
-          : "cursor-grab hover:bg-muted active:cursor-grabbing",
-        isDragging && "shadow-lg",
-      )}
-    >
-      <TeamLabel team={team} />
-    </button>
-  );
-}
-
 function GameRow({
   game,
   index,
@@ -212,7 +145,6 @@ function GameRow({
   onRemove: (team: TeamId) => void;
 }) {
   return (
-    // "vs" sits in the middle, both teams get the same width on each side
     <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
       <GameSlot
         team={game.home}
@@ -242,34 +174,48 @@ function GameSlot({
     id: `${slot.game}-${slot.side}`,
     data: slot,
   });
+  const away = slot.side === "away";
+
+  if (!team) {
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          "flex h-9 min-w-0 items-center rounded-lg border border-dashed px-3 text-sm font-medium text-muted-foreground",
+          away && "justify-end",
+          isDropTarget && "border-primary bg-muted",
+        )}
+      >
+        <span className="truncate">{sideLabel[slot.side]}</span>
+      </div>
+    );
+  }
 
   return (
-    <div
+    <Button
       ref={ref}
+      type="button"
+      variant="outline"
+      size="lg"
+      aria-label={`Remove ${teams[team].name}`}
+      onClick={() => onRemove(team)}
       className={cn(
-        "flex h-11 min-w-0 items-center justify-between gap-2 rounded-lg border pr-1 pl-3 text-sm font-medium",
-        slot.side === "away" && "flex-row-reverse pr-3 pl-1",
-        !team && "border-dashed px-3 text-muted-foreground",
+        "min-w-0 justify-between",
+        away && "flex-row-reverse",
         isDropTarget && "border-primary bg-muted",
       )}
     >
-      {team ? (
-        <>
-          <TeamLabel team={team} reverse={slot.side === "away"} />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-xs"
-            aria-label={`Remove ${teams[team].name}`}
-            onClick={() => onRemove(team)}
-          >
-            <X />
-          </Button>
-        </>
-      ) : (
-        <span className="truncate">{sideLabel[slot.side]}</span>
-      )}
-    </div>
+      <span
+        className={cn(
+          "flex min-w-0 items-center gap-1.5",
+          away && "flex-row-reverse",
+        )}
+      >
+        <img src={teams[team].logo} alt="" className="size-6 object-contain" />
+        <span className="truncate">{teams[team].name}</span>
+      </span>
+      <X />
+    </Button>
   );
 }
 
@@ -277,17 +223,3 @@ const sideLabel: Record<Side, string> = {
   home: "Home team",
   away: "Away team",
 };
-
-function TeamLabel({ team, reverse }: { team: TeamId; reverse?: boolean }) {
-  return (
-    <span
-      className={cn(
-        "flex min-w-0 items-center gap-2",
-        reverse && "flex-row-reverse",
-      )}
-    >
-      <img src={teams[team].logo} alt="" className="size-6 object-contain" />
-      <span className="truncate">{teams[team].name}</span>
-    </span>
-  );
-}

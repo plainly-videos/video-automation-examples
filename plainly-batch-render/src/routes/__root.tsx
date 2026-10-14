@@ -8,7 +8,11 @@ export const Route = createRootRoute({
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Plainly batch render example" },
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", href: "/favicon.ico" },
+      { rel: "manifest", href: "/manifest.json" },
+    ],
   }),
   notFoundComponent: () => <p>The requested page could not be found.</p>,
   shellComponent: RootDocument,
