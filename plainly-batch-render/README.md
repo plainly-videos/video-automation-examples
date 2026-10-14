@@ -26,8 +26,8 @@ A TanStack Start app that sends one `POST /api/v2/batch` request containing a ba
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/plainly-videos/examples.git
-    cd examples/plainly-batch-render
+    git clone https://github.com/plainly-videos/video-automation-examples.git
+    cd video-automation-examples/plainly-batch-render
     ```
 2. Install dependencies:
 

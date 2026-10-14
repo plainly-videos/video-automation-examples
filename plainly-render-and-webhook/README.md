@@ -30,8 +30,8 @@ By working through this example, you'll understand how to:
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/plainly-videos/examples.git
-    cd examples/plainly-render-and-webhook
+    git clone https://github.com/plainly-videos/video-automation-examples.git
+    cd video-automation-examples/plainly-render-and-webhook
     ```
 2. Install dependencies:
 

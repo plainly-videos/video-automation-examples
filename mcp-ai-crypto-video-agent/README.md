@@ -16,14 +16,14 @@ talks with you and orchestrates MCP tools for data fetching and rendering.
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/plainly-videos/examples.git
-    cd examples/mcp-ai-crypto-video-agent
+    git clone https://github.com/plainly-videos/video-automation-examples.git
+    cd video-automation-examples/mcp-ai-crypto-video-agent
     ```
 
 2. Install dependencies:
    - `pnpm install --frozen-lockfile`
 3. Upload the After Effects project used in this example to Plainly:
-    - Download the example project from [here](./after-effects/Crypto%202025.zip).
+    - Download the example project from [here](../ae-projects/Crypto%202025.zip).
     - Go to [Upload form](https://app.plainlyvideos.com/dashboard/projects/create) and upload the project.
     - Once the upload is done, auto-generate a template with prefix option:
         - Set the prefixes to `edit`, which will include all compositions starting with `edit` and their parameters.

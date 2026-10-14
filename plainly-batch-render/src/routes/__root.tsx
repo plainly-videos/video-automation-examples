@@ -25,7 +25,7 @@ const footerLinks = [
     label: "Learn",
   },
   {
-    href: "https://github.com/plainly-videos/examples/tree/master/plainly-batch-render",
+    href: "https://github.com/plainly-videos/video-automation-examples/tree/master/plainly-batch-render",
     icon: "/github-142-svgrepo-com.svg",
     label: "View on GitHub",
   },

@@ -61,7 +61,7 @@ Found an issue or want to contribute a new example? We welcome contributions! Pl
 
 Need help? Here's how to get support:
 - 📖 Check the [Help center](https://help.plainlyvideos.com/) first.
-- 📧 Open a [new issue](https://github.com/plainly-videos/examples/issues/new).
+- 📧 Open a [new issue](https://github.com/plainly-videos/video-automation-examples/issues/new).
 
 ---
 
@@ -69,6 +69,6 @@ Need help? Here's how to get support:
 
 **If you find this project helpful, please consider giving it a ⭐!**
 
-[![Star on GitHub](https://img.shields.io/github/stars/plainly-videos/examples?style=for-the-badge&logo=github&label=Star%20this%20repo&color=FFD700)](https://github.com/plainly-videos/examples/stargazers)
+[![Star on GitHub](https://img.shields.io/github/stars/plainly-videos/video-automation-examples?style=for-the-badge&logo=github&label=Star%20this%20repo&color=FFD700)](https://github.com/plainly-videos/video-automation-examples/stargazers)
 
 </div>
