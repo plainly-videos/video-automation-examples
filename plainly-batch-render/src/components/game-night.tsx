@@ -46,7 +46,7 @@ export function GameNight() {
     try {
       const { id } = await createBatchFn({ data: complete });
       setGames([]);
-      await navigate({ to: "/", search: { batch: id } });
+      await navigate({ to: "/batch/$batchId", params: { batchId: id } });
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {

@@ -21,7 +21,7 @@ By working through this example, you'll understand how to:
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) (v24 or later)
+- [Node.js](https://nodejs.org/) (v24 or later, run `nvm use` to pick it up from `.nvmrc`)
 - [pnpm](https://pnpm.io/) package manager (v12 or later)
 - [Docker](https://www.docker.com/), including [Docker Compose](https://docs.docker.com/compose/), for running a local PostgreSQL instance
 
@@ -38,8 +38,8 @@ By working through this example, you'll understand how to:
     ```bash
     pnpm install --frozen-lockfile
     ```
-3. Upload the After Effects project used in this example to Plainly:
-   - Download the example project from [here](../ae-projects/Sports%20Matchup.zip).
+3. Upload the After Effects project used in this example to Plainly Videos:
+   - Download the example project from [here](../after-effects-projects/Sports%20Matchup.zip).
    - Go to [Upload form](https://app.plainlyvideos.com/dashboard/projects/create) and upload the project.
    - Once the upload is done, auto-generate a template with prefix option:
       - Set the target composition to `editRender`.
@@ -48,7 +48,7 @@ By working through this example, you'll understand how to:
 
 
    <p align="center">
-     <img src=".assets/auto-generate-template.png" alt="Plainly auto-generate template" width="500" />
+     <img src=".assets/auto-generate-template.png" alt="Plainly Videos auto-generate template" width="500" />
    </p>
 
 4. Set up environment variables:
@@ -57,7 +57,7 @@ By working through this example, you'll understand how to:
     cp .env.example .env.local
     ```
 
-    Update `.env.local` with your API key from [Plainly settings](https://app.plainlyvideos.com/dashboard/user/settings/general) and the project `ID` from the project you just uploaded.
+    Update `.env.local` with your API key from [Plainly Videos settings](https://app.plainlyvideos.com/dashboard/user/settings/general) and the project `ID` from the project you just uploaded.
     
     ```properties
     # DB connection string, update if you change postgres settings in docker-compose
@@ -105,7 +105,7 @@ A table below the form will show all the match ups created so far, along with th
 At the bottom, your Webhook status should be set to `configured` with the `tunnel` URL.
 
 <p align="center">
-  <img src=".assets/app.png" alt="Plainly render and webhook example UI" width="500" />
+  <img src=".assets/app.png" alt="Plainly Videos render and webhook example UI" width="500" />
 </p>
 
 ### Create a new matchup video

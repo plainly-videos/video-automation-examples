@@ -17,7 +17,7 @@ Plainly Videos is a cloud-based video automation platform that enables developer
 Before diving into the examples, we recommend checking out these resources:
 
 - 📚 **[Help center](https://help.plainlyvideos.com/)** - General guides, tips and FAQ.
-- 🛠️ **[Developer guide](https://help.plainlyvideos.com/docs/developer-guide)** - Special section for developers integrating Plainly's API.
+- 🛠️ **[Developer guide](https://help.plainlyvideos.com/docs/developer-guide)** - Special section for developers integrating the Plainly Videos API.
 - 🌐 **[API reference](https://app.plainlyvideos.com/api-reference.html)** - Complete REST API reference.
 
 ## Examples
@@ -25,9 +25,9 @@ Before diving into the examples, we recommend checking out these resources:
 Simply choose an example that matches your use case and follow the `README.md` file provided for setup instructions. Currently, the following examples are available:
 
 1. **[Render and webhook](plainly-render-and-webhook/)**
-   * **Purpose**: Demonstrates a complete video rendering workflow, from creating render jobs via the Plainly API to receiving webhook notifications and tracking render status in a database. Renders are triggered from a web form, so this also works as a form-to-video example.
+   * **Purpose**: Demonstrates a complete video rendering workflow, from creating render jobs via the Plainly Videos API to receiving webhook notifications and tracking render status in a database. Renders are triggered from a web form, so this also works as a form-to-video example.
    * **What it shows**:
-      - Creating video render jobs via the Plainly API.
+      - Creating video render jobs via the Plainly Videos API.
       - Setting up webhook endpoints to receive render completion notifications.
       - Database integration to track render status and results.
       - User interface for managing video generation requests.
@@ -37,12 +37,12 @@ Simply choose an example that matches your use case and follow the `README.md` f
    * **Purpose**: Showcases an AI-powered video generation agent that creates cryptocurrency-related videos.
    * **What it shows**:
       - Integrating with AI services to generate video content dynamically.
-      - Using Plainly's API to render videos based on AI-generated scripts and assets.
+      - Using the Plainly Videos API to render videos based on AI-generated scripts and assets.
       - Automating the entire video creation process from content generation to rendering.
    * **Tech Stack**: Node.js, TypeScript
 
 3. **[Batch render](plainly-batch-render/)**
-   * **Purpose**: Demonstrates rendering multiple After Effects videos in a single request using Plainly's batch render API.
+   * **Purpose**: Demonstrates rendering multiple After Effects videos in a single request using the Plainly Videos Batch Renders API.
    * **What it shows**:
       - Creating many renders with one Batch Renders API request.
       - Polling a batch's renders until they are finished, without webhooks or a database.
