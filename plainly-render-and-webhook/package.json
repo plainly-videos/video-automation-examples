@@ -15,7 +15,7 @@
     "lint": "biome check",
     "lint:fix": "biome lint --write",
     "format": "biome format --write",
-    "prisma:studio": "dotenv -e .env.local --- npx prisma studio",
+    "prisma:studio": "dotenv -e .env.local -- npx prisma studio",
     "prisma:generate": "dotenv -e .env.local -- npx prisma generate",
     "prisma:push": "dotenv -e .env.local -- npx prisma db push"
   },

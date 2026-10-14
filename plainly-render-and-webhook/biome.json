@@ -32,10 +32,7 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "preset": "recommended",
-      "suspicious": {
-        "noUnknownAtRules": "off"
-      }
+      "preset": "recommended"
     },
     "domains": {
       "next": "recommended",
