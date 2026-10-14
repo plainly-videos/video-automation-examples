@@ -23,8 +23,8 @@ test("isBatchId only accepts UUIDs", () => {
   }
 });
 
-test("isBatchFinished needs at least one render and all of them final", () => {
-  expect(isBatchFinished([])).toBe(false);
+test("isBatchFinished needs every render final", () => {
+  expect(isBatchFinished([])).toBe(true);
   expect(isBatchFinished([{ state: "DONE" }, { state: "QUEUED" }])).toBe(false);
   expect(isBatchFinished([{ state: "DONE" }, { state: "FAILED" }])).toBe(true);
 });

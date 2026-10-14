@@ -4,12 +4,12 @@ import {
   Link,
   useRouter,
 } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { GameNight } from "@/components/game-night";
 import { RenderGrid } from "@/components/render-grid";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { isBatchFinished } from "@/lib/batch";
+import { isBatchFinished, type Render } from "@/lib/batch";
 import { getBatchRenders } from "@/lib/plainly";
 
 const POLL_INTERVAL_MS = 5000;
@@ -32,20 +32,67 @@ export const Route = createFileRoute("/")({
 function Home() {
   const renders = Route.useLoaderData();
   const { batch } = Route.useSearch();
-  const router = useRouter();
-  const polling = renders !== null && !isBatchFinished(renders);
-
-  // Re-run the loader until every render in the batch is finished
-  useEffect(() => {
-    if (!polling) return;
-    const timer = setInterval(() => router.invalidate(), POLL_INTERVAL_MS);
-    return () => clearInterval(timer);
-  }, [polling, router]);
 
   return (
     <>
       <GameNight />
-      {batch && renders && <RenderGrid batchId={batch} renders={renders} />}
+      {batch && renders && (
+        <BatchRenders key={batch} batchId={batch} initial={renders} />
+      )}
+    </>
+  );
+}
+
+// Polls the batch until every render is finished. Polling happens here instead of
+// re-running the route loader, so a failed poll keeps the last renders on screen
+// (and the game night draft) instead of swapping the page for the error component.
+function BatchRenders({
+  batchId,
+  initial,
+}: {
+  batchId: string;
+  initial: Render[];
+}) {
+  const [renders, setRenders] = useState(initial);
+  const [pollFailed, setPollFailed] = useState(false);
+
+  useEffect(() => {
+    if (isBatchFinished(initial)) return;
+    let active = true;
+    let timer: ReturnType<typeof setTimeout>;
+
+    // The next poll is scheduled only after the previous one settles,
+    // so slow responses never overlap or cancel each other
+    const poll = async () => {
+      try {
+        const next = await getBatchRenders({ data: batchId });
+        if (!active) return;
+        setRenders(next);
+        setPollFailed(false);
+        if (isBatchFinished(next)) return;
+      } catch {
+        if (!active) return;
+        setPollFailed(true);
+      }
+      timer = setTimeout(poll, POLL_INTERVAL_MS);
+    };
+    timer = setTimeout(poll, POLL_INTERVAL_MS);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [batchId, initial]);
+
+  return (
+    <>
+      {pollFailed && (
+        <Alert>
+          <AlertTitle>Could not refresh batch</AlertTitle>
+          <AlertDescription>Retrying in a few seconds.</AlertDescription>
+        </Alert>
+      )}
+      <RenderGrid batchId={batchId} renders={renders} />
     </>
   );
 }

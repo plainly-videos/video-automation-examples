@@ -114,6 +114,9 @@ jobs:
       - name: Run Biome
         run: biome ci .
 
+      - name: Typecheck
+        run: pnpm typecheck
+
       - name: Test
         run: pnpm test
 

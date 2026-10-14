@@ -5,7 +5,8 @@ import { teams } from "@/teams";
 export type Render = {
   id: string;
   state: string;
-  attributes: { home?: string; away?: string };
+  // null when the render was created without custom attributes
+  attributes: { home?: string; away?: string } | null;
   output?: string;
   thumbnailUris?: string[];
   expired?: boolean;
@@ -25,9 +26,9 @@ export const stateLabel = (state: string) =>
 export const isBatchId = (id: string) =>
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
-// An empty list means Plainly has not returned the renders yet, so keep polling
+// Batch creation is synchronous, so an empty list will never fill up: stop polling
 export const isBatchFinished = (renders: Pick<Render, "state">[]) =>
-  renders.length > 0 && renders.every(isFinished);
+  renders.every(isFinished);
 
 // One batch data entry per game, each entry becomes its own render
 export const toBatchData = (games: Game[]) =>

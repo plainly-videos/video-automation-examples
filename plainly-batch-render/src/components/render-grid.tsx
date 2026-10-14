@@ -42,6 +42,9 @@ function RenderPreview({ render }: { render: Render }) {
       />
     );
   }
+  if (render.state === "DONE") {
+    return <p className="text-sm text-muted-foreground">No preview</p>;
+  }
   if (isFinished(render)) {
     return <p className="text-sm text-destructive">Render failed</p>;
   }
@@ -71,7 +74,7 @@ export function RenderGrid({
       </h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {renders.map((render) => {
-          const { home, away } = render.attributes;
+          const { home, away } = render.attributes ?? {};
           return (
             <Card key={render.id}>
               <CardHeader className="flex flex-row items-center">

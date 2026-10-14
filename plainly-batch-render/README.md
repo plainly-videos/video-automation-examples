@@ -182,18 +182,23 @@ export const Route = createFileRoute("/")({
 });
 ```
 
-The `getBatchRenders` server function in `./src/lib/plainly.ts` performs the API call. While the batch is not finished, the page re-runs the loader every 5 seconds:
+The `getBatchRenders` server function in `./src/lib/plainly.ts` performs the API call. While the batch is not finished, the page calls it again 5 seconds after the previous call settles. A failed poll keeps the last renders on screen and retries:
 
 ```tsx
 // ./src/routes/index.tsx
-const polling = renders !== null && !isBatchFinished(renders);
-
-// Re-run the loader until every render in the batch is finished
-useEffect(() => {
-  if (!polling) return;
-  const timer = setInterval(() => router.invalidate(), POLL_INTERVAL_MS);
-  return () => clearInterval(timer);
-}, [polling, router]);
+const poll = async () => {
+  try {
+    const next = await getBatchRenders({ data: batchId });
+    if (!active) return;
+    setRenders(next);
+    setPollFailed(false);
+    if (isBatchFinished(next)) return;
+  } catch {
+    if (!active) return;
+    setPollFailed(true);
+  }
+  timer = setTimeout(poll, POLL_INTERVAL_MS);
+};
 ```
 
 Polling stops when every render is in a final state, which is any state except `PENDING`, `THROTTLED`, `QUEUED` and `IN_PROGRESS`:
@@ -206,9 +211,9 @@ const IN_PROGRESS_STATES = ["PENDING", "THROTTLED", "QUEUED", "IN_PROGRESS"];
 export const isFinished = (render: Pick<Render, "state">) =>
   !IN_PROGRESS_STATES.includes(render.state);
 
-// An empty list means Plainly has not returned the renders yet, so keep polling
+// Batch creation is synchronous, so an empty list will never fill up: stop polling
 export const isBatchFinished = (renders: Pick<Render, "state">[]) =>
-  renders.length > 0 && renders.every(isFinished);
+  renders.every(isFinished);
 ```
 
 ### Good to know
