@@ -19,6 +19,7 @@ import {
   removeTeam,
   type Side,
 } from "@/lib/game";
+import { saveBatch } from "@/lib/history";
 import { createBatch } from "@/lib/plainly";
 import { cn } from "@/lib/utils";
 import { type TeamId, teamIds, teams } from "@/teams";
@@ -42,6 +43,7 @@ export function GameNight() {
 
     try {
       const { id } = await createBatchFn({ data: complete });
+      saveBatch({ id, games: complete, createdAt: Date.now() });
       setGames([]);
       await navigate({ to: "/batch/$batchId", params: { batchId: id } });
     } catch (err) {

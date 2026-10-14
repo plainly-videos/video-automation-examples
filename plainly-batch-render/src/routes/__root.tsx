@@ -4,6 +4,7 @@ import {
   Outlet,
   Scripts,
 } from "@tanstack/react-router";
+import { BatchHistory } from "@/components/batch-history";
 import { GameNight } from "@/components/game-night";
 import appCss from "../styles.css?url";
 
@@ -27,6 +28,7 @@ export const Route = createRootRoute({
     <>
       <GameNight />
       <Outlet />
+      <BatchHistory />
     </>
   ),
 });
