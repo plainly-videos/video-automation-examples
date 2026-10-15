@@ -16,6 +16,8 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Render with webhook | Plainly Videos example",
   description: "A simple example integration of Plainly render with webhook",
+  icons:
+    "https://raw.githubusercontent.com/plainly-videos/video-automation-examples/master/assets/favicon.ico",
 };
 
 export default function RootLayout({
