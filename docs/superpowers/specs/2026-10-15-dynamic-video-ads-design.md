@@ -166,3 +166,9 @@ Repo-level changes: root `README.md` gets a 4th example entry; `.github/workflow
 
 - Real AE project from the designer: final parameter names, length limits, template setup steps for the README, product assets.
 - README screenshot once the real template renders.
+
+## Verified API behavior (2026-10-15)
+
+- Render visible to the attribute filter right after creation: yes
+- Attribute filter result order: newest-first
+- Project templates include `resolution.width` and `resolution.height`: yes
