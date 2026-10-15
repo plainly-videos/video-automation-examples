@@ -4,6 +4,9 @@ import {
   Outlet,
   Scripts,
 } from "@tanstack/react-router";
+import { RecentAds } from "@/components/recent-ads";
+import type { AdSummary } from "@/lib/ad";
+import { listAds } from "@/lib/plainly";
 import appCss from "../styles.css?url";
 
 export const Route = createRootRoute({
@@ -21,8 +24,30 @@ export const Route = createRootRoute({
   }),
   notFoundComponent: () => <p>The requested page could not be found.</p>,
   shellComponent: RootDocument,
-  component: Outlet,
+  // Recent ads live in the layout, so they show under every page.
+  // A failed list must not break the form, so the error is shown in the card
+  loader: async (): Promise<{ ads: AdSummary[]; error?: string }> => {
+    try {
+      return { ads: await listAds() };
+    } catch (err) {
+      return {
+        ads: [],
+        error: err instanceof Error ? err.message : String(err),
+      };
+    }
+  },
+  component: RootLayout,
 });
+
+function RootLayout() {
+  const { ads, error } = Route.useLoaderData();
+  return (
+    <>
+      <Outlet />
+      <RecentAds ads={ads} error={error} />
+    </>
+  );
+}
 
 const footerLinks = [
   {
