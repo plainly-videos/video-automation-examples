@@ -2,18 +2,21 @@ import { notFound } from "@tanstack/react-router";
 import { createServerFn, createServerOnlyFn } from "@tanstack/react-start";
 import {
   type Ad,
+  canRetry,
   EXAMPLE,
   FORMATS,
   type Format,
   groupAds,
   isAdId,
   isFormat,
+  latestPerFormat,
   pickAd,
   type Render,
   renderBody,
   type Template,
   templatesByFormat,
   toParameters,
+  toRender,
 } from "@/lib/ad";
 
 const PLAINLY_API = "https://api.plainlyvideos.com/api/v2";
@@ -88,7 +91,7 @@ const filterRenders = createServerOnlyFn(
     });
     if (!res.ok) throw await apiError(res);
     const renders: Render[] = await res.json();
-    return renders;
+    return renders.map(toRender);
   },
 );
 
@@ -139,6 +142,10 @@ export const retryFormat = createServerFn({ method: "POST" })
     const renders = await filterRenders("adId", adId, 50);
     const parameters = renders.find((render) => render.parameters)?.parameters;
     if (!parameters) throw new Error("Ad not found");
+    // The button is hidden for these, but anyone can call this server function
+    if (!canRetry(latestPerFormat(renders)[format])) {
+      throw new Error(`${format} is done or still rendering, no retry needed`);
+    }
 
     const templates = await getTemplates(projectId);
     // Same attributes as the first try, so the new render replaces the old one

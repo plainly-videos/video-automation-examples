@@ -2,6 +2,7 @@ import { expect, test } from "vitest";
 import {
   adFor,
   adStatus,
+  canRetry,
   formatOf,
   fromParameters,
   groupAds,
@@ -15,6 +16,7 @@ import {
   stateLabel,
   templatesByFormat,
   toParameters,
+  toRender,
 } from "@/lib/ad";
 
 const valid = {
@@ -275,5 +277,47 @@ test("adStatus summarizes an ad in one badge", () => {
   expect(adStatus({ done: 3, failed: 0, rendering: 0 })).toEqual({
     label: "3/3 done",
     tone: "done",
+  });
+});
+
+test("canRetry allows only failed or missing formats", () => {
+  expect(canRetry(undefined)).toBe(true);
+  for (const state of ["FAILED", "INVALID", "CANCELLED"]) {
+    expect(canRetry({ state }), state).toBe(true);
+  }
+  // Retrying these would only create duplicate renders
+  for (const state of ["DONE", "PENDING", "QUEUED", "IN_PROGRESS"]) {
+    expect(canRetry({ state }), state).toBe(false);
+  }
+});
+
+test("fromParameters ignores values that are not text", () => {
+  // Any render in the org can carry the example attribute with odd parameters
+  const ad = fromParameters({
+    plainlyEditHeadline: 42,
+    plainlyEditOffer: { text: "20% OFF" },
+    plainlyEditPrice: "$79",
+  });
+  expect(ad).toMatchObject({ headline: "", offer: "", price: "$79" });
+});
+
+test("toRender keeps only the fields the app shows", () => {
+  const raw = {
+    ...render("16:9", "DONE", "2026-10-15T10:00:00Z"),
+    output: "https://cdn.example.com/ad.mp4",
+    projectZipUrl: "https://storage.example.com/project.zip",
+    createdBy: "user-id",
+    webhook: { url: "https://example.com/hook" },
+  };
+  const slim = toRender(raw);
+  expect(slim).not.toHaveProperty("projectZipUrl");
+  expect(slim).not.toHaveProperty("createdBy");
+  expect(slim).not.toHaveProperty("webhook");
+  expect(slim).toMatchObject({
+    id: raw.id,
+    state: "DONE",
+    output: "https://cdn.example.com/ad.mp4",
+    attributes: raw.attributes,
+    parameters: raw.parameters,
   });
 });

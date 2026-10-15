@@ -141,6 +141,7 @@ function AdRenders({ adId, initial }: { adId: string; initial: Render[] }) {
                 <RenderFrame
                   render={latest[format]}
                   retrying={retrying === format}
+                  disabled={retrying !== undefined}
                   onRetry={() => retry(format)}
                 />
               )}

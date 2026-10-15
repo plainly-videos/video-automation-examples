@@ -16,10 +16,13 @@ export function RenderBadge({ render }: { render?: Render }) {
 export function RenderFrame({
   render,
   retrying,
+  disabled,
   onRetry,
 }: {
   render?: Render;
   retrying: boolean;
+  // One retry at a time, so a double click never creates two renders
+  disabled: boolean;
   onRetry: () => void;
 }) {
   if (render?.state === "DONE" && render.expired) {
@@ -61,7 +64,7 @@ export function RenderFrame({
           {render.error.message}
         </p>
       )}
-      <Button size="sm" variant="outline" disabled={retrying} onClick={onRetry}>
+      <Button size="sm" variant="outline" disabled={disabled} onClick={onRetry}>
         {retrying ? "Retrying…" : "Retry"}
       </Button>
     </div>

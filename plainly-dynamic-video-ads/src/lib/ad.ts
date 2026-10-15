@@ -121,14 +121,21 @@ export const toParameters = (ad: Ad): Record<string, string> => ({
 });
 
 // Reverse of toParameters, prefills the form from an existing render
-export const fromParameters = (params: Record<string, string>): Ad => ({
-  productId: productIdOf(params.plainlyEditImage) ?? productIds[0],
-  headline: params.plainlyEditHeadline ?? "",
-  offer: params.plainlyEditOffer ?? "",
-  price: params.plainlyEditPrice ?? "",
-  oldPrice: params.plainlyEditOldPrice ?? "",
-  cta: params.plainlyEditCta ?? "",
-});
+// Any render in the org can carry our attributes, so values are not trusted to be text
+export function fromParameters(params: Record<string, unknown>): Ad {
+  const text = (key: string) => {
+    const value = params[key];
+    return typeof value === "string" ? value : "";
+  };
+  return {
+    productId: productIdOf(params.plainlyEditImage) ?? productIds[0],
+    headline: text("plainlyEditHeadline"),
+    offer: text("plainlyEditOffer"),
+    price: text("plainlyEditPrice"),
+    oldPrice: text("plainlyEditOldPrice"),
+    cta: text("plainlyEditCta"),
+  };
+}
 
 // Request body of POST /renders. The three renders of an ad differ only in
 // templateId and the format attribute
@@ -172,6 +179,25 @@ const IN_PROGRESS_STATES = ["PENDING", "THROTTLED", "QUEUED", "IN_PROGRESS"];
 // Anything else (DONE, INVALID, FAILED, CANCELLED) is final
 export const isFinished = (render: Pick<Render, "state">) =>
   !IN_PROGRESS_STATES.includes(render.state);
+
+// Only failed or never created formats are rendered again. Anything else
+// would create a duplicate render, and every render costs credits
+export const canRetry = (render?: Pick<Render, "state">) =>
+  !render || (isFinished(render) && render.state !== "DONE");
+
+// The API returns much more (project zip URL, webhook, creator), keep only
+// what the page shows, so nothing else reaches the browser
+export const toRender = (render: Render): Render => ({
+  id: render.id,
+  state: render.state,
+  createdDate: render.createdDate,
+  attributes: render.attributes,
+  parameters: render.parameters,
+  output: render.output,
+  thumbnailUris: render.thumbnailUris,
+  expired: render.expired,
+  error: render.error && { message: render.error.message },
+});
 
 // IN_PROGRESS -> "In progress", for people instead of the API
 export const stateLabel = (state: string) =>
