@@ -5,6 +5,7 @@ import {
   adSchema,
   adStatus,
   canRetry,
+  findTemplates,
   formatOf,
   fromParameters,
   groupAds,
@@ -52,6 +53,12 @@ test("templatesByFormat picks the first template per format", () => {
       { id: "square", resolution: { width: 1080, height: 1080 } },
     ]),
   ).toEqual({ "16:9": "wide", "9:16": "tall", "1:1": "square" });
+});
+
+test("findTemplates leaves out formats without a template", () => {
+  expect(
+    findTemplates([{ id: "wide", resolution: { width: 1920, height: 1080 } }]),
+  ).toEqual({ "16:9": "wide" });
 });
 
 test("templatesByFormat names the missing format", () => {

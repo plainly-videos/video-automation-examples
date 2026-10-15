@@ -41,13 +41,27 @@ export type Template = {
 
 // One template per format, matched by the size of its rendered composition.
 // The first match wins, other templates in the project are ignored.
+export function findTemplates(
+  templates: Template[],
+): Partial<Record<Format, string>> {
+  const found: Partial<Record<Format, string>> = {};
+  for (const format of FORMATS) {
+    found[format] = templates.find(
+      (t) => formatOf(t.resolution) === format,
+    )?.id;
+  }
+  return found;
+}
+
+// Rendering needs all three formats
 export function templatesByFormat(
   templates: Template[],
 ): Record<Format, string> {
+  const found = findTemplates(templates);
   const idOf = (format: Format) => {
-    const template = templates.find((t) => formatOf(t.resolution) === format);
-    if (!template) throw new Error(`Project has no ${format} template`);
-    return template.id;
+    const id = found[format];
+    if (!id) throw new Error(`Project has no ${format} template`);
+    return id;
   };
   return { "16:9": idOf("16:9"), "9:16": idOf("9:16"), "1:1": idOf("1:1") };
 }
@@ -154,7 +168,8 @@ export const renderBody = ({
 // What the API request card needs from the server to show a runnable request
 export type RenderTarget = {
   projectId: string;
-  templates: Record<Format, string>;
+  // Formats without a template are missing
+  templates: Partial<Record<Format, string>>;
 };
 
 export const RENDERS_URL = "https://api.plainlyvideos.com/api/v2/renders";

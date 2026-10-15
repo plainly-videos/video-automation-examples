@@ -6,6 +6,7 @@ import {
   EXAMPLE,
   FORMATS,
   type Format,
+  findTemplates,
   groupAds,
   isAdId,
   isFormat,
@@ -64,12 +65,15 @@ const getProjectId = createServerOnlyFn(() => {
 
 // Template ids are not configured: the project lists its templates, and each
 // template's resolution tells which aspect ratio it renders
-const getTemplates = createServerOnlyFn(async (projectId: string) => {
+const fetchTemplates = createServerOnlyFn(async (projectId: string) => {
   const res = await plainlyFetch(`/projects/${encodeURIComponent(projectId)}`);
   if (!res.ok) throw await apiError(res);
   const project: { templates?: Template[] } = await res.json();
-  return templatesByFormat(project.templates ?? []);
+  return project.templates ?? [];
 });
+
+const getTemplates = async (projectId: string) =>
+  templatesByFormat(await fetchTemplates(projectId));
 
 // https://help.plainlyvideos.com/docs/developer-guide
 const createRender = createServerOnlyFn(
@@ -132,7 +136,9 @@ export const createAd = createServerFn({ method: "POST" })
 export const getRenderTarget = createServerFn({ method: "GET" }).handler(
   async (): Promise<RenderTarget> => {
     const projectId = getProjectId();
-    return { projectId, templates: await getTemplates(projectId) };
+    // Shows what the project has, missing formats keep their placeholder
+    const templates = await fetchTemplates(projectId).catch(() => []);
+    return { projectId, templates: findTemplates(templates) };
   },
 );
 
