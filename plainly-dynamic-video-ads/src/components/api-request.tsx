@@ -12,18 +12,23 @@ import {
   type Ad,
   FORMATS,
   type Format,
+  RENDERS_URL,
+  type RenderTarget,
   renderBody,
+  toCurl,
   toParameters,
 } from "@/lib/ad";
 
-// The body createAd sends for one format, with placeholders for what only
-// the server knows
-const bodyFor = (ad: Ad, format: Format) =>
+// The body createAd sends for one format. Placeholders stay when the server
+// could not load the project
+const bodyFor = (ad: Ad, format: Format, adId: string, target?: RenderTarget) =>
   JSON.stringify(
     renderBody({
-      projectId: "[PROJECT_ID]",
-      templateId: `[TEMPLATE_ID_${format.replace(":", "x")}]`,
-      adId: "[AD_ID]",
+      projectId: target?.projectId ?? "[PROJECT_ID]",
+      templateId:
+        target?.templates[format] ??
+        `[TEMPLATE_ID_${format.replace(":", "x")}]`,
+      adId,
       format,
       parameters: toParameters(ad),
     }),
@@ -56,13 +61,21 @@ function Json({ text }: { text: string }) {
 }
 
 // Second half of the preview card, below the frames
-export function ApiRequest({ ad }: { ad: Ad }) {
+export function ApiRequest({
+  ad,
+  adId,
+  target,
+}: {
+  ad: Ad;
+  adId: string;
+  target?: RenderTarget;
+}) {
   const [format, setFormat] = useState<Format>("16:9");
   const [copied, setCopied] = useState(false);
-  const body = bodyFor(ad, format);
+  const body = bodyFor(ad, format, adId, target);
 
   const copy = async () => {
-    await navigator.clipboard.writeText(body);
+    await navigator.clipboard.writeText(toCurl(body));
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
@@ -72,7 +85,8 @@ export function ApiRequest({ ad }: { ad: Ad }) {
       <CardHeader className="rounded-none border-t pt-(--card-spacing)">
         <CardTitle>API request</CardTitle>
         <CardDescription>
-          What Render sends, once per format. Updates as you edit the ad.
+          What Render sends, once per format. Copy gives a curl command that
+          reads PLAINLY_API_KEY from your shell.
         </CardDescription>
         <CardAction className="flex rounded-lg border p-0.5">
           {FORMATS.map((f) => (
@@ -93,12 +107,11 @@ export function ApiRequest({ ad }: { ad: Ad }) {
         <div className="flex flex-1 flex-col rounded-lg border font-mono text-xs">
           <div className="flex items-center justify-between gap-2 border-b py-1.5 pr-1.5 pl-3">
             <span className="truncate">
-              <span className="text-emerald-500">POST</span>{" "}
-              https://api.plainlyvideos.com/api/v2/renders
+              <span className="text-emerald-500">POST</span> {RENDERS_URL}
             </span>
             <Button variant="outline" size="sm" onClick={copy}>
               {copied ? <Check /> : <Copy />}
-              {copied ? "Copied" : "Copy"}
+              {copied ? "Copied" : "Copy curl"}
             </Button>
           </div>
           <pre className="flex flex-1 items-center overflow-x-auto p-3 leading-relaxed">

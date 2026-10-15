@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { expect, test } from "vitest";
 import {
   adFor,
@@ -15,6 +16,7 @@ import {
   renderBody,
   stateLabel,
   templatesByFormat,
+  toCurl,
   toParameters,
   toRender,
 } from "@/lib/ad";
@@ -338,4 +340,14 @@ test("groupAds falls back to defaults when no render has parameters", () => {
   );
   const [ad] = groupAds([bare]);
   expect(ad.ad).toEqual(fromParameters({}));
+});
+
+test("toCurl passes the body to the shell unchanged", () => {
+  const body = JSON.stringify({ headline: `Don't "wait" $(rm -rf /) \`x\`` });
+  // A fake curl prints its last argument, the body the shell handed over
+  const fakeCurl = 'curl() { for arg; do :; done; printf %s "$arg"; }\n';
+  const out = execFileSync("sh", ["-c", fakeCurl + toCurl(body)], {
+    encoding: "utf8",
+  });
+  expect(out).toBe(body);
 });

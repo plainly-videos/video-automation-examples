@@ -11,6 +11,7 @@ import {
   isFormat,
   latestPerFormat,
   type Render,
+  type RenderTarget,
   renderBody,
   type Template,
   templatesByFormat,
@@ -126,6 +127,14 @@ export const createAd = createServerFn({ method: "POST" })
 
     return { adId };
   });
+
+// Real ids for the API request card, so the copied curl runs as it is
+export const getRenderTarget = createServerFn({ method: "GET" }).handler(
+  async (): Promise<RenderTarget> => {
+    const projectId = getProjectId();
+    return { projectId, templates: await getTemplates(projectId) };
+  },
+);
 
 // Renders one format of an existing ad again
 export const retryFormat = createServerFn({ method: "POST" })

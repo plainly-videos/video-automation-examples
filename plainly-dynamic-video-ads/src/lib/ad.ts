@@ -151,6 +151,24 @@ export const renderBody = ({
   attributes: { example: EXAMPLE, adId, format },
 });
 
+// What the API request card needs from the server to show a runnable request
+export type RenderTarget = {
+  projectId: string;
+  templates: Record<Format, string>;
+};
+
+export const RENDERS_URL = "https://api.plainlyvideos.com/api/v2/renders";
+
+// The body sits in single quotes, so the shell expands nothing in the ad
+// text. A quote in the text closes the string, adds an escaped quote and reopens it
+export const toCurl = (body: string) =>
+  [
+    `curl -X POST ${RENDERS_URL} \\`,
+    `  -u "$PLAINLY_API_KEY:" \\`,
+    `  -H "Content-Type: application/json" \\`,
+    `  -d '${body.replaceAll("'", "'\\''")}'`,
+  ].join("\n");
+
 // Subset of the render object returned by the Plainly API
 export type Render = {
   id: string;
