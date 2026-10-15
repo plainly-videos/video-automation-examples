@@ -92,7 +92,7 @@ export function AdEditor({
               <legend className="mb-2 text-sm font-medium">Product</legend>
               <form.Subscribe selector={(state) => state.values.productId}>
                 {(productId) => (
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-4 gap-2 lg:grid-cols-2">
                     {productIds.map((id) => (
                       <ProductButton
                         key={id}
