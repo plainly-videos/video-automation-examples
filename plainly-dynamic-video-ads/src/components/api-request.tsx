@@ -88,8 +88,9 @@ export function ApiRequest({ ad }: { ad: Ad }) {
           ))}
         </CardAction>
       </CardHeader>
-      <CardContent>
-        <div className="rounded-lg border font-mono text-xs">
+      {/* Fills the card when the form next to it is taller */}
+      <CardContent className="flex flex-1 flex-col">
+        <div className="flex flex-1 flex-col rounded-lg border font-mono text-xs">
           <div className="flex items-center justify-between gap-2 border-b py-1.5 pr-1.5 pl-3">
             <span className="truncate">
               <span className="text-emerald-500">POST</span>{" "}
@@ -100,8 +101,11 @@ export function ApiRequest({ ad }: { ad: Ad }) {
               {copied ? "Copied" : "Copy"}
             </Button>
           </div>
-          <pre className="overflow-x-auto p-3 leading-relaxed">
-            <Json text={body} />
+          <pre className="flex flex-1 items-center overflow-x-auto p-3 leading-relaxed">
+            {/* One flex item, so the text nodes stay inline */}
+            <code>
+              <Json text={body} />
+            </code>
           </pre>
         </div>
       </CardContent>
