@@ -1,6 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AdEditor } from "@/components/ad-editor";
+import { PreviewCard } from "@/components/ad-frames";
+import { adFor } from "@/lib/ad";
 
-// Replaced by the ad editor in a later task
-export const Route = createFileRoute("/")({
-  component: () => <p>Dynamic video ads</p>,
-});
+export const Route = createFileRoute("/")({ component: Home });
+
+function Home() {
+  return (
+    <AdEditor
+      initial={adFor("sneakers")}
+      aside={(ad) => <PreviewCard ad={ad} />}
+    />
+  );
+}
