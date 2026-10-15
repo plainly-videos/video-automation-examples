@@ -65,7 +65,7 @@ export function AdEditor({
     form.reset(adFor(id), { keepDefaultValues: true });
 
   return (
-    <div className="grid items-start gap-6 lg:grid-cols-[22rem_1fr]">
+    <div className="grid gap-6 lg:grid-cols-[22rem_1fr]">
       <Card>
         <CardHeader>
           <CardTitle>Ad</CardTitle>
@@ -121,7 +121,8 @@ export function AdEditor({
               </div>
             ))}
           </CardContent>
-          <CardFooter className="justify-end gap-2">
+          {/* mt-auto keeps the buttons at the bottom when the card stretches */}
+          <CardFooter className="mt-auto justify-end gap-2">
             <Button
               type="button"
               variant="outline"

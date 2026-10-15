@@ -2,7 +2,6 @@ import { Check, Copy } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
   CardAction,
   CardContent,
   CardDescription,
@@ -56,7 +55,8 @@ function Json({ text }: { text: string }) {
   });
 }
 
-export function ApiRequestCard({ ad }: { ad: Ad }) {
+// Second half of the preview card, below the frames
+export function ApiRequest({ ad }: { ad: Ad }) {
   const [format, setFormat] = useState<Format>("16:9");
   const [copied, setCopied] = useState(false);
   const body = bodyFor(ad, format);
@@ -68,8 +68,8 @@ export function ApiRequestCard({ ad }: { ad: Ad }) {
   };
 
   return (
-    <Card>
-      <CardHeader>
+    <>
+      <CardHeader className="rounded-none border-t pt-(--card-spacing)">
         <CardTitle>API request</CardTitle>
         <CardDescription>
           What Render sends, once per format. Updates as you edit the ad.
@@ -105,6 +105,6 @@ export function ApiRequestCard({ ad }: { ad: Ad }) {
           </pre>
         </div>
       </CardContent>
-    </Card>
+    </>
   );
 }

@@ -1,4 +1,5 @@
 import { AdFrames } from "@/components/ad-frames";
+import { ApiRequest } from "@/components/api-request";
 import {
   Card,
   CardContent,
@@ -69,6 +70,7 @@ export function PreviewCard({ ad }: { ad: Ad }) {
       <CardContent>
         <AdFrames frame={(format) => <AdPreview ad={ad} format={format} />} />
       </CardContent>
+      <ApiRequest ad={ad} />
     </Card>
   );
 }
