@@ -151,3 +151,115 @@ export const renderBody = ({
   // Custom attributes let the app find this render again with the attribute filter
   attributes: { example: EXAMPLE, adId, format },
 });
+
+// Subset of the render object returned by the Plainly API
+export type Render = {
+  id: string;
+  state: string;
+  createdDate: string;
+  // null when the render was created without custom attributes
+  attributes: { adId?: string; format?: string } | null;
+  // This example only sends text parameters
+  parameters?: Record<string, string>;
+  output?: string;
+  thumbnailUris?: string[];
+  expired?: boolean;
+  error?: { message?: string };
+};
+
+const IN_PROGRESS_STATES = ["PENDING", "THROTTLED", "QUEUED", "IN_PROGRESS"];
+
+// Anything else (DONE, INVALID, FAILED, CANCELLED) is final
+export const isFinished = (render: Pick<Render, "state">) =>
+  !IN_PROGRESS_STATES.includes(render.state);
+
+// IN_PROGRESS -> "In progress", for people instead of the API
+export const stateLabel = (state: string) =>
+  state.charAt(0) + state.slice(1).toLowerCase().replaceAll("_", " ");
+
+// Ad ids are UUIDs, anything else never reaches the API
+export const isAdId = (id: unknown): id is string =>
+  typeof id === "string" &&
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
+// A retry adds a new render with the same attributes, and the API's sort
+// order is not documented, so compare createdDate ourselves
+export function latestPerFormat(
+  renders: Render[],
+): Partial<Record<Format, Render>> {
+  const latest: Partial<Record<Format, Render>> = {};
+  for (const render of renders) {
+    const format = render.attributes?.format;
+    if (!isFormat(format)) continue;
+    const current = latest[format];
+    if (
+      !current ||
+      Date.parse(render.createdDate) > Date.parse(current.createdDate)
+    ) {
+      latest[format] = render;
+    }
+  }
+  return latest;
+}
+
+// Formats that were never created have nothing to wait for
+export const isAdFinished = (renders: Render[]) => {
+  const latest = latestPerFormat(renders);
+  return FORMATS.every((format) => {
+    const render = latest[format];
+    return !render || isFinished(render);
+  });
+};
+
+export type AdSummary = {
+  adId: string;
+  createdDate: string;
+  ad: Ad;
+  done: number;
+  failed: number;
+  rendering: number;
+};
+
+export function groupAds(renders: Render[]): AdSummary[] {
+  const byAd = new Map<string, Render[]>();
+  for (const render of renders) {
+    const adId = render.attributes?.adId;
+    if (!isAdId(adId)) continue;
+    byAd.set(adId, [...(byAd.get(adId) ?? []), render]);
+  }
+
+  return [...byAd]
+    .map(([adId, group]) => {
+      const latest = latestPerFormat(group);
+      const present = FORMATS.flatMap((format) => latest[format] ?? []);
+      const done = present.filter((render) => render.state === "DONE").length;
+      const rendering = present.filter((render) => !isFinished(render)).length;
+      return {
+        adId,
+        // The first render marks when the ad was created, retries come later
+        createdDate: group.reduce(
+          (first, render) =>
+            Date.parse(render.createdDate) < Date.parse(first)
+              ? render.createdDate
+              : first,
+          group[0].createdDate,
+        ),
+        ad: fromParameters(group.find((r) => r.parameters)?.parameters ?? {}),
+        done,
+        rendering,
+        // Failed, invalid, cancelled and never created formats
+        failed: FORMATS.length - done - rendering,
+      };
+    })
+    .sort((a, b) => Date.parse(b.createdDate) - Date.parse(a.createdDate));
+}
+
+export function adStatus({
+  done,
+  failed,
+  rendering,
+}: Pick<AdSummary, "done" | "failed" | "rendering">) {
+  if (rendering > 0) return { label: "Rendering", tone: "rendering" } as const;
+  if (failed > 0) return { label: `${failed} failed`, tone: "failed" } as const;
+  return { label: `${done}/${FORMATS.length} done`, tone: "done" } as const;
+}

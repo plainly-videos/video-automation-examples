@@ -1,10 +1,18 @@
 import { expect, test } from "vitest";
 import {
   adFor,
+  adStatus,
   formatOf,
   fromParameters,
+  groupAds,
+  isAdFinished,
+  isAdId,
+  isFinished,
+  latestPerFormat,
   pickAd,
+  type Render,
   renderBody,
+  stateLabel,
   templatesByFormat,
   toParameters,
 } from "@/lib/ad";
@@ -146,5 +154,126 @@ test("renderBody tags the render with the example, ad and format", () => {
     templateId: "template",
     parameters: { plainlyEditHeadline: "Hi" },
     attributes: { example: "dynamic-video-ads", adId: "ad", format: "9:16" },
+  });
+});
+
+const AD = "97226b64-8b8a-437d-a76e-f014d3845c42";
+const OTHER_AD = "1b4e28ba-2fa1-41d2-883f-0016d3cca427";
+
+const render = (
+  format: string,
+  state: string,
+  createdDate: string,
+  adId = AD,
+): Render => ({
+  id: `${adId}-${format}-${createdDate}`,
+  state,
+  createdDate,
+  attributes: { adId, format },
+  parameters: toParameters(adFor("coffee")),
+});
+
+test("isFinished treats every state except the in-progress ones as final", () => {
+  for (const state of ["DONE", "INVALID", "FAILED", "CANCELLED"]) {
+    expect(isFinished({ state }), state).toBe(true);
+  }
+  for (const state of ["PENDING", "THROTTLED", "QUEUED", "IN_PROGRESS"]) {
+    expect(isFinished({ state }), state).toBe(false);
+  }
+});
+
+test("stateLabel turns API states into readable text", () => {
+  expect(stateLabel("DONE")).toBe("Done");
+  expect(stateLabel("IN_PROGRESS")).toBe("In progress");
+});
+
+test("isAdId only accepts UUIDs", () => {
+  expect(isAdId(AD)).toBe(true);
+  for (const id of ["..", "", "a/b", "abc", 42, undefined, null]) {
+    expect(isAdId(id), String(id)).toBe(false);
+  }
+});
+
+test("latestPerFormat picks the newest render, whatever the API order", () => {
+  const failed = render("1:1", "FAILED", "2026-10-15T10:00:00Z");
+  const retried = render("1:1", "QUEUED", "2026-10-15T10:05:00Z");
+  expect(latestPerFormat([failed, retried])["1:1"]).toBe(retried);
+  expect(latestPerFormat([retried, failed])["1:1"]).toBe(retried);
+});
+
+test("latestPerFormat ignores renders without a known format", () => {
+  const unknownFormat = render("4:3", "DONE", "2026-10-15T10:00:00Z");
+  const noAttributes: Render = {
+    ...render("1:1", "DONE", "2026-10-15T10:00:00Z"),
+    attributes: null,
+  };
+  expect(latestPerFormat([unknownFormat, noAttributes])).toEqual({});
+});
+
+test("isAdFinished waits only for the newest render of each format", () => {
+  expect(isAdFinished([])).toBe(true);
+  // Formats that were never created have nothing to wait for
+  expect(isAdFinished([render("16:9", "DONE", "2026-10-15T10:00:00Z")])).toBe(
+    true,
+  );
+  expect(
+    isAdFinished([
+      render("16:9", "DONE", "2026-10-15T10:00:00Z"),
+      render("9:16", "FAILED", "2026-10-15T10:00:00Z"),
+    ]),
+  ).toBe(true);
+  // A retry of a failed render is in progress again
+  expect(
+    isAdFinished([
+      render("1:1", "FAILED", "2026-10-15T10:00:00Z"),
+      render("1:1", "QUEUED", "2026-10-15T10:05:00Z"),
+    ]),
+  ).toBe(false);
+});
+
+test("groupAds groups renders per ad, newest ad first", () => {
+  const ads = groupAds([
+    render("16:9", "DONE", "2026-10-15T09:00:00Z", OTHER_AD),
+    render("16:9", "DONE", "2026-10-15T10:00:00Z"),
+    render("9:16", "IN_PROGRESS", "2026-10-15T10:00:01Z"),
+    render("1:1", "FAILED", "2026-10-15T10:00:02Z"),
+    // Not created by this app
+    { ...render("1:1", "DONE", "2026-10-15T12:00:00Z"), attributes: null },
+  ]);
+
+  expect(ads.map((ad) => ad.adId)).toEqual([AD, OTHER_AD]);
+  expect(ads[0]).toEqual({
+    adId: AD,
+    createdDate: "2026-10-15T10:00:00Z",
+    ad: adFor("coffee"),
+    done: 1,
+    rendering: 1,
+    failed: 1,
+  });
+  // Formats that were never created count as failed
+  expect(ads[1]).toMatchObject({ done: 1, rendering: 0, failed: 2 });
+});
+
+test("groupAds keeps the ad's creation time when a format is retried", () => {
+  const [ad] = groupAds([
+    render("1:1", "DONE", "2026-10-15T10:05:00Z"),
+    render("1:1", "FAILED", "2026-10-15T10:00:00Z"),
+  ]);
+  expect(ad.createdDate).toBe("2026-10-15T10:00:00Z");
+  expect(ad).toMatchObject({ done: 1, failed: 2, rendering: 0 });
+});
+
+test("adStatus summarizes an ad in one badge", () => {
+  expect(adStatus({ done: 1, failed: 1, rendering: 1 })).toEqual({
+    label: "Rendering",
+    tone: "rendering",
+  });
+  expect(adStatus({ done: 2, failed: 1, rendering: 0 })).toEqual({
+    label: "1 failed",
+    tone: "failed",
+  });
+  expect(adStatus({ done: 3, failed: 0, rendering: 0 })).toEqual({
+    label: "3/3 done",
+    tone: "done",
   });
 });
