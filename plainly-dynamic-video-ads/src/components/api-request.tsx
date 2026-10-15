@@ -32,6 +32,30 @@ const bodyFor = (ad: Ad, format: Format) =>
     2,
   );
 
+// The capture group keeps strings and punctuation as the odd entries of split
+const TOKEN = /("(?:[^"\\]|\\.)*"|[{}[\],:])/;
+
+// Enough highlighting for JSON.stringify output, no highlighter library.
+// Spans instead of innerHTML, so typed ad text can't inject markup
+function Json({ text }: { text: string }) {
+  const parts = text.split(TOKEN);
+  return parts.map((part, i) => {
+    if (i % 2 === 0) return part;
+    // JSON.stringify puts the colon right after a key
+    const className = !part.startsWith('"')
+      ? "text-muted-foreground"
+      : parts[i + 2] === ":"
+        ? "text-sky-700 dark:text-sky-300"
+        : undefined;
+    return (
+      // biome-ignore lint/suspicious/noArrayIndexKey: the text is re-split on every render
+      <span key={i} className={className}>
+        {part}
+      </span>
+    );
+  });
+}
+
 export function ApiRequestCard({ ad }: { ad: Ad }) {
   const [format, setFormat] = useState<Format>("16:9");
   const [copied, setCopied] = useState(false);
@@ -76,7 +100,9 @@ export function ApiRequestCard({ ad }: { ad: Ad }) {
               {copied ? "Copied" : "Copy"}
             </Button>
           </div>
-          <pre className="overflow-x-auto p-3 leading-relaxed">{body}</pre>
+          <pre className="overflow-x-auto p-3 leading-relaxed">
+            <Json text={body} />
+          </pre>
         </div>
       </CardContent>
     </Card>
