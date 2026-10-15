@@ -9,10 +9,6 @@ import type { AdSummary } from "@/lib/ad";
 import { listAds } from "@/lib/plainly";
 import appCss from "../styles.css?url";
 
-// Shared by every example in the repo, so the files are not copied into each one
-const ASSETS =
-  "https://raw.githubusercontent.com/plainly-videos/video-automation-examples/master/assets";
-
 export const Route = createRootRoute({
   head: () => ({
     meta: [
@@ -22,7 +18,7 @@ export const Route = createRootRoute({
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: `${ASSETS}/favicon.ico` },
+      { rel: "icon", href: "/favicon.ico" },
       { rel: "manifest", href: "/manifest.json" },
     ],
   }),
@@ -56,17 +52,17 @@ function RootLayout() {
 const footerLinks = [
   {
     href: "https://help.plainlyvideos.com/",
-    icon: `${ASSETS}/file.svg`,
+    icon: "/file.svg",
     label: "Learn",
   },
   {
     href: "https://github.com/plainly-videos/video-automation-examples/tree/master/plainly-dynamic-video-ads",
-    icon: `${ASSETS}/github-142-svgrepo-com.svg`,
+    icon: "/github-142-svgrepo-com.svg",
     label: "View on GitHub",
   },
   {
     href: "https://app.plainlyvideos.com/",
-    icon: `${ASSETS}/globe.svg`,
+    icon: "/globe.svg",
     label: "Go to app.plainlyvideos.com →",
   },
 ];
@@ -80,14 +76,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body className="font-sans antialiased">
         <div className="mx-auto flex min-h-svh max-w-6xl flex-col items-center gap-10 px-4 py-12">
           <img
-            src={`${ASSETS}/plainly-logo-black.png`}
+            src="/plainly-logo-black.png"
             alt="Plainly Videos logo"
             width={160}
             height={32}
             className="dark:hidden"
           />
           <img
-            src={`${ASSETS}/plainly-logo-white.png`}
+            src="/plainly-logo-white.png"
             alt="Plainly Videos logo"
             width={160}
             height={32}

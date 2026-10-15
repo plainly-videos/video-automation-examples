@@ -13,10 +13,6 @@ import {
 import WebhookStatus from "@/components/webhook-status";
 import prisma from "../../lib/prisma";
 
-// Shared by every example in the repo, so the files are not copied into each one
-const ASSETS =
-  "https://raw.githubusercontent.com/plainly-videos/video-automation-examples/master/assets";
-
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
@@ -29,16 +25,14 @@ export default async function Home() {
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
         <div className="w-full flex items-center justify-center" id="logo-card">
           <Image
-            src={`${ASSETS}/plainly-logo-black.png`}
-            unoptimized
+            src="/plainly logo black.png"
             alt="Plainly Videos logo"
             width={160}
             height={32}
             priority
           />
           <Image
-            src={`${ASSETS}/plainly-logo-white.png`}
-            unoptimized
+            src="/plainly logo white.png"
             alt="Plainly Videos logo"
             width={160}
             height={32}
@@ -67,8 +61,7 @@ export default async function Home() {
         >
           <Image
             aria-hidden
-            src={`${ASSETS}/file.svg`}
-            unoptimized
+            src="/file.svg"
             alt="File icon"
             width={16}
             height={16}
@@ -83,8 +76,7 @@ export default async function Home() {
         >
           <Image
             aria-hidden
-            src={`${ASSETS}/github-142-svgrepo-com.svg`}
-            unoptimized
+            src="/github-142-svgrepo-com.svg"
             alt="Window icon"
             width={16}
             height={16}
@@ -99,8 +91,7 @@ export default async function Home() {
         >
           <Image
             aria-hidden
-            src={`${ASSETS}/globe.svg`}
-            unoptimized
+            src="/globe.svg"
             alt="Globe icon"
             width={16}
             height={16}
