@@ -142,7 +142,8 @@ function ProductButton({
       aria-pressed={selected}
       onClick={onPick}
       className={cn(
-        "grid gap-1 rounded-lg border p-1.5 text-xs hover:bg-muted",
+        // minmax(0, 1fr) keeps a long name from widening the image
+        "grid grid-cols-[minmax(0,1fr)] gap-1 rounded-lg border p-1 text-[11px] hover:bg-muted",
         selected && "border-primary ring-1 ring-primary",
       )}
     >
@@ -151,7 +152,7 @@ function ProductButton({
         alt=""
         className="aspect-square w-full rounded-md object-cover"
       />
-      {products[id].name}
+      <span className="truncate">{products[id].name}</span>
     </button>
   );
 }
