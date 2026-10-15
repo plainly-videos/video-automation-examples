@@ -1,7 +1,7 @@
 import { notFound } from "@tanstack/react-router";
 import { createServerFn, createServerOnlyFn } from "@tanstack/react-start";
 import {
-  type Ad,
+  adSchema,
   canRetry,
   EXAMPLE,
   FORMATS,
@@ -10,7 +10,6 @@ import {
   isAdId,
   isFormat,
   latestPerFormat,
-  pickAd,
   type Render,
   renderBody,
   type Template,
@@ -97,7 +96,7 @@ const filterRenders = createServerOnlyFn(
 
 // One ad, three single render calls: same parameters, one template per format
 export const createAd = createServerFn({ method: "POST" })
-  .validator((ad: Ad) => pickAd(ad))
+  .validator(adSchema)
   .handler(async ({ data: ad }) => {
     const projectId = getProjectId();
     const templates = await getTemplates(projectId);

@@ -1,3 +1,4 @@
+import { z } from "zod";
 import {
   isProductId,
   type ProductCopy,
@@ -14,7 +15,7 @@ export const FORMATS = ["16:9", "9:16", "1:1"] as const;
 export type Format = (typeof FORMATS)[number];
 
 export const isFormat = (value: unknown): value is Format =>
-  FORMATS.includes(value as Format);
+  FORMATS.some((format) => format === value);
 
 // Width divided by height
 const RATIOS: Record<Format, number> = {
@@ -43,15 +44,12 @@ export type Template = {
 export function templatesByFormat(
   templates: Template[],
 ): Record<Format, string> {
-  const found: Partial<Record<Format, string>> = {};
-  for (const template of templates) {
-    const format = formatOf(template.resolution);
-    if (format && !found[format]) found[format] = template.id;
-  }
-  for (const format of FORMATS) {
-    if (!found[format]) throw new Error(`Project has no ${format} template`);
-  }
-  return found as Record<Format, string>;
+  const idOf = (format: Format) => {
+    const template = templates.find((t) => formatOf(t.resolution) === format);
+    if (!template) throw new Error(`Project has no ${format} template`);
+    return template.id;
+  };
+  return { "16:9": idOf("16:9"), "9:16": idOf("9:16"), "1:1": idOf("1:1") };
 }
 
 export type Ad = { productId: ProductId } & ProductCopy;
@@ -81,34 +79,28 @@ export const adFor = (productId: ProductId): Ad => ({
   ...products[productId].copy,
 });
 
-// Runs on the server: the browser can send anything, so check every field
-export function pickAd(input: unknown): Ad {
-  const data = (input ?? {}) as Record<string, unknown>;
-  if (!isProductId(data.productId)) {
-    throw new Error(`Unknown product: ${data.productId}`);
-  }
-  const text = (field: TextField) => {
-    const raw = data[field];
-    const value = typeof raw === "string" ? raw.trim() : "";
-    if (!value && !OPTIONAL_FIELDS.includes(field)) {
-      throw new Error(`${LABELS[field]} is required`);
-    }
-    if (value.length > LIMITS[field]) {
-      throw new Error(
-        `${LABELS[field]} can be at most ${LIMITS[field]} characters`,
-      );
-    }
-    return value;
-  };
-  return {
-    productId: data.productId,
-    headline: text("headline"),
-    offer: text("offer"),
-    price: text("price"),
-    oldPrice: text("oldPrice"),
-    cta: text("cta"),
-  };
-}
+const text = (field: TextField) => {
+  const value = z
+    .string()
+    .trim()
+    .max(
+      LIMITS[field],
+      `${LABELS[field]} can be at most ${LIMITS[field]} characters`,
+    );
+  return OPTIONAL_FIELDS.includes(field)
+    ? value
+    : value.min(1, `${LABELS[field]} is required`);
+};
+
+// Used by the form and again on the server, where the browser can send anything
+export const adSchema = z.object({
+  productId: z.custom<ProductId>(isProductId, "Unknown product"),
+  headline: text("headline"),
+  offer: text("offer"),
+  price: text("price"),
+  oldPrice: text("oldPrice"),
+  cta: text("cta"),
+});
 
 // The only place that knows the template's parameter names
 export const toParameters = (ad: Ad): Record<string, string> => ({

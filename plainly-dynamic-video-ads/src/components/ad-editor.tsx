@@ -1,3 +1,4 @@
+import { type AnyFieldApi, useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
@@ -11,11 +12,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   type Ad,
   adFor,
+  adSchema,
   LABELS,
   LIMITS,
   OPTIONAL_FIELDS,
@@ -39,29 +41,28 @@ export function AdEditor({
   initial: Ad;
   aside: (ad: Ad) => React.ReactNode;
 }) {
-  const [ad, setAd] = useState(initial);
   const [error, setError] = useState<string>();
-  const [submitting, setSubmitting] = useState(false);
   const createAdFn = useServerFn(createAd);
   const navigate = useNavigate();
 
-  const setField = (field: TextField, value: string) =>
-    setAd((prev) => ({ ...prev, [field]: value }));
+  const form = useForm({
+    defaultValues: initial,
+    // The server checks the same schema again
+    validators: { onChange: adSchema },
+    onSubmit: async ({ value }) => {
+      setError(undefined);
+      try {
+        const { adId } = await createAdFn({ data: value });
+        await navigate({ to: "/ad/$adId", params: { adId } });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err));
+      }
+    },
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(undefined);
-    setSubmitting(true);
-
-    try {
-      const { adId } = await createAdFn({ data: ad });
-      await navigate({ to: "/ad/$adId", params: { adId } });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  // Picking a product swaps in its copy, Reset still goes back to `initial`
+  const pickProduct = (id: ProductId) =>
+    form.reset(adFor(id), { keepDefaultValues: true });
 
   return (
     <div className="grid items-start gap-6 lg:grid-cols-[22rem_1fr]">
@@ -73,7 +74,13 @@ export function AdEditor({
             calls.
           </CardDescription>
         </CardHeader>
-        <form className="contents" onSubmit={handleSubmit}>
+        <form
+          className="contents"
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+        >
           <CardContent className="grid gap-4">
             {error && (
               <Alert variant="destructive">
@@ -83,27 +90,33 @@ export function AdEditor({
             )}
             <fieldset className="grid gap-2">
               <legend className="mb-2 text-sm font-medium">Product</legend>
-              <div className="grid grid-cols-4 gap-2">
-                {productIds.map((id) => (
-                  <ProductButton
-                    key={id}
-                    id={id}
-                    selected={ad.productId === id}
-                    onPick={() => setAd(adFor(id))}
-                  />
-                ))}
-              </div>
+              <form.Subscribe selector={(state) => state.values.productId}>
+                {(productId) => (
+                  <div className="grid grid-cols-4 gap-2">
+                    {productIds.map((id) => (
+                      <ProductButton
+                        key={id}
+                        id={id}
+                        selected={productId === id}
+                        onPick={() => pickProduct(id)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </form.Subscribe>
             </fieldset>
             {FIELDS.map((row) => (
               <div key={row.join()} className="grid grid-cols-2 gap-3">
-                {row.map((field) => (
-                  <TextInput
-                    key={field}
-                    field={field}
-                    value={ad[field]}
-                    onChange={setField}
-                    wide={row.length === 1}
-                  />
+                {row.map((name) => (
+                  <form.Field key={name} name={name}>
+                    {(field) => (
+                      <TextInput
+                        name={name}
+                        field={field}
+                        wide={row.length === 1}
+                      />
+                    )}
+                  </form.Field>
                 ))}
               </div>
             ))}
@@ -112,17 +125,23 @@ export function AdEditor({
             <Button
               type="button"
               variant="outline"
-              onClick={() => setAd(initial)}
+              onClick={() => form.reset()}
             >
               Reset
             </Button>
-            <Button type="submit" disabled={submitting}>
-              {submitting ? "Creating renders…" : "Render 3 formats"}
-            </Button>
+            <form.Subscribe selector={(state) => state.isSubmitting}>
+              {(submitting) => (
+                <Button type="submit" disabled={submitting}>
+                  {submitting ? "Creating renders…" : "Render 3 formats"}
+                </Button>
+              )}
+            </form.Subscribe>
           </CardFooter>
         </form>
       </Card>
-      {aside(ad)}
+      <form.Subscribe selector={(state) => state.values}>
+        {(ad) => aside(ad)}
+      </form.Subscribe>
     </div>
   );
 }
@@ -158,34 +177,38 @@ function ProductButton({
 }
 
 function TextInput({
+  name,
   field,
-  value,
-  onChange,
   wide,
 }: {
-  field: TextField;
-  value: string;
-  onChange: (field: TextField, value: string) => void;
+  name: TextField;
+  field: AnyFieldApi;
   wide: boolean;
 }) {
-  const id = `ad-${field}`;
-  const optional = OPTIONAL_FIELDS.includes(field);
+  const id = `ad-${name}`;
+  const invalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
   return (
-    <div className={cn("grid gap-1.5", wide && "col-span-2")}>
-      <Label htmlFor={id}>
-        {LABELS[field]}
-        {optional && (
+    <Field
+      data-invalid={invalid}
+      className={cn("gap-1.5", wide && "col-span-2")}
+    >
+      <FieldLabel htmlFor={id}>
+        {LABELS[name]}
+        {OPTIONAL_FIELDS.includes(name) && (
           <span className="font-normal text-muted-foreground">(optional)</span>
         )}
-      </Label>
+      </FieldLabel>
       <Input
         id={id}
-        value={value}
-        required={!optional}
-        maxLength={LIMITS[field]}
-        onChange={(e) => onChange(field, e.target.value)}
+        name={name}
+        value={field.state.value}
+        maxLength={LIMITS[name]}
+        aria-invalid={invalid}
+        onBlur={field.handleBlur}
+        onChange={(e) => field.handleChange(e.target.value)}
       />
-    </div>
+      {invalid && <FieldError errors={field.state.meta.errors} />}
+    </Field>
   );
 }

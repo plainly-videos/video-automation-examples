@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
 import {
   adFor,
+  adSchema,
   adStatus,
   canRetry,
   formatOf,
@@ -10,7 +11,6 @@ import {
   isAdId,
   isFinished,
   latestPerFormat,
-  pickAd,
   type Render,
   renderBody,
   stateLabel,
@@ -66,9 +66,9 @@ test("adFor fills an ad with the product's copy", () => {
   expect(adFor("sneakers")).toEqual(valid);
 });
 
-test("pickAd trims fields and allows an empty old price", () => {
+test("adSchema trims fields and allows an empty old price", () => {
   expect(
-    pickAd({
+    adSchema.parse({
       ...valid,
       headline: "  Run further. Recover faster.  ",
       oldPrice: "",
@@ -76,38 +76,38 @@ test("pickAd trims fields and allows an empty old price", () => {
   ).toEqual({ ...valid, oldPrice: "" });
 });
 
-test("pickAd rejects unknown products", () => {
-  expect(() => pickAd({ ...valid, productId: "boat" })).toThrow(
-    "Unknown product: boat",
-  );
-  // Inherited object keys are not products
-  expect(() => pickAd({ ...valid, productId: "toString" })).toThrow(
+test("adSchema rejects unknown products", () => {
+  expect(() => adSchema.parse({ ...valid, productId: "boat" })).toThrow(
     "Unknown product",
   );
-  expect(() => pickAd(null)).toThrow("Unknown product");
+  // Inherited object keys are not products
+  expect(() => adSchema.parse({ ...valid, productId: "toString" })).toThrow(
+    "Unknown product",
+  );
+  expect(() => adSchema.parse(null)).toThrow("expected object");
 });
 
-test("pickAd requires every field except old price", () => {
-  expect(() => pickAd({ ...valid, headline: "   " })).toThrow(
+test("adSchema requires every field except old price", () => {
+  expect(() => adSchema.parse({ ...valid, headline: "   " })).toThrow(
     "Headline is required",
   );
-  expect(() => pickAd({ ...valid, offer: undefined })).toThrow(
-    "Offer is required",
+  expect(() => adSchema.parse({ ...valid, offer: undefined })).toThrow(
+    "expected string",
   );
   // The browser can send anything, a number is not text
-  expect(() => pickAd({ ...valid, cta: 42 })).toThrow(
-    "Call to action is required",
+  expect(() => adSchema.parse({ ...valid, cta: 42 })).toThrow(
+    "expected string",
   );
 });
 
-test("pickAd enforces length limits", () => {
-  expect(() => pickAd({ ...valid, headline: "x".repeat(41) })).toThrow(
+test("adSchema enforces length limits", () => {
+  expect(() => adSchema.parse({ ...valid, headline: "x".repeat(41) })).toThrow(
     "Headline can be at most 40 characters",
   );
-  expect(pickAd({ ...valid, headline: "x".repeat(40) }).headline).toHaveLength(
-    40,
-  );
-  expect(() => pickAd({ ...valid, oldPrice: "x".repeat(11) })).toThrow(
+  expect(
+    adSchema.parse({ ...valid, headline: "x".repeat(40) }).headline,
+  ).toHaveLength(40);
+  expect(() => adSchema.parse({ ...valid, oldPrice: "x".repeat(11) })).toThrow(
     "Old price can be at most 10 characters",
   );
 });
@@ -320,4 +320,22 @@ test("toRender keeps only the fields the app shows", () => {
     attributes: raw.attributes,
     parameters: raw.parameters,
   });
+});
+
+test("toRender keeps only the error message", () => {
+  const failed = {
+    ...render("16:9", "FAILED", "2026-10-15T10:00:00Z"),
+    error: { message: "Missing font", details: "stack trace" },
+  };
+  expect(toRender(failed).error).toEqual({ message: "Missing font" });
+});
+
+test("groupAds falls back to defaults when no render has parameters", () => {
+  const { parameters: _, ...bare } = render(
+    "16:9",
+    "DONE",
+    "2026-10-15T10:00:00Z",
+  );
+  const [ad] = groupAds([bare]);
+  expect(ad.ad).toEqual(fromParameters({}));
 });
