@@ -191,6 +191,9 @@ export const toCurl = (body: string) =>
 export type Render = {
   id: string;
   state: string;
+  // What the render was made from, the ad page shows the request it sent
+  projectId?: string;
+  templateId?: string;
   createdDate: string;
   // null when the render was created without custom attributes
   attributes: { adId?: string; format?: string } | null;
@@ -218,6 +221,8 @@ export const canRetry = (render?: Pick<Render, "state">) =>
 export const toRender = (render: Render): Render => ({
   id: render.id,
   state: render.state,
+  projectId: render.projectId,
+  templateId: render.templateId,
   createdDate: render.createdDate,
   attributes: render.attributes,
   parameters: render.parameters,

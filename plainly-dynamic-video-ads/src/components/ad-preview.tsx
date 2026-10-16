@@ -7,7 +7,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { Ad, Format, RenderTarget } from "@/lib/ad";
+import {
+  type Ad,
+  type Format,
+  type RenderTarget,
+  toParameters,
+} from "@/lib/ad";
 import { products } from "@/products";
 
 // Text size relative to the frame width, so the copy fits every format
@@ -80,7 +85,12 @@ export function PreviewCard({
       <CardContent>
         <AdFrames frame={(format) => <AdPreview ad={ad} format={format} />} />
       </CardContent>
-      <ApiRequest ad={ad} adId={adId} target={target} />
+      <ApiRequest
+        parameters={toParameters(ad)}
+        adId={adId}
+        target={target}
+        className="rounded-none border-t pt-(--card-spacing)"
+      />
     </Card>
   );
 }

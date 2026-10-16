@@ -28,7 +28,7 @@ import {
 import { type AdSummary, adStatus, EXAMPLE } from "@/lib/ad";
 import { products } from "@/products";
 
-const formatDate = (date: string) =>
+export const formatDate = (date: string) =>
   new Date(date).toLocaleString(undefined, {
     month: "short",
     day: "numeric",
@@ -36,7 +36,7 @@ const formatDate = (date: string) =>
     minute: "2-digit",
   });
 
-const BADGE_VARIANT = {
+export const BADGE_VARIANT = {
   done: "default",
   rendering: "secondary",
   failed: "destructive",

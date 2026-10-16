@@ -9,19 +9,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  type Ad,
   FORMATS,
   type Format,
   RENDERS_URL,
   type RenderTarget,
   renderBody,
   toCurl,
-  toParameters,
 } from "@/lib/ad";
 
 // The body createAd sends for one format. Placeholders stay when the server
 // could not load the project
-const bodyFor = (ad: Ad, format: Format, adId: string, target?: RenderTarget) =>
+const bodyFor = (
+  parameters: Record<string, string>,
+  format: Format,
+  adId: string,
+  target?: RenderTarget,
+) =>
   JSON.stringify(
     renderBody({
       projectId: target?.projectId ?? "[PROJECT_ID]",
@@ -30,7 +33,7 @@ const bodyFor = (ad: Ad, format: Format, adId: string, target?: RenderTarget) =>
         `[TEMPLATE_ID_${format.replace(":", "x")}]`,
       adId,
       format,
-      parameters: toParameters(ad),
+      parameters,
     }),
     null,
     2,
@@ -62,17 +65,19 @@ function Json({ text }: { text: string }) {
 
 // Second half of the preview card, below the frames
 export function ApiRequest({
-  ad,
+  parameters,
   adId,
   target,
+  className,
 }: {
-  ad: Ad;
+  parameters: Record<string, string>;
   adId: string;
   target?: RenderTarget;
+  className?: string;
 }) {
   const [format, setFormat] = useState<Format>("16:9");
   const [copied, setCopied] = useState(false);
-  const body = bodyFor(ad, format, adId, target);
+  const body = bodyFor(parameters, format, adId, target);
 
   const copy = async () => {
     await navigator.clipboard.writeText(toCurl(body));
@@ -82,11 +87,11 @@ export function ApiRequest({
 
   return (
     <>
-      <CardHeader className="rounded-none border-t pt-(--card-spacing)">
+      <CardHeader className={className}>
         <CardTitle>API request</CardTitle>
         <CardDescription>
-          What Render sends, once per format. Copy gives a curl command that
-          reads PLAINLY_API_KEY from your shell.
+          One request per format. Copy gives a curl command that reads
+          PLAINLY_API_KEY from your shell.
         </CardDescription>
         <CardAction className="flex rounded-lg border p-0.5">
           {FORMATS.map((f) => (
