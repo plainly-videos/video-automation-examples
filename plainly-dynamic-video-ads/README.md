@@ -44,6 +44,11 @@ A TanStack Start app that reads the project's templates from `GET /api/v2/projec
       - Set the prefixes to `edit`, which includes all compositions and layers whose name starts with `edit`.
       - Check **Strip prefix**, so the layer `editHook` becomes the parameter `Hook`. The app sends the parameter names without the prefix.
       - Click on "Generate".
+
+   <p align="center">
+     <img src=".assets/auto-generate-template.png" alt="Plainly Videos auto-generate template" width="500" />
+   </p>
+
    - This generates three templates, `Render16x9`, `Render9x16` and `Render1x1`, each with the parameters `Hook`, `ButtonCTA`, `CTA`, `Product1`-`Product3`, `Price1`-`Price3` (text) and `Image1`-`Image3` (image). The video opens with the hook, shows one slide per product with a button and ends with the call to action. `Logo` and `ButtonSwitch` are generated too, the app leaves them at their defaults.
 
 4. Set up environment variables:
