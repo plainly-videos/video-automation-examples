@@ -26,6 +26,7 @@ import {
   FORMATS,
   groupAds,
   isAdFinished,
+  latestParameters,
   latestPerFormat,
   type Render,
   type RenderTarget,
@@ -173,9 +174,7 @@ function AdRenders({ adId, initial }: { adId: string; initial: Render[] }) {
         <Card>
           <ApiRequest
             // As sent, not rebuilt from the ad, so older ads show their own parameters
-            parameters={
-              renders.find((render) => render.parameters)?.parameters ?? {}
-            }
+            parameters={latestParameters(renders)}
             adId={adId}
             target={target}
           />

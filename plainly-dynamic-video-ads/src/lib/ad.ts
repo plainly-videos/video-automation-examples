@@ -236,8 +236,20 @@ export const isAdId = (id: unknown): id is string =>
   typeof id === "string" &&
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
-// Ads made with earlier versions of the app can have two renders for one
-// format. The API's sort order is not documented, so compare createdDate
+// A UUID v4 for a new ad. crypto.randomUUID only exists on https and
+// localhost, and the home loader also runs in the browser
+export function newAdId() {
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40; // version 4
+  bytes[8] = (bytes[8] & 0x3f) | 0x80; // RFC 4122 variant
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join(
+    "",
+  );
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
+// An ad can have two renders for one format: made with earlier versions of
+// the app, or a copied curl run twice. The newest one counts
 export function latestPerFormat(
   renders: Render[],
 ): Partial<Record<Format, Render>> {
@@ -254,6 +266,22 @@ export function latestPerFormat(
     }
   }
   return latest;
+}
+
+// The values of the ad's newest render. A copied curl keeps the adId, so it
+// can add renders with edited text to an existing ad
+export function latestParameters(renders: Render[]): Record<string, string> {
+  let latest: Render | undefined;
+  for (const render of renders) {
+    if (
+      render.parameters &&
+      (!latest ||
+        Date.parse(render.createdDate) > Date.parse(latest.createdDate))
+    ) {
+      latest = render;
+    }
+  }
+  return latest?.parameters ?? {};
 }
 
 // Formats that were never created have nothing to wait for
@@ -298,7 +326,7 @@ export function groupAds(renders: Render[]): AdSummary[] {
               : first,
           group[0].createdDate,
         ),
-        ad: fromParameters(group.find((r) => r.parameters)?.parameters ?? {}),
+        ad: fromParameters(latestParameters(group)),
         done,
         rendering,
         // Failed, invalid, cancelled and never created formats

@@ -76,13 +76,18 @@ export function ApiRequest({
   className?: string;
 }) {
   const [format, setFormat] = useState<Format>("16:9");
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<"copied" | "failed">();
   const body = bodyFor(parameters, format, adId, target);
 
   const copy = async () => {
-    await navigator.clipboard.writeText(toCurl(body));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    try {
+      await navigator.clipboard.writeText(toCurl(body));
+      setCopied("copied");
+    } catch {
+      // The clipboard only exists on https and localhost, and can be denied
+      setCopied("failed");
+    }
+    setTimeout(() => setCopied(undefined), 1500);
   };
 
   return (
@@ -115,8 +120,12 @@ export function ApiRequest({
               <span className="text-emerald-500">POST</span> {RENDERS_URL}
             </span>
             <Button variant="outline" size="sm" onClick={copy}>
-              {copied ? <Check /> : <Copy />}
-              {copied ? "Copied" : "Copy curl"}
+              {copied === "copied" ? <Check /> : <Copy />}
+              {copied === "copied"
+                ? "Copied"
+                : copied === "failed"
+                  ? "Copy failed"
+                  : "Copy curl"}
             </Button>
           </div>
           <pre className="flex flex-1 items-center overflow-x-auto p-3 leading-relaxed">

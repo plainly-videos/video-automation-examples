@@ -111,8 +111,7 @@ function Price({ price }: { price: string }) {
 // An HTML version of the ad that plays the same 13 seconds as the video.
 // Close to the template, the final look still comes from After Effects.
 // The timings and layouts are hand-measured, see ad-preview-data.ts
-export function AdPreview({ ad, format }: { ad: Ad; format: Format }) {
-  const t = useClock();
+function AdPreview({ ad, format, t }: { ad: Ad; format: Format; t: number }) {
   const { intro, slide, chip, pill, outro, fullBleed } = LAYOUTS[format];
   const introOut = tween(t, INTRO_OUT);
   const outroIn = tween(t, OUTRO_IN);
@@ -294,6 +293,15 @@ export function AdPreview({ ad, format }: { ad: Ad; format: Format }) {
   );
 }
 
+// One clock for all three formats. It lives here, so only the frames
+// re-render on every tick, not the API request below them
+function Previews({ ad }: { ad: Ad }) {
+  const t = useClock();
+  return (
+    <AdFrames frame={(format) => <AdPreview ad={ad} format={format} t={t} />} />
+  );
+}
+
 export function PreviewCard({
   ad,
   adId,
@@ -313,7 +321,7 @@ export function PreviewCard({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <AdFrames frame={(format) => <AdPreview ad={ad} format={format} />} />
+        <Previews ad={ad} />
       </CardContent>
       <ApiRequest
         parameters={toParameters(ad)}

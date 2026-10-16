@@ -12,7 +12,9 @@ import {
   isAdFinished,
   isAdId,
   isFinished,
+  latestParameters,
   latestPerFormat,
+  newAdId,
   type Render,
   renderBody,
   slotFor,
@@ -232,6 +234,29 @@ test("latestPerFormat picks the newest render, whatever the API order", () => {
   const newer = render("1:1", "QUEUED", "2026-10-15T10:05:00Z");
   expect(latestPerFormat([older, newer])["1:1"]).toBe(newer);
   expect(latestPerFormat([newer, older])["1:1"]).toBe(newer);
+});
+
+test("latestParameters takes the newest render's values, whatever the API order", () => {
+  const older = render("16:9", "DONE", "2026-10-15T10:00:00Z");
+  const newer = {
+    ...render("9:16", "DONE", "2026-10-15T10:05:00Z"),
+    parameters: { Hook: "Edited" },
+  };
+  const { parameters: _, ...bare } = render(
+    "1:1",
+    "FAILED",
+    "2026-10-15T10:09:00Z",
+  );
+  expect(latestParameters([older, newer, bare])).toEqual({ Hook: "Edited" });
+  expect(latestParameters([bare, newer, older])).toEqual({ Hook: "Edited" });
+  expect(latestParameters([bare])).toEqual({});
+});
+
+test("newAdId makes distinct ids that pass isAdId", () => {
+  const ids = Array.from({ length: 100 }, newAdId);
+  expect(ids.every(isAdId)).toBe(true);
+  expect(new Set(ids).size).toBe(100);
+  expect(ids[0][14]).toBe("4");
 });
 
 test("latestPerFormat ignores renders without a known format", () => {

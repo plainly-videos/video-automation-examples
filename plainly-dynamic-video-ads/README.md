@@ -87,20 +87,20 @@ Template ids are not configured. The app reads the project and matches each temp
 
 ```ts
 // ./src/lib/ad.ts
-export function templatesByFormat(
+export function findTemplates(
   templates: Template[],
-): Record<Format, string> {
+): Partial<Record<Format, string>> {
   const found: Partial<Record<Format, string>> = {};
-  for (const template of templates) {
-    const format = formatOf(template.resolution);
-    if (format && !found[format]) found[format] = template.id;
-  }
   for (const format of FORMATS) {
-    if (!found[format]) throw new Error(`Project has no ${format} template`);
+    found[format] = templates.find(
+      (t) => formatOf(t.resolution) === format,
+    )?.id;
   }
-  return found as Record<Format, string>;
+  return found;
 }
 ```
+
+Rendering needs all three, so `templatesByFormat` throws `Project has no 9:16 template` when one is missing. The API request card uses `findTemplates` directly and keeps a placeholder for a missing format.
 
 ### Render one ad in three formats
 
@@ -153,11 +153,12 @@ Every request carries custom attributes. Plainly stores them on the render, whic
 
 ### Find renders by attribute
 
-`POST /api/v2/renders/attributes` returns the renders whose attributes match. The ad page filters by `adId`, the recent ads list filters by `example`:
+`POST /api/v2/renders/attributes` returns the renders whose attributes match. The ad page filters by `adId`, the recent ads list filters by `example`. `sort=createdDate,desc` puts the newest renders first, so a full page leaves out the oldest ones:
 
 ```ts
 // ./src/lib/plainly.ts
-const res = await plainlyFetch(`/renders/attributes?size=${size}`, {
+const query = `size=${size}&sort=createdDate,desc`;
+const res = await plainlyFetch(`/renders/attributes?${query}`, {
   method: "POST",
   body: JSON.stringify({ filters: [{ key, value }] }),
 });

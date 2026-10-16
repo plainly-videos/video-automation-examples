@@ -7,6 +7,7 @@ import {
   findTemplates,
   groupAds,
   isAdId,
+  newAdId,
   type Render,
   type RenderTarget,
   renderBody,
@@ -28,14 +29,15 @@ const plainlyFetch = createServerOnlyFn(
       );
     }
 
-    return fetch(`${PLAINLY_API}${path}`, {
-      ...init,
-      headers: {
-        "Content-Type": "application/json",
-        // Basic auth: API key as the username, empty password
-        Authorization: `Basic ${btoa(`${apiKey}:`)}`,
-      },
-    });
+    // Keeps the caller's headers, every request still sends the API key
+    const headers = new Headers(init?.headers);
+    if (!headers.has("Content-Type")) {
+      headers.set("Content-Type", "application/json");
+    }
+    // Basic auth: API key as the username, empty password
+    headers.set("Authorization", `Basic ${btoa(`${apiKey}:`)}`);
+
+    return fetch(`${PLAINLY_API}${path}`, { ...init, headers });
   },
 );
 
@@ -82,10 +84,12 @@ const createRender = createServerOnlyFn(
   },
 );
 
-// Finds renders by one custom attribute, so no database is needed
+// Finds renders by one custom attribute, so no database is needed. Newest
+// first, so a full page leaves out the oldest renders
 const filterRenders = createServerOnlyFn(
   async (key: string, value: string, size: number) => {
-    const res = await plainlyFetch(`/renders/attributes?size=${size}`, {
+    const query = `size=${size}&sort=createdDate,desc`;
+    const res = await plainlyFetch(`/renders/attributes?${query}`, {
       method: "POST",
       body: JSON.stringify({ filters: [{ key, value }] }),
     });
@@ -101,7 +105,7 @@ export const createAd = createServerFn({ method: "POST" })
   .handler(async ({ data: ad }) => {
     const projectId = getProjectId();
     const templates = await getTemplates(projectId);
-    const adId = crypto.randomUUID();
+    const adId = newAdId();
     const parameters = toParameters(ad);
 
     // Renders are independent: one format can fail while the others are created
@@ -155,6 +159,17 @@ export const getAdRenders = createServerFn({ method: "GET" })
 // Latest ads made with this example, found by the `example` attribute
 export const listAds = createServerFn({ method: "GET" }).handler(async () => {
   // About 20 ads with 3 renders each
-  const renders = await filterRenders("example", EXAMPLE, 60);
-  return groupAds(renders).slice(0, 20);
+  const size = 60;
+  const renders = await filterRenders("example", EXAMPLE, size);
+  const ads = groupAds(renders).slice(0, 20);
+  if (renders.length < size) return ads;
+  // A full page can cut off an ad's older renders, and a missing format counts
+  // as failed. Ads with a failed format are loaded whole to be sure
+  return Promise.all(
+    ads.map(async (ad) =>
+      ad.failed > 0
+        ? groupAds(await filterRenders("adId", ad.adId, 50))[0]
+        : ad,
+    ),
+  );
 });
