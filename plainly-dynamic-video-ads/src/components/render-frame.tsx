@@ -1,6 +1,5 @@
 import { LoaderCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { isFinished, type Render, stateLabel } from "@/lib/ad";
 
 export function RenderBadge({ render }: { render?: Render }) {
@@ -13,18 +12,7 @@ export function RenderBadge({ render }: { render?: Render }) {
   );
 }
 
-export function RenderFrame({
-  render,
-  retrying,
-  disabled,
-  onRetry,
-}: {
-  render?: Render;
-  retrying: boolean;
-  // One retry at a time, so a double click never creates two renders
-  disabled: boolean;
-  onRetry: () => void;
-}) {
+export function RenderFrame({ render }: { render?: Render }) {
   if (render?.state === "DONE" && render.expired) {
     return <p className="text-sm text-muted-foreground">Output expired</p>;
   }
@@ -66,9 +54,6 @@ export function RenderFrame({
           {render.error.message}
         </p>
       )}
-      <Button size="sm" variant="outline" disabled={disabled} onClick={onRetry}>
-        {retrying ? "Retrying…" : "Retry"}
-      </Button>
     </div>
   );
 }

@@ -55,7 +55,6 @@ Simply choose an example that matches your use case and follow the `README.md` f
       - Rendering one ad in three aspect ratios with three single render requests.
       - Finding the template for each format from the project's templates.
       - Tagging renders with custom attributes and finding them again with the attribute filter.
-      - Retrying a single failed format.
    * **Tech Stack**: TanStack Start, TypeScript, Tailwind CSS, shadcn/ui
 
 ## Contributing

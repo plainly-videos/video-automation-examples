@@ -2,15 +2,11 @@ import { notFound } from "@tanstack/react-router";
 import { createServerFn, createServerOnlyFn } from "@tanstack/react-start";
 import {
   adSchema,
-  canRetry,
   EXAMPLE,
   FORMATS,
-  type Format,
   findTemplates,
   groupAds,
   isAdId,
-  isFormat,
-  latestPerFormat,
   type Render,
   type RenderTarget,
   renderBody,
@@ -142,39 +138,7 @@ export const getRenderTarget = createServerFn({ method: "GET" }).handler(
   },
 );
 
-// Renders one format of an existing ad again
-export const retryFormat = createServerFn({ method: "POST" })
-  .validator((input: { adId: string; format: Format }) => {
-    if (!isAdId(input?.adId) || !isFormat(input?.format)) {
-      throw new Error("Invalid retry request");
-    }
-    return { adId: input.adId, format: input.format };
-  })
-  .handler(async ({ data: { adId, format } }) => {
-    const projectId = getProjectId();
-    // Every render of an ad has the same parameters, copy them from any of them
-    const renders = await filterRenders("adId", adId, 50);
-    const parameters = renders.find((render) => render.parameters)?.parameters;
-    if (!parameters) throw new Error("Ad not found");
-    // The button is hidden for these, but anyone can call this server function
-    if (!canRetry(latestPerFormat(renders)[format])) {
-      throw new Error(`${format} is done or still rendering, no retry needed`);
-    }
-
-    const templates = await getTemplates(projectId);
-    // Same attributes as the first try, so the new render replaces the old one
-    await createRender(
-      renderBody({
-        projectId,
-        templateId: templates[format],
-        adId,
-        format,
-        parameters,
-      }),
-    );
-  });
-
-// Every render of one ad, including retries
+// Every render of one ad
 export const getAdRenders = createServerFn({ method: "GET" })
   .validator((adId: string) => {
     // Rejects ids like ".." before they reach the API
@@ -182,7 +146,7 @@ export const getAdRenders = createServerFn({ method: "GET" })
     return adId;
   })
   .handler(async ({ data: adId }) => {
-    // Three formats plus retries, 50 leaves plenty of room
+    // Three formats, 50 leaves plenty of room
     const renders = await filterRenders("adId", adId, 50);
     if (renders.length === 0) throw notFound();
     return renders;

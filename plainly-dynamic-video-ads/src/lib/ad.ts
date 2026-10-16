@@ -211,11 +211,6 @@ const IN_PROGRESS_STATES = ["PENDING", "THROTTLED", "QUEUED", "IN_PROGRESS"];
 export const isFinished = (render: Pick<Render, "state">) =>
   !IN_PROGRESS_STATES.includes(render.state);
 
-// Only failed or never created formats are rendered again. Anything else
-// would create a duplicate render, and every render costs credits
-export const canRetry = (render?: Pick<Render, "state">) =>
-  !render || (isFinished(render) && render.state !== "DONE");
-
 // The API returns much more (project zip URL, webhook, creator), keep only
 // what the page shows, so nothing else reaches the browser
 export const toRender = (render: Render): Render => ({
@@ -241,8 +236,8 @@ export const isAdId = (id: unknown): id is string =>
   typeof id === "string" &&
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
-// A retry adds a new render with the same attributes, and the API's sort
-// order is not documented, so compare createdDate ourselves
+// Ads made with earlier versions of the app can have two renders for one
+// format. The API's sort order is not documented, so compare createdDate
 export function latestPerFormat(
   renders: Render[],
 ): Partial<Record<Format, Render>> {
@@ -295,7 +290,7 @@ export function groupAds(renders: Render[]): AdSummary[] {
       const rendering = present.filter((render) => !isFinished(render)).length;
       return {
         adId,
-        // The first render marks when the ad was created, retries come later
+        // The first render marks when the ad was created
         createdDate: group.reduce(
           (first, render) =>
             Date.parse(render.createdDate) < Date.parse(first)

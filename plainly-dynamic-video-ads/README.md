@@ -15,7 +15,6 @@ A TanStack Start app that reads the project's templates from `GET /api/v2/projec
 - **🎯 One ad, many formats**: Fan out one set of parameters to one render per aspect ratio.
 - **🧩 Template discovery**: Find the right template for each format from the project, instead of configuring template ids.
 - **🏷️ Attribute filtering**: Tag renders with your own data and query them later, for both a single ad and a list of recent ads.
-- **🔁 Per-render retry**: Renders are independent, so one format can fail and be retried on its own.
 - **🔐 Server functions**: Keep your Plainly Videos API key on the server with TanStack Start server functions.
 
 ## Prerequisites
@@ -78,7 +77,7 @@ A TanStack Start app that reads the project's templates from `GET /api/v2/projec
 
 Open http://localhost:3000. Pick a product for each of the three slots, which fills in its name and price, edit any field, and check the preview of all three formats on the right. The preview plays the ad in HTML, close to the video; the final look comes from the After Effects template.
 
-Click **Render 3 formats**. The app opens `/ad/<id>`, where each format turns into a video once its render is finished. If a format fails, click **Retry** to render only that format again. The page also shows the ad's values and the exact API request each render was made with. Click **Edit as new ad** to open the form prefilled with this ad.
+Click **Render 3 formats**. The app opens `/ad/<id>`, where each format turns into a video once its render is finished. The page also shows the ad's values and the exact API request each render was made with. Click **Edit as new ad** to open the form prefilled with this ad.
 
 Every ad made with this app is listed under **Recent ads**, so you can reopen an earlier ad with one click. The list comes from Plainly, so it shows ads created by everyone using the same API key.
 
@@ -165,31 +164,6 @@ const res = await plainlyFetch(`/renders/attributes?size=${size}`, {
 ```
 
 While any format is still rendering, the ad page calls this again every 5 seconds.
-
-### Retry one format
-
-A retry creates a new render with the same parameters and attributes. An ad can now have two renders for one format, so the app always shows the newest one:
-
-```ts
-// ./src/lib/ad.ts
-export function latestPerFormat(
-  renders: Render[],
-): Partial<Record<Format, Render>> {
-  const latest: Partial<Record<Format, Render>> = {};
-  for (const render of renders) {
-    const format = render.attributes?.format;
-    if (!isFormat(format)) continue;
-    const current = latest[format];
-    if (
-      !current ||
-      Date.parse(render.createdDate) > Date.parse(current.createdDate)
-    ) {
-      latest[format] = render;
-    }
-  }
-  return latest;
-}
-```
 
 ### Good to know
 

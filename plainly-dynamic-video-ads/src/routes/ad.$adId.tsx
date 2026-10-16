@@ -4,7 +4,6 @@ import {
   Link,
   useRouter,
 } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, Pencil } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AdFrames } from "@/components/ad-frames";
@@ -25,14 +24,13 @@ import {
   type Ad,
   adStatus,
   FORMATS,
-  type Format,
   groupAds,
   isAdFinished,
   latestPerFormat,
   type Render,
   type RenderTarget,
 } from "@/lib/ad";
-import { getAdRenders, retryFormat } from "@/lib/plainly";
+import { getAdRenders } from "@/lib/plainly";
 import { cn } from "@/lib/utils";
 import { products } from "@/products";
 
@@ -58,13 +56,10 @@ function AdPage() {
 function AdRenders({ adId, initial }: { adId: string; initial: Render[] }) {
   const [renders, setRenders] = useState(initial);
   const [pollFailed, setPollFailed] = useState(false);
-  const [retrying, setRetrying] = useState<Format>();
-  const [retryError, setRetryError] = useState<string>();
-  const retryFormatFn = useServerFn(retryFormat);
   const router = useRouter();
 
   useEffect(() => {
-    // The loader runs again after a retry, start over from its data
+    // The loader runs again once the ad is finished, start over from its data
     setRenders(initial);
     if (isAdFinished(initial)) return;
     let active = true;
@@ -96,20 +91,6 @@ function AdRenders({ adId, initial }: { adId: string; initial: Render[] }) {
       clearTimeout(timer);
     };
   }, [adId, initial, router]);
-
-  const retry = async (format: Format) => {
-    setRetrying(format);
-    setRetryError(undefined);
-    try {
-      await retryFormatFn({ data: { adId, format } });
-      // Reloads the renders, which also restarts polling
-      await router.invalidate();
-    } catch (err) {
-      setRetryError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setRetrying(undefined);
-    }
-  };
 
   const latest = latestPerFormat(renders);
   // The loader throws notFound for an ad without renders, so there is one
@@ -171,8 +152,7 @@ function AdRenders({ adId, initial }: { adId: string; initial: Render[] }) {
         <CardHeader>
           <CardTitle>Renders</CardTitle>
           <CardDescription>
-            {summary.done} of {FORMATS.length} formats done. A failed format can
-            be rendered again on its own.
+            {summary.done} of {FORMATS.length} formats done.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
@@ -182,22 +162,9 @@ function AdRenders({ adId, initial }: { adId: string; initial: Render[] }) {
               <AlertDescription>Retrying in a few seconds.</AlertDescription>
             </Alert>
           )}
-          {retryError && (
-            <Alert variant="destructive">
-              <AlertTitle>Retry failed</AlertTitle>
-              <AlertDescription>{retryError}</AlertDescription>
-            </Alert>
-          )}
           <AdFrames
             badge={(format) => <RenderBadge render={latest[format]} />}
-            frame={(format) => (
-              <RenderFrame
-                render={latest[format]}
-                retrying={retrying === format}
-                disabled={retrying !== undefined}
-                onRetry={() => retry(format)}
-              />
-            )}
+            frame={(format) => <RenderFrame render={latest[format]} />}
           />
         </CardContent>
       </Card>

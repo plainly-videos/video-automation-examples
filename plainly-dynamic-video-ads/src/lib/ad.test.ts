@@ -4,7 +4,6 @@ import {
   type Ad,
   adSchema,
   adStatus,
-  canRetry,
   DEFAULT_AD,
   findTemplates,
   formatOf,
@@ -229,10 +228,10 @@ test("isAdId only accepts UUIDs", () => {
 });
 
 test("latestPerFormat picks the newest render, whatever the API order", () => {
-  const failed = render("1:1", "FAILED", "2026-10-15T10:00:00Z");
-  const retried = render("1:1", "QUEUED", "2026-10-15T10:05:00Z");
-  expect(latestPerFormat([failed, retried])["1:1"]).toBe(retried);
-  expect(latestPerFormat([retried, failed])["1:1"]).toBe(retried);
+  const older = render("1:1", "FAILED", "2026-10-15T10:00:00Z");
+  const newer = render("1:1", "QUEUED", "2026-10-15T10:05:00Z");
+  expect(latestPerFormat([older, newer])["1:1"]).toBe(newer);
+  expect(latestPerFormat([newer, older])["1:1"]).toBe(newer);
 });
 
 test("latestPerFormat ignores renders without a known format", () => {
@@ -288,7 +287,7 @@ test("groupAds groups renders per ad, newest ad first", () => {
   expect(ads[1]).toMatchObject({ done: 1, rendering: 0, failed: 2 });
 });
 
-test("groupAds keeps the ad's creation time when a format is retried", () => {
+test("groupAds keeps the ad's creation time when a format has two renders", () => {
   const [ad] = groupAds([
     render("1:1", "DONE", "2026-10-15T10:05:00Z"),
     render("1:1", "FAILED", "2026-10-15T10:00:00Z"),
@@ -310,17 +309,6 @@ test("adStatus summarizes an ad in one badge", () => {
     label: "3/3 done",
     tone: "done",
   });
-});
-
-test("canRetry allows only failed or missing formats", () => {
-  expect(canRetry(undefined)).toBe(true);
-  for (const state of ["FAILED", "INVALID", "CANCELLED"]) {
-    expect(canRetry({ state }), state).toBe(true);
-  }
-  // Retrying these would only create duplicate renders
-  for (const state of ["DONE", "PENDING", "QUEUED", "IN_PROGRESS"]) {
-    expect(canRetry({ state }), state).toBe(false);
-  }
 });
 
 test("fromParameters ignores values that are not text", () => {
