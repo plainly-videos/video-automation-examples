@@ -82,7 +82,11 @@ A TanStack Start app that reads the project's templates from `GET /api/v2/projec
 
 Open http://localhost:3000. Pick a category, which fills the three slides with its products. Swap any slide for another product of the same category, which fills in its name and price, edit any field, and check the preview of all three formats on the right. The preview plays the ad in HTML, close to the video; the final look comes from the After Effects template.
 
+<p align="center"><img src=".assets/app.png" alt="Dynamic video ads editor with the live preview" width="500" /></p>
+
 Click **Render 3 formats**. The app opens `/ad/<id>`, where each format turns into a video once its render is finished. The page also shows the ad's values and the exact API request each render was made with. Click **Edit as new ad** to open the form prefilled with this ad.
+
+<p align="center"><img src=".assets/ad.png" alt="Ad page with the rendered 16:9, 9:16 and 1:1 videos" width="500" /></p>
 
 Every ad made with this app is listed under **Recent ads**, so you can reopen an earlier ad with one click. The list comes from Plainly, so it shows ads created by everyone using the same API key.
 
