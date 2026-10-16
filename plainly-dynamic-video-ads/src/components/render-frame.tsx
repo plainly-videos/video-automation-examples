@@ -30,12 +30,14 @@ export function RenderFrame({
   }
   if (render?.state === "DONE" && render.output) {
     return (
-      // biome-ignore lint/a11y/useMediaCaption: generated ad video has no captions
       <video
         src={render.output}
         poster={render.thumbnailUris?.[0]}
         controls
-        preload="metadata"
+        // Browsers only autoplay muted videos, viewers can unmute with the controls
+        autoPlay
+        muted
+        playsInline
         className="size-full object-cover"
       />
     );
