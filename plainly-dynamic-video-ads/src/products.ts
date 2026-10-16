@@ -26,6 +26,31 @@ export const products = {
     price: "$199",
     image: unsplash("photo-1523275335684-37898b6baf30"),
   },
+  camera: {
+    name: "Instant camera",
+    price: "$99",
+    image: unsplash("photo-1526170375885-4d8ecf77b99f"),
+  },
+  sunglasses: {
+    name: "Sunglasses",
+    price: "$59",
+    image: unsplash("photo-1572635196237-14b3f281503f"),
+  },
+  backpack: {
+    name: "City backpack",
+    price: "$69",
+    image: unsplash("photo-1553062407-98eeb64c6a62"),
+  },
+  speaker: {
+    name: "Bluetooth speaker",
+    price: "$89",
+    image: unsplash("photo-1608043152269-423dbba4e7e1"),
+  },
+  smartwatch: {
+    name: "Smartwatch",
+    price: "$249",
+    image: unsplash("photo-1546868871-7041f2a55e12"),
+  },
 } satisfies Record<string, Product>;
 
 export type ProductId = keyof typeof products;
