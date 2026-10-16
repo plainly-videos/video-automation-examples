@@ -23,7 +23,14 @@ import {
 } from "@/components/ui/select";
 import { type Ad, adSchema, LIMITS, slotFor } from "@/lib/ad";
 import { createAd } from "@/lib/plainly";
-import { isProductId, type ProductId, productIds, products } from "@/products";
+import {
+  type Category,
+  categories,
+  isProductId,
+  type ProductId,
+  products,
+  productsIn,
+} from "@/products";
 
 export function AdEditor({
   initial,
@@ -57,8 +64,7 @@ export function AdEditor({
         <CardHeader>
           <CardTitle>Ad</CardTitle>
           <CardDescription>
-            One ad, rendered in 16:9, 9:16 and 1:1 with three single render
-            calls.
+            One video that shows three products, rendered in 16:9, 9:16 and 1:1.
           </CardDescription>
         </CardHeader>
         <form
@@ -95,6 +101,43 @@ export function AdEditor({
                 />
               )}
             </form.Field>
+            <form.Subscribe
+              selector={(state) =>
+                products[state.values.slots[0].productId].category
+              }
+            >
+              {(category) => (
+                <Field className="gap-1.5 md:col-span-full lg:col-span-1">
+                  <FieldLabel htmlFor="ad-category">Category</FieldLabel>
+                  <Select
+                    value={category}
+                    // A new category brings its own three products
+                    onValueChange={(next) =>
+                      next &&
+                      form.setFieldValue(
+                        "slots",
+                        productsIn(next)
+                          .slice(0, initial.slots.length)
+                          .map(slotFor),
+                      )
+                    }
+                  >
+                    <SelectTrigger id="ad-category" className="w-full">
+                      <SelectValue>
+                        {(id: Category) => categories[id]}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(categories).map(([id, label]) => (
+                        <SelectItem key={id} value={id}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+              )}
+            </form.Subscribe>
             {initial.slots.map((_, i) => (
               <fieldset
                 // biome-ignore lint/suspicious/noArrayIndexKey: the slots never move
@@ -106,30 +149,56 @@ export function AdEditor({
                 </legend>
                 <form.Field name={`slots[${i}].productId`}>
                   {(field) => (
-                    <Select
-                      value={field.state.value}
-                      // A new product brings its own name and price
-                      onValueChange={(id) =>
-                        isProductId(id) &&
-                        form.setFieldValue(`slots[${i}]`, slotFor(id))
-                      }
-                    >
-                      <SelectTrigger
-                        aria-label={`Product ${i + 1}`}
-                        className="col-span-2 w-full"
+                    <>
+                      <Select
+                        value={field.state.value}
+                        // A new product brings its own name and price
+                        onValueChange={(id) =>
+                          isProductId(id) &&
+                          form.setFieldValue(`slots[${i}]`, slotFor(id))
+                        }
                       >
-                        <SelectValue>
-                          {(id: ProductId) => <ProductOption id={id} />}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {productIds.map((id) => (
-                          <SelectItem key={id} value={id}>
-                            <ProductOption id={id} />
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                        <SelectTrigger
+                          aria-label={`Product ${i + 1}`}
+                          className="col-span-2 w-full"
+                        >
+                          <SelectValue>
+                            {(id: ProductId) => <ProductOption id={id} />}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <form.Subscribe
+                            selector={(state) =>
+                              state.values.slots.map((slot) => slot.productId)
+                            }
+                          >
+                            {(picked) =>
+                              productsIn(products[picked[0]].category).map(
+                                (id) => (
+                                  <SelectItem
+                                    key={id}
+                                    value={id}
+                                    // Each product appears once per ad
+                                    disabled={picked.some(
+                                      (other, j) => j !== i && other === id,
+                                    )}
+                                  >
+                                    <ProductOption id={id} />
+                                  </SelectItem>
+                                ),
+                              )
+                            }
+                          </form.Subscribe>
+                        </SelectContent>
+                      </Select>
+                      {/* Shows up when an earlier ad repeats a product or mixes categories */}
+                      {!field.state.meta.isValid && (
+                        <FieldError
+                          className="col-span-2"
+                          errors={field.state.meta.errors}
+                        />
+                      )}
+                    </>
                   )}
                 </form.Field>
                 <form.Field name={`slots[${i}].name`}>

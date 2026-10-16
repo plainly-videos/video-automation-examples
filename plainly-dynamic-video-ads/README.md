@@ -2,13 +2,18 @@
 
 This example demonstrates dynamic creative for video advertising with [Plainly Videos](https://www.plainlyvideos.com/): one After Effects template produces many ad variants with a different hook, products, prices and call to action, and every variant renders in 16:9, 9:16 and 1:1, ready for each ad platform.
 
+The template is a collection ad: one video opens with a hook, shows three products from one category, such as tech or clothes, one slide each, and ends with a call to action. An ad is that one video, rendered once per format.
+
 ## What this App does?
 
 **Non-technical view:**
-Write a hook, pick three products with their names and prices, set the button text and a call to action, and watch a live preview in all three formats. Click one button and get the same ad as a wide, a tall and a square video.
+Write a hook, pick a category and the three products the ad shows, adjust their names and prices, set the button text and a call to action, and watch a live preview in all three formats. Click one button and get the same ad as a wide, a tall and a square video.
 
 **Technical view:**
 A TanStack Start app that reads the project's templates from `GET /api/v2/projects/{projectId}`, picks one template per aspect ratio by its resolution, and sends three `POST /api/v2/renders` requests to `https://api.plainlyvideos.com`, one per format. Every render is tagged with custom attributes, and the app finds them again with `POST /api/v2/renders/attributes`. No database, no webhooks and no local storage are needed.
+
+> [!WARNING]
+> Finding renders by custom attributes keeps this example short, but do not copy it into a real app. Every render in the organization can carry the same attributes, the lookup is a paginated search, and older renders drop out of the results. Keep your own records instead: save each render id next to the data it belongs to and update its status from webhooks, as the [Render and webhook example](../plainly-render-and-webhook/) does.
 
 ## What you'll learn
 
@@ -75,7 +80,7 @@ A TanStack Start app that reads the project's templates from `GET /api/v2/projec
 
 ## Usage
 
-Open http://localhost:3000. Pick a product for each of the three slots, which fills in its name and price, edit any field, and check the preview of all three formats on the right. The preview plays the ad in HTML, close to the video; the final look comes from the After Effects template.
+Open http://localhost:3000. Pick a category, which fills the three slides with its products. Swap any slide for another product of the same category, which fills in its name and price, edit any field, and check the preview of all three formats on the right. The preview plays the ad in HTML, close to the video; the final look comes from the After Effects template.
 
 Click **Render 3 formats**. The app opens `/ad/<id>`, where each format turns into a video once its render is finished. The page also shows the ad's values and the exact API request each render was made with. Click **Edit as new ad** to open the form prefilled with this ad.
 
@@ -133,15 +138,15 @@ Every request carries custom attributes. Plainly stores them on the render, whic
     "Hook": "New season picks",
     "ButtonCTA": "Shop now",
     "CTA": "Shop the collection",
-    "Product1": "Running sneakers",
-    "Price1": "$79",
-    "Image1": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1080&q=80",
-    "Product2": "Wireless headphones",
-    "Price2": "$129",
-    "Image2": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1080&q=80",
-    "Product3": "Coffee beans",
-    "Price3": "$12",
-    "Image3": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1080&q=80"
+    "Product1": "Wireless headphones",
+    "Price1": "$129",
+    "Image1": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1080&q=80",
+    "Product2": "Bluetooth speaker",
+    "Price2": "$89",
+    "Image2": "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=1080&q=80",
+    "Product3": "Smartwatch",
+    "Price3": "$249",
+    "Image3": "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=1080&q=80"
   },
   "attributes": {
     "example": "dynamic-video-ads",
@@ -169,7 +174,7 @@ While any format is still rendering, the ad page calls this again every 5 second
 ### Good to know
 
 - The preview is made by hand for this template: its timings and layouts were measured on rendered videos, see `src/components/ad-preview-data.ts`. Plainly does not provide it, so other templates need their own preview, or none.
-- Product images must be public URLs, because Plainly downloads them while rendering. The example uses placeholder photos from [Unsplash](https://unsplash.com/).
+- Product images must be public URLs, because Plainly downloads them while rendering. The example uses placeholder photos from [Unsplash](https://unsplash.com/). Add products or categories in `src/products.ts`.
 - To render many ads at once, use the Batch Renders API, see the [Batch render example](../plainly-batch-render/).
 - Prefer webhooks over polling in production. See [webhook delivery](https://help.plainlyvideos.com/docs/user-guide/rendering/video-delivery#webhook-delivery) and the [Render and webhook example](../plainly-render-and-webhook/).
 

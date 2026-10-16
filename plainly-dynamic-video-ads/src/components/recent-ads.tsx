@@ -25,7 +25,7 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item";
-import { type AdSummary, EXAMPLE } from "@/lib/ad";
+import type { AdSummary } from "@/lib/ad";
 import { formatDate } from "@/lib/utils";
 import { products } from "@/products";
 
@@ -40,9 +40,7 @@ export function RecentAds({
     <Card>
       <CardHeader>
         <CardTitle>Recent ads</CardTitle>
-        <CardDescription>
-          Found with the <code>example = {EXAMPLE}</code> attribute filter.
-        </CardDescription>
+        <CardDescription>Ads made with this app, newest first.</CardDescription>
       </CardHeader>
       <CardContent className="max-h-96 overflow-y-auto">
         {error ? (

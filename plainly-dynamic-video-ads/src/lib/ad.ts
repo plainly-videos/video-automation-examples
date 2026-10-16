@@ -3,8 +3,8 @@ import {
   isProductId,
   type ProductId,
   productIdOf,
-  productIds,
   products,
+  productsIn,
 } from "@/products";
 
 // Tags every render made by this example, so the app can list them again
@@ -81,7 +81,7 @@ export const DEFAULT_AD: Ad = {
   hook: "New season picks",
   button: "Shop now",
   cta: "Shop the collection",
-  slots: productIds.slice(0, 3).map(slotFor),
+  slots: productsIn("tech").slice(0, 3).map(slotFor),
 };
 
 // Short enough to fit the narrow 9:16 format
@@ -107,7 +107,21 @@ export const adSchema = z.object({
         price: text("Price", LIMITS.price),
       }),
     )
-    .length(DEFAULT_AD.slots.length, "An ad has three products"),
+    .length(DEFAULT_AD.slots.length, "An ad has three products")
+    .superRefine((slots, ctx) =>
+      slots.forEach((slot, i) => {
+        const message =
+          slots.findIndex((s) => s.productId === slot.productId) < i
+            ? "This product is already in the ad"
+            : products[slot.productId].category !==
+                products[slots[0].productId].category
+              ? "All products must be from one category"
+              : undefined;
+        if (message) {
+          ctx.addIssue({ code: "custom", path: [i, "productId"], message });
+        }
+      }),
+    ),
 });
 
 // The only place that knows the template's parameter names. Product1, Price1

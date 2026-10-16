@@ -24,13 +24,14 @@ import {
   toParameters,
   toRender,
 } from "@/lib/ad";
+import { productIds } from "@/products";
 
 const valid: Ad = DEFAULT_AD;
 const other: Ad = {
-  hook: "Coffee time",
+  hook: "Fall layers",
   button: "Order",
   cta: "Order now",
-  slots: [slotFor("coffee"), slotFor("watch"), slotFor("coffee")],
+  slots: [slotFor("jacket"), slotFor("tshirt"), slotFor("hoodie")],
 };
 
 test("formatOf maps resolutions to aspect ratios", () => {
@@ -77,7 +78,7 @@ test("adSchema trims text", () => {
   const parsed = adSchema.parse({
     ...valid,
     hook: "  New season picks  ",
-    slots: [{ ...valid.slots[0], price: " $79 " }, ...valid.slots.slice(1)],
+    slots: [{ ...valid.slots[0], price: " $129 " }, ...valid.slots.slice(1)],
   });
   expect(parsed).toEqual(valid);
 });
@@ -120,6 +121,20 @@ test("adSchema needs exactly three products", () => {
   ).toThrow("An ad has three products");
 });
 
+test("adSchema rejects the same product twice", () => {
+  const twice = {
+    ...valid,
+    slots: [valid.slots[0], valid.slots[0], valid.slots[2]],
+  };
+  const issues = adSchema.safeParse(twice).error?.issues;
+  expect(issues).toMatchObject([
+    {
+      path: ["slots", 1, "productId"],
+      message: "This product is already in the ad",
+    },
+  ]);
+});
+
 test("adSchema enforces length limits", () => {
   expect(() => adSchema.parse({ ...valid, hook: "x".repeat(25) })).toThrow(
     "Hook can be at most 24 characters",
@@ -135,7 +150,23 @@ test("adSchema enforces length limits", () => {
   ).toThrow("Price can be at most 6 characters");
 });
 
-test("every default product fits the limits", () => {
+test("adSchema rejects products from different categories", () => {
+  const mixed = {
+    ...valid,
+    slots: [...valid.slots.slice(0, 2), slotFor("jacket")],
+  };
+  expect(adSchema.safeParse(mixed).error?.issues).toMatchObject([
+    {
+      path: ["slots", 2, "productId"],
+      message: "All products must be from one category",
+    },
+  ]);
+});
+
+test("every product fits the limits", () => {
+  for (const id of productIds) {
+    expect(() => adSchema.shape.slots.element.parse(slotFor(id))).not.toThrow();
+  }
   expect(adSchema.parse(valid)).toEqual(valid);
   expect(adSchema.parse(other)).toEqual(other);
 });
@@ -146,15 +177,15 @@ test("toParameters maps an ad to the template parameters", () => {
     Hook: "New season picks",
     ButtonCTA: "Shop now",
     CTA: "Shop the collection",
-    Product1: "Running sneakers",
-    Price1: "$79",
-    Image1: image("photo-1542291026-7eec264c27ff"),
-    Product2: "Wireless headphones",
-    Price2: "$129",
-    Image2: image("photo-1505740420928-5e560c06d30e"),
-    Product3: "Coffee beans",
-    Price3: "$12",
-    Image3: image("photo-1509042239860-f550ce710b93"),
+    Product1: "Wireless headphones",
+    Price1: "$129",
+    Image1: image("photo-1505740420928-5e560c06d30e"),
+    Product2: "Bluetooth speaker",
+    Price2: "$89",
+    Image2: image("photo-1608043152269-423dbba4e7e1"),
+    Product3: "Smartwatch",
+    Price3: "$249",
+    Image3: image("photo-1546868871-7041f2a55e12"),
   });
 });
 
@@ -341,10 +372,10 @@ test("fromParameters ignores values that are not text", () => {
   const ad = fromParameters({
     Hook: 42,
     CTA: { text: "Shop now" },
-    Product1: "Sneakers",
+    Product1: "Headphones",
   });
   expect(ad).toMatchObject({ hook: "", cta: "" });
-  expect(ad.slots[0].name).toBe("Sneakers");
+  expect(ad.slots[0].name).toBe("Headphones");
 });
 
 test("toRender keeps only the fields the app shows", () => {
