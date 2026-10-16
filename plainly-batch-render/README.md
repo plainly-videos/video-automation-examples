@@ -84,6 +84,9 @@ Every batch you create is also saved in your browser's localStorage and listed u
 
 A batch request has a `projectId` and a `batchData` array. Every entry in `batchData` holds the `parameters` for one render, so two games produce two renders. Each entry also carries custom `attributes`: Plainly Videos echoes them back on every render in the batch, which is how the app matches a render to its game.
 
+> [!WARNING]
+> Here attributes only match the renders of one known batch back to its games. Do not use them as a way to store or look up your data: keep your own records, save each render id next to the data it belongs to and update its status from webhooks, as the [Render and webhook example](../plainly-render-and-webhook/) does.
+
 Batch creation is synchronous and all-or-nothing: the API responds only after all renders are created, and if the request fails, no renders are created. The response contains the batch `id`.
 
 The `createBatch` server function runs on the server, so your API key never reaches the browser:

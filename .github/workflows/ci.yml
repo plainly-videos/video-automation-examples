@@ -6,28 +6,62 @@ on:
   pull_request:
 
 jobs:
-  build-plainly-render-and-webhook:
-    name: Build plainly-render-and-webhook
+  # Every top-level folder with a package.json is an example. Only changed
+  # examples build, so a new example needs no change here
+  changes:
+    name: Detect changed examples
     runs-on: ubuntu-latest
+    outputs:
+      examples: ${{ steps.list.outputs.examples }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: List changed examples
+        id: list
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          all=$(ls -d */package.json | xargs -n1 dirname)
+          # A change to this workflow, or a base that can't be compared, builds everything
+          if changed=$(git diff --name-only "$BASE" HEAD) && ! grep -qx .github/workflows/ci.yml <<< "$changed"; then
+            examples=$(grep -Fxf <(cut -d/ -f1 <<< "$changed" | sort -u) <<< "$all" || true)
+          else
+            examples=$all
+          fi
+          echo "examples=$(jq -cn '$ARGS.positional' --args $examples)" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build ${{ matrix.example }}
+    needs: changes
+    if: needs.changes.outputs.examples != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        example: ${{ fromJSON(needs.changes.outputs.examples) }}
     defaults:
       run:
-        working-directory: plainly-render-and-webhook
+        working-directory: ${{ matrix.example }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v7
 
+      # Versions come from the example's packageManager field and .nvmrc
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
         with:
-          version: 12
+          package_json_file: ${{ matrix.example }}/package.json
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version-file: ${{ matrix.example }}/.nvmrc
           cache: pnpm
-          cache-dependency-path: plainly-render-and-webhook/pnpm-lock.yaml
+          cache-dependency-path: ${{ matrix.example }}/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -35,90 +69,16 @@ jobs:
       - name: Setup Biome
         uses: biomejs/setup-biome@v2
         with:
-          working-dir: plainly-render-and-webhook
-
-      - name: Run Biome
-        run: biome ci .
-
-      - name: Build
-        run: pnpm build
-
-  build-mcp-ai-crypto-video-agent:
-    name: Build mcp-ai-crypto-video-agent
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: mcp-ai-crypto-video-agent
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v6
-        with:
-          version: 10
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: 20
-          cache: pnpm
-          cache-dependency-path: mcp-ai-crypto-video-agent/pnpm-lock.yaml
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Setup Biome
-        uses: biomejs/setup-biome@v2
-        with:
-          working-dir: mcp-ai-crypto-video-agent
-
-      - name: Run Biome
-        run: biome ci .
-
-      - name: Build
-        run: pnpm build
-
-  build-plainly-batch-render:
-    name: Build plainly-batch-render
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: plainly-batch-render
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v6
-        with:
-          version: 12
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: pnpm
-          cache-dependency-path: plainly-batch-render/pnpm-lock.yaml
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Setup Biome
-        uses: biomejs/setup-biome@v2
-        with:
-          working-dir: plainly-batch-render
+          working-dir: ${{ matrix.example }}
 
       - name: Run Biome
         run: biome ci .
 
       - name: Typecheck
-        run: pnpm typecheck
+        run: pnpm run --if-present typecheck
 
       - name: Test
-        run: pnpm test
+        run: pnpm run --if-present test
 
       - name: Build
         run: pnpm build

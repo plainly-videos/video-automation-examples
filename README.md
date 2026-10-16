@@ -49,6 +49,14 @@ Simply choose an example that matches your use case and follow the `README.md` f
       - Showing finished videos in a grid.
    * **Tech Stack**: TanStack Start, TypeScript, Tailwind CSS, shadcn/ui
 
+4. **[Dynamic video ads](plainly-dynamic-video-ads/)**
+   * **Purpose**: Demonstrates dynamic creative for video advertising, where one template produces many ad variants with different headlines, offers, pricing, and visuals. Every variant renders in multiple aspect ratios, like 16:9, 9:16, and 1:1, ready for each ad platform.
+   * **What it shows**:
+      - Rendering one ad in three aspect ratios with three single render requests.
+      - Finding the template for each format from the project's templates.
+      - Tagging renders with custom attributes and finding them again with the attribute filter.
+   * **Tech Stack**: TanStack Start, TypeScript, Tailwind CSS, shadcn/ui
+
 ## Contributing
 
 Found an issue or want to contribute a new example? We welcome contributions! Please feel free to:
