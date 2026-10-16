@@ -15,24 +15,15 @@ import {
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
-  type Ad,
-  adFor,
-  adSchema,
-  LABELS,
-  LIMITS,
-  OPTIONAL_FIELDS,
-  type TextField,
-} from "@/lib/ad";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { type Ad, adSchema, LIMITS, slotFor } from "@/lib/ad";
 import { createAd } from "@/lib/plainly";
-import { cn } from "@/lib/utils";
-import { type ProductId, productIds, products } from "@/products";
-
-const FIELDS: TextField[][] = [
-  ["headline"],
-  ["offer"],
-  ["price", "oldPrice"],
-  ["cta"],
-];
+import { isProductId, type ProductId, productIds, products } from "@/products";
 
 export function AdEditor({
   initial,
@@ -60,10 +51,6 @@ export function AdEditor({
     },
   });
 
-  // Picking a product swaps in its copy, Reset still goes back to `initial`
-  const pickProduct = (id: ProductId) =>
-    form.reset(adFor(id), { keepDefaultValues: true });
-
   return (
     <div className="grid gap-6 lg:grid-cols-[22rem_1fr]">
       <Card>
@@ -88,38 +75,74 @@ export function AdEditor({
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            <fieldset className="grid gap-2">
-              <legend className="mb-2 text-sm font-medium">Product</legend>
-              <form.Subscribe selector={(state) => state.values.productId}>
-                {(productId) => (
-                  <div className="grid grid-cols-4 gap-2 lg:grid-cols-2">
-                    {productIds.map((id) => (
-                      <ProductButton
-                        key={id}
-                        id={id}
-                        selected={productId === id}
-                        onPick={() => pickProduct(id)}
-                      />
-                    ))}
-                  </div>
-                )}
-              </form.Subscribe>
-            </fieldset>
-            {FIELDS.map((row) => (
-              <div key={row.join()} className="grid grid-cols-2 gap-3">
-                {row.map((name) => (
-                  <form.Field key={name} name={name}>
-                    {(field) => (
-                      <TextInput
-                        name={name}
-                        field={field}
-                        wide={row.length === 1}
-                      />
-                    )}
-                  </form.Field>
-                ))}
-              </div>
+            <form.Field name="hook">
+              {(field) => (
+                <TextInput field={field} label="Hook" max={LIMITS.hook} />
+              )}
+            </form.Field>
+            {initial.slots.map((_, i) => (
+              <fieldset
+                // biome-ignore lint/suspicious/noArrayIndexKey: the slots never move
+                key={i}
+                className="grid grid-cols-[minmax(0,1fr)_5rem] gap-3"
+              >
+                <legend className="mb-2 text-sm font-medium">
+                  Product {i + 1}
+                </legend>
+                <form.Field name={`slots[${i}].productId`}>
+                  {(field) => (
+                    <Select
+                      value={field.state.value}
+                      // A new product brings its own name and price
+                      onValueChange={(id) =>
+                        isProductId(id) &&
+                        form.setFieldValue(`slots[${i}]`, slotFor(id))
+                      }
+                    >
+                      <SelectTrigger
+                        aria-label={`Product ${i + 1}`}
+                        className="col-span-2 w-full"
+                      >
+                        <SelectValue>
+                          {(id: ProductId) => <ProductOption id={id} />}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {productIds.map((id) => (
+                          <SelectItem key={id} value={id}>
+                            <ProductOption id={id} />
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </form.Field>
+                <form.Field name={`slots[${i}].name`}>
+                  {(field) => (
+                    <TextInput field={field} label="Name" max={LIMITS.name} />
+                  )}
+                </form.Field>
+                <form.Field name={`slots[${i}].price`}>
+                  {(field) => (
+                    <TextInput field={field} label="Price" max={LIMITS.price} />
+                  )}
+                </form.Field>
+              </fieldset>
             ))}
+            <form.Field name="button">
+              {(field) => (
+                <TextInput field={field} label="Button" max={LIMITS.button} />
+              )}
+            </form.Field>
+            <form.Field name="cta">
+              {(field) => (
+                <TextInput
+                  field={field}
+                  label="Call to action"
+                  max={LIMITS.cta}
+                />
+              )}
+            </form.Field>
           </CardContent>
           {/* mt-auto keeps the buttons at the bottom when the card stretches */}
           <CardFooter className="mt-auto justify-end gap-2">
@@ -147,64 +170,40 @@ export function AdEditor({
   );
 }
 
-function ProductButton({
-  id,
-  selected,
-  onPick,
-}: {
-  id: ProductId;
-  selected: boolean;
-  onPick: () => void;
-}) {
+function ProductOption({ id }: { id: ProductId }) {
   return (
-    <button
-      type="button"
-      aria-pressed={selected}
-      onClick={onPick}
-      className={cn(
-        // minmax(0, 1fr) keeps a long name from widening the image
-        "grid grid-cols-[minmax(0,1fr)] gap-1 rounded-lg border p-1 text-[11px] hover:bg-muted",
-        selected && "border-primary ring-1 ring-primary",
-      )}
-    >
+    <>
       <img
         src={products[id].image}
         alt=""
-        className="aspect-square w-full rounded-md object-cover"
+        className="size-5 rounded-sm object-cover"
       />
-      <span className="truncate">{products[id].name}</span>
-    </button>
+      {products[id].name}
+    </>
   );
 }
 
 function TextInput({
-  name,
   field,
-  wide,
+  label,
+  max,
 }: {
-  name: TextField;
   field: AnyFieldApi;
-  wide: boolean;
+  label: string;
+  max: number;
 }) {
-  const id = `ad-${name}`;
+  // Field names like slots[0].name are not valid in a selector
+  const id = `ad-${field.name.replace(/\W+/g, "-")}`;
   const invalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
   return (
-    <Field
-      data-invalid={invalid}
-      className={cn("gap-1.5", wide && "col-span-2")}
-    >
-      <FieldLabel htmlFor={id}>
-        {LABELS[name]}
-        {OPTIONAL_FIELDS.includes(name) && (
-          <span className="font-normal text-muted-foreground">(optional)</span>
-        )}
-      </FieldLabel>
+    <Field data-invalid={invalid} className="gap-1.5">
+      <FieldLabel htmlFor={id}>{label}</FieldLabel>
       <Input
         id={id}
-        name={name}
+        name={field.name}
         value={field.state.value}
-        maxLength={LIMITS[name]}
+        maxLength={max}
         aria-invalid={invalid}
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(e.target.value)}

@@ -1,10 +1,11 @@
 import { execFileSync } from "node:child_process";
 import { expect, test } from "vitest";
 import {
-  adFor,
+  type Ad,
   adSchema,
   adStatus,
   canRetry,
+  DEFAULT_AD,
   findTemplates,
   formatOf,
   fromParameters,
@@ -15,6 +16,7 @@ import {
   latestPerFormat,
   type Render,
   renderBody,
+  slotFor,
   stateLabel,
   templatesByFormat,
   toCurl,
@@ -22,13 +24,12 @@ import {
   toRender,
 } from "@/lib/ad";
 
-const valid = {
-  productId: "sneakers",
-  headline: "Run further. Recover faster.",
-  offer: "20% OFF",
-  price: "$79",
-  oldPrice: "$99",
-  cta: "Shop now",
+const valid: Ad = DEFAULT_AD;
+const other: Ad = {
+  hook: "Coffee time",
+  button: "Order",
+  cta: "Order now",
+  slots: [slotFor("coffee"), slotFor("watch"), slotFor("coffee")],
 };
 
 test("formatOf maps resolutions to aspect ratios", () => {
@@ -71,83 +72,105 @@ test("templatesByFormat names the missing format", () => {
   expect(() => templatesByFormat([])).toThrow("Project has no 16:9 template");
 });
 
-test("adFor fills an ad with the product's copy", () => {
-  expect(adFor("sneakers")).toEqual(valid);
-});
-
-test("adSchema trims fields and allows an empty old price", () => {
-  expect(
-    adSchema.parse({
-      ...valid,
-      headline: "  Run further. Recover faster.  ",
-      oldPrice: "",
-    }),
-  ).toEqual({ ...valid, oldPrice: "" });
+test("adSchema trims text", () => {
+  const parsed = adSchema.parse({
+    ...valid,
+    hook: "  New season picks  ",
+    slots: [{ ...valid.slots[0], price: " $79 " }, ...valid.slots.slice(1)],
+  });
+  expect(parsed).toEqual(valid);
 });
 
 test("adSchema rejects unknown products", () => {
-  expect(() => adSchema.parse({ ...valid, productId: "boat" })).toThrow(
-    "Unknown product",
-  );
+  const withProduct = (productId: unknown) => ({
+    ...valid,
+    slots: [{ ...valid.slots[0], productId }, ...valid.slots.slice(1)],
+  });
+  expect(() => adSchema.parse(withProduct("boat"))).toThrow("Unknown product");
   // Inherited object keys are not products
-  expect(() => adSchema.parse({ ...valid, productId: "toString" })).toThrow(
+  expect(() => adSchema.parse(withProduct("toString"))).toThrow(
     "Unknown product",
   );
   expect(() => adSchema.parse(null)).toThrow("expected object");
 });
 
-test("adSchema requires every field except old price", () => {
-  expect(() => adSchema.parse({ ...valid, headline: "   " })).toThrow(
-    "Headline is required",
+test("adSchema requires every field", () => {
+  expect(() => adSchema.parse({ ...valid, hook: "   " })).toThrow(
+    "Hook is required",
   );
-  expect(() => adSchema.parse({ ...valid, offer: undefined })).toThrow(
+  expect(() => adSchema.parse({ ...valid, cta: undefined })).toThrow(
     "expected string",
   );
   // The browser can send anything, a number is not text
-  expect(() => adSchema.parse({ ...valid, cta: 42 })).toThrow(
-    "expected string",
-  );
+  expect(() =>
+    adSchema.parse({
+      ...valid,
+      slots: [{ ...valid.slots[0], name: 42 }, ...valid.slots.slice(1)],
+    }),
+  ).toThrow("expected string");
+});
+
+test("adSchema needs exactly three products", () => {
+  expect(() =>
+    adSchema.parse({ ...valid, slots: valid.slots.slice(0, 2) }),
+  ).toThrow("An ad has three products");
+  expect(() =>
+    adSchema.parse({ ...valid, slots: [...valid.slots, valid.slots[0]] }),
+  ).toThrow("An ad has three products");
 });
 
 test("adSchema enforces length limits", () => {
-  expect(() => adSchema.parse({ ...valid, headline: "x".repeat(41) })).toThrow(
-    "Headline can be at most 40 characters",
+  expect(() => adSchema.parse({ ...valid, hook: "x".repeat(25) })).toThrow(
+    "Hook can be at most 24 characters",
   );
-  expect(
-    adSchema.parse({ ...valid, headline: "x".repeat(40) }).headline,
-  ).toHaveLength(40);
-  expect(() => adSchema.parse({ ...valid, oldPrice: "x".repeat(11) })).toThrow(
-    "Old price can be at most 10 characters",
+  expect(adSchema.parse({ ...valid, hook: "x".repeat(24) }).hook).toHaveLength(
+    24,
   );
+  expect(() =>
+    adSchema.parse({
+      ...valid,
+      slots: [{ ...valid.slots[0], price: "$1234.5" }, ...valid.slots.slice(1)],
+    }),
+  ).toThrow("Price can be at most 6 characters");
+});
+
+test("every default product fits the limits", () => {
+  expect(adSchema.parse(valid)).toEqual(valid);
+  expect(adSchema.parse(other)).toEqual(other);
 });
 
 test("toParameters maps an ad to the template parameters", () => {
-  expect(toParameters(adFor("sneakers"))).toEqual({
-    plainlyEditHeadline: "Run further. Recover faster.",
-    plainlyEditOffer: "20% OFF",
-    plainlyEditPrice: "$79",
-    plainlyEditOldPrice: "$99",
-    plainlyEditCta: "Shop now",
-    plainlyEditImage:
-      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1080&q=80",
+  const image = (id: string) => `https://images.unsplash.com/${id}?w=1080&q=80`;
+  expect(toParameters(valid)).toEqual({
+    Hook: "New season picks",
+    ButtonCTA: "Shop now",
+    CTA: "Shop the collection",
+    Product1: "Running sneakers",
+    Price1: "$79",
+    Image1: image("photo-1542291026-7eec264c27ff"),
+    Product2: "Wireless headphones",
+    Price2: "$129",
+    Image2: image("photo-1505740420928-5e560c06d30e"),
+    Product3: "Coffee beans",
+    Price3: "$12",
+    Image3: image("photo-1509042239860-f550ce710b93"),
   });
 });
 
 test("fromParameters reverses toParameters", () => {
-  const ad = adFor("watch");
-  expect(fromParameters(toParameters(ad))).toEqual(ad);
+  expect(fromParameters(toParameters(other))).toEqual(other);
 });
 
 test("fromParameters falls back for unknown images and missing values", () => {
-  expect(
-    fromParameters({ plainlyEditImage: "https://example.com/boat.png" }),
-  ).toEqual({
-    productId: "sneakers",
-    headline: "",
-    offer: "",
-    price: "",
-    oldPrice: "",
+  expect(fromParameters({ Image2: "https://example.com/boat.png" })).toEqual({
+    hook: "",
+    button: "",
     cta: "",
+    slots: valid.slots.map(({ productId }) => ({
+      productId,
+      name: "",
+      price: "",
+    })),
   });
 });
 
@@ -158,12 +181,12 @@ test("renderBody tags the render with the example, ad and format", () => {
       templateId: "template",
       adId: "ad",
       format: "9:16",
-      parameters: { plainlyEditHeadline: "Hi" },
+      parameters: { Hook: "Hi" },
     }),
   ).toEqual({
     projectId: "project",
     templateId: "template",
-    parameters: { plainlyEditHeadline: "Hi" },
+    parameters: { Hook: "Hi" },
     attributes: { example: "dynamic-video-ads", adId: "ad", format: "9:16" },
   });
 });
@@ -181,7 +204,7 @@ const render = (
   state,
   createdDate,
   attributes: { adId, format },
-  parameters: toParameters(adFor("coffee")),
+  parameters: toParameters(other),
 });
 
 test("isFinished treats every state except the in-progress ones as final", () => {
@@ -256,7 +279,7 @@ test("groupAds groups renders per ad, newest ad first", () => {
   expect(ads[0]).toEqual({
     adId: AD,
     createdDate: "2026-10-15T10:00:00Z",
-    ad: adFor("coffee"),
+    ad: other,
     done: 1,
     rendering: 1,
     failed: 1,
@@ -303,11 +326,12 @@ test("canRetry allows only failed or missing formats", () => {
 test("fromParameters ignores values that are not text", () => {
   // Any render in the org can carry the example attribute with odd parameters
   const ad = fromParameters({
-    plainlyEditHeadline: 42,
-    plainlyEditOffer: { text: "20% OFF" },
-    plainlyEditPrice: "$79",
+    Hook: 42,
+    CTA: { text: "Shop now" },
+    Product1: "Sneakers",
   });
-  expect(ad).toMatchObject({ headline: "", offer: "", price: "$79" });
+  expect(ad).toMatchObject({ hook: "", cta: "" });
+  expect(ad.slots[0].name).toBe("Sneakers");
 });
 
 test("toRender keeps only the fields the app shows", () => {

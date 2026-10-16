@@ -1,7 +1,6 @@
 import { z } from "zod";
 import {
   isProductId,
-  type ProductCopy,
   type ProductId,
   productIdOf,
   productIds,
@@ -66,64 +65,66 @@ export function templatesByFormat(
   return { "16:9": idOf("16:9"), "9:16": idOf("9:16"), "1:1": idOf("1:1") };
 }
 
-export type Ad = { productId: ProductId } & ProductCopy;
-export type TextField = keyof ProductCopy;
+// One product slide of the video: the picked product's image, with a name
+// and price that can be edited
+export type Slot = { productId: ProductId; name: string; price: string };
+// The button sits on every product slide
+export type Ad = { hook: string; button: string; cta: string; slots: Slot[] };
 
-export const LABELS: Record<TextField, string> = {
-  headline: "Headline",
-  offer: "Offer",
-  price: "Price",
-  oldPrice: "Old price",
-  cta: "Call to action",
+export const slotFor = (productId: ProductId): Slot => ({
+  productId,
+  name: products[productId].name,
+  price: products[productId].price,
+});
+
+// The template shows exactly three products
+export const DEFAULT_AD: Ad = {
+  hook: "New season picks",
+  button: "Shop now",
+  cta: "Shop the collection",
+  slots: productIds.slice(0, 3).map(slotFor),
 };
 
 // Short enough to fit the narrow 9:16 format
-export const LIMITS: Record<TextField, number> = {
-  headline: 40,
-  offer: 15,
-  price: 10,
-  oldPrice: 10,
-  cta: 15,
-};
+export const LIMITS = { hook: 24, button: 12, cta: 24, name: 20, price: 6 };
 
-export const OPTIONAL_FIELDS: TextField[] = ["oldPrice"];
-
-export const adFor = (productId: ProductId): Ad => ({
-  productId,
-  ...products[productId].copy,
-});
-
-const text = (field: TextField) => {
-  const value = z
+const text = (label: string, max: number) =>
+  z
     .string()
     .trim()
-    .max(
-      LIMITS[field],
-      `${LABELS[field]} can be at most ${LIMITS[field]} characters`,
-    );
-  return OPTIONAL_FIELDS.includes(field)
-    ? value
-    : value.min(1, `${LABELS[field]} is required`);
-};
+    .min(1, `${label} is required`)
+    .max(max, `${label} can be at most ${max} characters`);
 
 // Used by the form and again on the server, where the browser can send anything
 export const adSchema = z.object({
-  productId: z.custom<ProductId>(isProductId, "Unknown product"),
-  headline: text("headline"),
-  offer: text("offer"),
-  price: text("price"),
-  oldPrice: text("oldPrice"),
-  cta: text("cta"),
+  hook: text("Hook", LIMITS.hook),
+  button: text("Button", LIMITS.button),
+  cta: text("Call to action", LIMITS.cta),
+  slots: z
+    .array(
+      z.object({
+        productId: z.custom<ProductId>(isProductId, "Unknown product"),
+        name: text("Name", LIMITS.name),
+        price: text("Price", LIMITS.price),
+      }),
+    )
+    .length(DEFAULT_AD.slots.length, "An ad has three products"),
 });
 
-// The only place that knows the template's parameter names
+// The only place that knows the template's parameter names. Product1, Price1
+// and Image1 make the first product slide, and so on. ButtonSwitch is left
+// out, its default shows the button
 export const toParameters = (ad: Ad): Record<string, string> => ({
-  plainlyEditHeadline: ad.headline,
-  plainlyEditOffer: ad.offer,
-  plainlyEditPrice: ad.price,
-  plainlyEditOldPrice: ad.oldPrice,
-  plainlyEditCta: ad.cta,
-  plainlyEditImage: products[ad.productId].image,
+  Hook: ad.hook,
+  ButtonCTA: ad.button,
+  CTA: ad.cta,
+  ...Object.fromEntries(
+    ad.slots.flatMap((slot, i) => [
+      [`Product${i + 1}`, slot.name],
+      [`Price${i + 1}`, slot.price],
+      [`Image${i + 1}`, products[slot.productId].image],
+    ]),
+  ),
 });
 
 // Reverse of toParameters, prefills the form from an existing render
@@ -134,12 +135,14 @@ export function fromParameters(params: Record<string, unknown>): Ad {
     return typeof value === "string" ? value : "";
   };
   return {
-    productId: productIdOf(params.plainlyEditImage) ?? productIds[0],
-    headline: text("plainlyEditHeadline"),
-    offer: text("plainlyEditOffer"),
-    price: text("plainlyEditPrice"),
-    oldPrice: text("plainlyEditOldPrice"),
-    cta: text("plainlyEditCta"),
+    hook: text("Hook"),
+    button: text("ButtonCTA"),
+    cta: text("CTA"),
+    slots: DEFAULT_AD.slots.map((fallback, i) => ({
+      productId: productIdOf(params[`Image${i + 1}`]) ?? fallback.productId,
+      name: text(`Product${i + 1}`),
+      price: text(`Price${i + 1}`),
+    })),
   };
 }
 
@@ -191,7 +194,7 @@ export type Render = {
   createdDate: string;
   // null when the render was created without custom attributes
   attributes: { adId?: string; format?: string } | null;
-  // This example only sends text parameters
+  // Text and image URLs, all strings
   parameters?: Record<string, string>;
   output?: string;
   thumbnailUris?: string[];

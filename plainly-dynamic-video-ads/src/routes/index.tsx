@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdEditor } from "@/components/ad-editor";
 import { PreviewCard } from "@/components/ad-preview";
-import { adFor } from "@/lib/ad";
+import { DEFAULT_AD } from "@/lib/ad";
 import { getRenderTarget } from "@/lib/plainly";
 
 export const Route = createFileRoute("/")({
@@ -19,7 +19,7 @@ function Home() {
   const { adId, target } = Route.useLoaderData();
   return (
     <AdEditor
-      initial={adFor("sneakers")}
+      initial={DEFAULT_AD}
       aside={(ad) => <PreviewCard ad={ad} adId={adId} target={target} />}
     />
   );

@@ -1,11 +1,4 @@
-export type ProductCopy = {
-  headline: string;
-  offer: string;
-  price: string;
-  oldPrice: string;
-  cta: string;
-};
-export type Product = { name: string; image: string; copy: ProductCopy };
+export type Product = { name: string; price: string; image: string };
 
 // Placeholder product photos from Unsplash. Plainly downloads them while
 // rendering, so they must be public URLs
@@ -14,48 +7,24 @@ const unsplash = (id: string) =>
 
 export const products = {
   sneakers: {
-    name: "Sneakers",
+    name: "Running sneakers",
+    price: "$79",
     image: unsplash("photo-1542291026-7eec264c27ff"),
-    copy: {
-      headline: "Run further. Recover faster.",
-      offer: "20% OFF",
-      price: "$79",
-      oldPrice: "$99",
-      cta: "Shop now",
-    },
   },
   headphones: {
-    name: "Headphones",
+    name: "Wireless headphones",
+    price: "$129",
     image: unsplash("photo-1505740420928-5e560c06d30e"),
-    copy: {
-      headline: "Silence the noise.",
-      offer: "NEW",
-      price: "$129",
-      oldPrice: "",
-      cta: "Listen now",
-    },
   },
   coffee: {
-    name: "Coffee",
+    name: "Coffee beans",
+    price: "$12",
     image: unsplash("photo-1509042239860-f550ce710b93"),
-    copy: {
-      headline: "Your morning, upgraded.",
-      offer: "2 FOR 1",
-      price: "$12",
-      oldPrice: "$24",
-      cta: "Order now",
-    },
   },
   watch: {
-    name: "Watch",
+    name: "Classic watch",
+    price: "$199",
     image: unsplash("photo-1523275335684-37898b6baf30"),
-    copy: {
-      headline: "Time well spent.",
-      offer: "FREE SHIPPING",
-      price: "$199",
-      oldPrice: "",
-      cta: "Buy now",
-    },
   },
 } satisfies Record<string, Product>;
 

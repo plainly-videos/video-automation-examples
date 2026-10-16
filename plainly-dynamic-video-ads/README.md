@@ -1,11 +1,11 @@
 # Dynamic video ads example
 
-This example demonstrates dynamic creative for video advertising with [Plainly Videos](https://www.plainlyvideos.com/): one After Effects template produces many ad variants with different headlines, offers, prices and product images, and every variant renders in 16:9, 9:16 and 1:1, ready for each ad platform.
+This example demonstrates dynamic creative for video advertising with [Plainly Videos](https://www.plainlyvideos.com/): one After Effects template produces many ad variants with a different hook, products, prices and call to action, and every variant renders in 16:9, 9:16 and 1:1, ready for each ad platform.
 
 ## What this App does?
 
 **Non-technical view:**
-Pick a product, adjust the headline, offer, price and call to action, and watch a live preview in all three formats. Click one button and get the same ad as a wide, a tall and a square video.
+Write a hook, pick three products with their names and prices, set the button text and a call to action, and watch a live preview in all three formats. Click one button and get the same ad as a wide, a tall and a square video.
 
 **Technical view:**
 A TanStack Start app that reads the project's templates from `GET /api/v2/projects/{projectId}`, picks one template per aspect ratio by its resolution, and sends three `POST /api/v2/renders` requests to `https://api.plainlyvideos.com`, one per format. Every render is tagged with custom attributes, and the app finds them again with `POST /api/v2/renders/attributes`. No database, no webhooks and no local storage are needed.
@@ -39,7 +39,7 @@ A TanStack Start app that reads the project's templates from `GET /api/v2/projec
 3. Upload an After Effects project to Plainly Videos:
    - The project needs three compositions: 1920×1080 (16:9), 1080×1920 (9:16) and 1080×1080 (1:1).
    - Go to [Upload form](https://app.plainlyvideos.com/dashboard/projects/create) and upload the project.
-   - Create one template per composition. Each template needs these parameters: `plainlyEditHeadline`, `plainlyEditOffer`, `plainlyEditPrice`, `plainlyEditOldPrice`, `plainlyEditCta` (text) and `plainlyEditImage` (image).
+   - Create one template per composition. Each template needs these parameters: `Hook`, `ButtonCTA`, `CTA`, `Product1`-`Product3`, `Price1`-`Price3` (text) and `Image1`-`Image3` (image). The video opens with the hook, shows one slide per product with a button and ends with the call to action.
 
 4. Set up environment variables:
 
@@ -66,7 +66,7 @@ A TanStack Start app that reads the project's templates from `GET /api/v2/projec
 
 ## Usage
 
-Open http://localhost:3000. Pick a product to fill in the ad, edit any field, and check the preview of all three formats on the right. The preview is plain HTML to show how the copy fits each shape; the final look comes from the After Effects template.
+Open http://localhost:3000. Pick a product for each of the three slots, which fills in its name and price, edit any field, and check the preview of all three formats on the right. The preview is plain HTML to show how the copy fits each shape; the final look comes from the After Effects template.
 
 Click **Render 3 formats**. The app opens `/ad/<id>`, where each format turns into a video once its render is finished. If a format fails, click **Retry** to render only that format again. Edit the form on this page and submit it to create a new ad based on this one.
 
@@ -121,12 +121,18 @@ Every request carries custom attributes. Plainly stores them on the render, whic
   "projectId": "your-project-id",
   "templateId": "template-id-of-the-9:16-composition",
   "parameters": {
-    "plainlyEditHeadline": "Run further. Recover faster.",
-    "plainlyEditOffer": "20% OFF",
-    "plainlyEditPrice": "$79",
-    "plainlyEditOldPrice": "$99",
-    "plainlyEditCta": "Shop now",
-    "plainlyEditImage": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1080&q=80"
+    "Hook": "New season picks",
+    "ButtonCTA": "Shop now",
+    "CTA": "Shop the collection",
+    "Product1": "Running sneakers",
+    "Price1": "$79",
+    "Image1": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1080&q=80",
+    "Product2": "Wireless headphones",
+    "Price2": "$129",
+    "Image2": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1080&q=80",
+    "Product3": "Coffee beans",
+    "Price3": "$12",
+    "Image3": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1080&q=80"
   },
   "attributes": {
     "example": "dynamic-video-ads",

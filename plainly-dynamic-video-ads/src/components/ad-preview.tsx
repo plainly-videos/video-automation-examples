@@ -17,42 +17,44 @@ const TEXT_SIZE: Record<Format, string> = {
   "1:1": "5.5cqw",
 };
 
-// A rough HTML version of the ad, the real one comes from After Effects
+// A rough HTML version of the ad, the real one comes from After Effects.
+// The video shows the hook, one slide per product and the call to action
+// one after another, the preview puts them on one frame
 export function AdPreview({ ad, format }: { ad: Ad; format: Format }) {
   return (
     <div
-      className="absolute inset-0 text-white"
+      className="absolute inset-0 flex flex-col items-center justify-evenly bg-linear-to-b from-white to-neutral-200 p-[0.8em] text-black"
       style={{ fontSize: TEXT_SIZE[format] }}
     >
-      <img
-        src={products[ad.productId].image}
-        alt=""
-        className="absolute inset-0 size-full object-cover"
-      />
-      <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 grid justify-items-start gap-[0.5em] p-[1.2em]">
-        {ad.offer && (
-          <span className="rounded-sm bg-white px-[0.5em] py-[0.15em] font-extrabold text-black">
-            {ad.offer}
-          </span>
-        )}
-        <p className="text-[1.8em] leading-none font-extrabold text-balance">
-          {ad.headline}
-        </p>
-        <p className="text-[1.4em] font-bold">
-          {ad.price}
-          {ad.oldPrice && (
-            <s className="ml-[0.4em] text-[0.65em] font-normal opacity-70">
-              {ad.oldPrice}
-            </s>
-          )}
-        </p>
-        {ad.cta && (
-          <span className="rounded-full bg-white px-[0.9em] py-[0.35em] font-semibold text-black">
-            {ad.cta}
-          </span>
-        )}
+      <p className="text-center text-[1.6em] leading-none font-extrabold uppercase text-balance">
+        {ad.hook}
+      </p>
+      <div className="grid w-full grid-cols-3 gap-[0.6em]">
+        {ad.slots.map((slot, i) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: the slots never move
+          <div key={i} className="grid grid-cols-[minmax(0,1fr)] gap-[0.4em]">
+            <div className="relative">
+              <img
+                src={products[slot.productId].image}
+                alt=""
+                className="aspect-square w-full rounded-[0.4em] object-cover"
+              />
+              <span className="absolute right-[0.3em] bottom-[0.3em] max-w-[90%] truncate rounded-full bg-black px-[0.5em] text-[0.55em] font-bold text-white">
+                {ad.button}
+              </span>
+            </div>
+            <div className="flex items-center gap-[0.3em] rounded-full border border-black p-[0.15em] pl-[0.5em] text-[0.6em] font-bold uppercase">
+              <span className="min-w-0 flex-1 truncate">{slot.name}</span>
+              <span className="rounded-full bg-black px-[0.4em] text-white">
+                {slot.price}
+              </span>
+            </div>
+          </div>
+        ))}
       </div>
+      <p className="text-center text-[1.3em] leading-none font-extrabold uppercase text-balance">
+        {ad.cta}
+      </p>
     </div>
   );
 }

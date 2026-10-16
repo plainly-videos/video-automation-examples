@@ -99,10 +99,10 @@ function AdItem({ summary }: { summary: AdSummary }) {
       render={<Link to="/ad/$adId" params={{ adId: summary.adId }} />}
     >
       <ItemMedia variant="image">
-        <img src={products[summary.ad.productId].image} alt="" />
+        <img src={products[summary.ad.slots[0].productId].image} alt="" />
       </ItemMedia>
       <ItemContent className="min-w-0">
-        <ItemTitle className="line-clamp-1">{summary.ad.headline}</ItemTitle>
+        <ItemTitle className="line-clamp-1">{summary.ad.hook}</ItemTitle>
         {/* Server and browser can format dates in different time zones */}
         <ItemDescription suppressHydrationWarning>
           {formatDate(summary.createdDate)}
