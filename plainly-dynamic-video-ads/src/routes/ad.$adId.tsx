@@ -201,7 +201,7 @@ function AdRenders({ adId, initial }: { adId: string; initial: Render[] }) {
           />
         </CardContent>
       </Card>
-      <div className="grid items-start gap-6 lg:grid-cols-[22rem_1fr]">
+      <div className="grid gap-6 lg:grid-cols-[22rem_1fr]">
         <AdDetails ad={summary.ad} />
         <Card>
           <ApiRequest
@@ -229,29 +229,30 @@ function AdDetails({ ad }: { ad: Ad }) {
         <CardTitle>Ad</CardTitle>
         <CardDescription>The same values in all three formats.</CardDescription>
       </CardHeader>
-      <CardContent>
-        <dl className="grid gap-4 text-sm">
+      {/* flex-1 fills the card, which matches the API request height on lg */}
+      <CardContent className="flex-1">
+        <dl className="grid h-full gap-4 text-sm sm:grid-cols-3 lg:grid-cols-1 lg:content-between">
           <Detail label="Hook">{orDash(ad.hook)}</Detail>
-          <Detail label="Products">
-            <ol className="grid gap-2">
+          <Detail label="Button">{orDash(ad.button)}</Detail>
+          <Detail label="Call to action">{orDash(ad.cta)}</Detail>
+          <Detail label="Products" className="col-span-full">
+            <ol className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
               {ad.slots.map((slot, i) => (
                 // biome-ignore lint/suspicious/noArrayIndexKey: the slots never move
                 <li key={i} className="flex items-center gap-3">
                   <img
                     src={products[slot.productId].image}
                     alt=""
-                    className="size-10 rounded-md object-cover"
+                    className="size-12 rounded-md object-cover lg:size-18"
                   />
-                  <span className="min-w-0 flex-1 truncate">
-                    {orDash(slot.name)}
+                  <span className="grid min-w-0">
+                    <span className="truncate">{orDash(slot.name)}</span>
+                    <span className="font-medium">{orDash(slot.price)}</span>
                   </span>
-                  <span className="font-medium">{orDash(slot.price)}</span>
                 </li>
               ))}
             </ol>
           </Detail>
-          <Detail label="Button">{orDash(ad.button)}</Detail>
-          <Detail label="Call to action">{orDash(ad.cta)}</Detail>
         </dl>
       </CardContent>
     </Card>
@@ -260,13 +261,15 @@ function AdDetails({ ad }: { ad: Ad }) {
 
 function Detail({
   label,
+  className,
   children,
 }: {
   label: string;
+  className?: string;
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid gap-1">
+    <div className={cn("grid gap-1", className)}>
       <dt className="text-muted-foreground">{label}</dt>
       <dd>{children}</dd>
     </div>

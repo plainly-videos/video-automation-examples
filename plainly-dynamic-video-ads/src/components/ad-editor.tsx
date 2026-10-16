@@ -68,9 +68,10 @@ export function AdEditor({
             form.handleSubmit();
           }}
         >
-          <CardContent className="grid gap-4">
+          {/* Between md and lg the texts share a row, and so do the products */}
+          <CardContent className="grid gap-4 md:grid-cols-3 lg:grid-cols-1">
             {error && (
-              <Alert variant="destructive">
+              <Alert variant="destructive" className="col-span-full">
                 <AlertTitle>Failed to create ad</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
@@ -78,6 +79,20 @@ export function AdEditor({
             <form.Field name="hook">
               {(field) => (
                 <TextInput field={field} label="Hook" max={LIMITS.hook} />
+              )}
+            </form.Field>
+            <form.Field name="button">
+              {(field) => (
+                <TextInput field={field} label="Button" max={LIMITS.button} />
+              )}
+            </form.Field>
+            <form.Field name="cta">
+              {(field) => (
+                <TextInput
+                  field={field}
+                  label="Call to action"
+                  max={LIMITS.cta}
+                />
               )}
             </form.Field>
             {initial.slots.map((_, i) => (
@@ -129,20 +144,6 @@ export function AdEditor({
                 </form.Field>
               </fieldset>
             ))}
-            <form.Field name="button">
-              {(field) => (
-                <TextInput field={field} label="Button" max={LIMITS.button} />
-              )}
-            </form.Field>
-            <form.Field name="cta">
-              {(field) => (
-                <TextInput
-                  field={field}
-                  label="Call to action"
-                  max={LIMITS.cta}
-                />
-              )}
-            </form.Field>
           </CardContent>
           {/* mt-auto keeps the buttons at the bottom when the card stretches */}
           <CardFooter className="mt-auto justify-end gap-2">
