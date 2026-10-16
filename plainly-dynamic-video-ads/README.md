@@ -36,10 +36,15 @@ A TanStack Start app that reads the project's templates from `GET /api/v2/projec
     ```bash
     pnpm install --frozen-lockfile
     ```
-3. Upload an After Effects project to Plainly Videos:
-   - The project needs three compositions: 1920×1080 (16:9), 1080×1920 (9:16) and 1080×1080 (1:1).
+3. Upload the After Effects project used in this example to Plainly Videos:
+   - Download the example project from [here](../after-effects-projects/Dynamic%20Video%20Ads.zip). It has one composition per format: `editRender16x9` (1920×1080), `editRender9x16` (1080×1920) and `editRender1x1` (1080×1080).
    - Go to [Upload form](https://app.plainlyvideos.com/dashboard/projects/create) and upload the project.
-   - Create one template per composition. Each template needs these parameters: `Hook`, `ButtonCTA`, `CTA`, `Product1`-`Product3`, `Price1`-`Price3` (text) and `Image1`-`Image3` (image). The video opens with the hook, shows one slide per product with a button and ends with the call to action.
+   - Once the upload is done, auto-generate the templates with the prefix option:
+      - Leave the target composition empty.
+      - Set the prefixes to `edit`, which includes all compositions and layers whose name starts with `edit`.
+      - Check **Strip prefix**, so the layer `editHook` becomes the parameter `Hook`. The app sends the parameter names without the prefix.
+      - Click on "Generate".
+   - This generates three templates, `Render16x9`, `Render9x16` and `Render1x1`, each with the parameters `Hook`, `ButtonCTA`, `CTA`, `Product1`-`Product3`, `Price1`-`Price3` (text) and `Image1`-`Image3` (image). The video opens with the hook, shows one slide per product with a button and ends with the call to action. `Logo` and `ButtonSwitch` are generated too, the app leaves them at their defaults.
 
 4. Set up environment variables:
 
@@ -66,7 +71,7 @@ A TanStack Start app that reads the project's templates from `GET /api/v2/projec
 
 ## Usage
 
-Open http://localhost:3000. Pick a product for each of the three slots, which fills in its name and price, edit any field, and check the preview of all three formats on the right. The preview is plain HTML to show how the copy fits each shape; the final look comes from the After Effects template.
+Open http://localhost:3000. Pick a product for each of the three slots, which fills in its name and price, edit any field, and check the preview of all three formats on the right. The preview plays the ad in HTML, close to the video; the final look comes from the After Effects template.
 
 Click **Render 3 formats**. The app opens `/ad/<id>`, where each format turns into a video once its render is finished. If a format fails, click **Retry** to render only that format again. The page also shows the ad's values and the exact API request each render was made with. Click **Edit as new ad** to open the form prefilled with this ad.
 
@@ -183,6 +188,7 @@ export function latestPerFormat(
 
 ### Good to know
 
+- The preview is made by hand for this template: its timings and layouts were measured on rendered videos, see `src/components/ad-preview-data.ts`. Plainly does not provide it, so other templates need their own preview, or none.
 - Product images must be public URLs, because Plainly downloads them while rendering. The example uses placeholder photos from [Unsplash](https://unsplash.com/).
 - To render many ads at once, use the Batch Renders API, see the [Batch render example](../plainly-batch-render/).
 - Prefer webhooks over polling in production. See [webhook delivery](https://help.plainlyvideos.com/docs/user-guide/rendering/video-delivery#webhook-delivery) and the [Render and webhook example](../plainly-render-and-webhook/).
