@@ -16,7 +16,6 @@ export type Format = (typeof FORMATS)[number];
 export const isFormat = (value: unknown): value is Format =>
   FORMATS.some((format) => format === value);
 
-// Width divided by height
 const RATIOS: Record<Format, number> = {
   "16:9": 16 / 9,
   "9:16": 9 / 16,
@@ -127,8 +126,8 @@ export const toParameters = (ad: Ad): Record<string, string> => ({
   ),
 });
 
-// Reverse of toParameters, prefills the form from an existing render
-// Any render in the org can carry our attributes, so values are not trusted to be text
+// Reverse of toParameters. Any render in the org can carry our attributes,
+// so values are not trusted to be text
 export function fromParameters(params: Record<string, unknown>): Ad {
   const text = (key: string) => {
     const value = params[key];
@@ -171,7 +170,6 @@ export const renderBody = ({
 // What the API request card needs from the server to show a runnable request
 export type RenderTarget = {
   projectId: string;
-  // Formats without a template are missing
   templates: Partial<Record<Format, string>>;
 };
 
@@ -191,13 +189,11 @@ export const toCurl = (body: string) =>
 export type Render = {
   id: string;
   state: string;
-  // What the render was made from, the ad page shows the request it sent
   projectId?: string;
   templateId?: string;
   createdDate: string;
   // null when the render was created without custom attributes
   attributes: { adId?: string; format?: string } | null;
-  // Text and image URLs, all strings
   parameters?: Record<string, string>;
   output?: string;
   thumbnailUris?: string[];
@@ -227,7 +223,7 @@ export const toRender = (render: Render): Render => ({
   error: render.error && { message: render.error.message },
 });
 
-// IN_PROGRESS -> "In progress", for people instead of the API
+// IN_PROGRESS -> "In progress"
 export const stateLabel = (state: string) =>
   state.charAt(0) + state.slice(1).toLowerCase().replaceAll("_", " ");
 

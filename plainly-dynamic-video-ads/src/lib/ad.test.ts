@@ -280,7 +280,7 @@ test("isAdFinished waits only for the newest render of each format", () => {
       render("9:16", "FAILED", "2026-10-15T10:00:00Z"),
     ]),
   ).toBe(true);
-  // A retry of a failed render is in progress again
+  // A newer render of a failed format is in progress
   expect(
     isAdFinished([
       render("1:1", "FAILED", "2026-10-15T10:00:00Z"),

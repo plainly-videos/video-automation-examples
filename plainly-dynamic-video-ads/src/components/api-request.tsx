@@ -63,7 +63,6 @@ function Json({ text }: { text: string }) {
   });
 }
 
-// Second half of the preview card, below the frames
 export function ApiRequest({
   parameters,
   adId,

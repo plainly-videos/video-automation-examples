@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Clapperboard } from "lucide-react";
+import { AdStatusBadge } from "@/components/render-frame";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -25,22 +25,9 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item";
-import { type AdSummary, adStatus, EXAMPLE } from "@/lib/ad";
+import { type AdSummary, EXAMPLE } from "@/lib/ad";
+import { formatDate } from "@/lib/utils";
 import { products } from "@/products";
-
-export const formatDate = (date: string) =>
-  new Date(date).toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
-
-export const BADGE_VARIANT = {
-  done: "default",
-  rendering: "secondary",
-  failed: "destructive",
-} as const;
 
 export function RecentAds({
   ads,
@@ -88,8 +75,6 @@ export function RecentAds({
 }
 
 function AdItem({ summary }: { summary: AdSummary }) {
-  const status = adStatus(summary);
-
   return (
     <Item
       variant="outline"
@@ -109,7 +94,7 @@ function AdItem({ summary }: { summary: AdSummary }) {
         </ItemDescription>
       </ItemContent>
       <ItemActions>
-        <Badge variant={BADGE_VARIANT[status.tone]}>{status.label}</Badge>
+        <AdStatusBadge summary={summary} />
       </ItemActions>
     </Item>
   );

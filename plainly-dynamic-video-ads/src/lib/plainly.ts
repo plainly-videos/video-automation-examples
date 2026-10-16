@@ -19,7 +19,7 @@ import {
 
 const PLAINLY_API = "https://api.plainlyvideos.com/api/v2";
 
-// Server-only helper: env vars are read per request and never reach the browser
+// Env vars are read per request and never reach the browser
 const plainlyFetch = createServerOnlyFn(
   async (path: string, init?: RequestInit) => {
     const apiKey = process.env.PLAINLY_API_KEY;
@@ -29,7 +29,6 @@ const plainlyFetch = createServerOnlyFn(
       );
     }
 
-    // Keeps the caller's headers, every request still sends the API key
     const headers = new Headers(init?.headers);
     if (!headers.has("Content-Type")) {
       headers.set("Content-Type", "application/json");
@@ -70,9 +69,6 @@ const fetchTemplates = createServerOnlyFn(async (projectId: string) => {
   return project.templates ?? [];
 });
 
-const getTemplates = async (projectId: string) =>
-  templatesByFormat(await fetchTemplates(projectId));
-
 // https://help.plainlyvideos.com/docs/developer-guide
 const createRender = createServerOnlyFn(
   async (body: ReturnType<typeof renderBody>) => {
@@ -104,7 +100,7 @@ export const createAd = createServerFn({ method: "POST" })
   .validator(adSchema)
   .handler(async ({ data: ad }) => {
     const projectId = getProjectId();
-    const templates = await getTemplates(projectId);
+    const templates = templatesByFormat(await fetchTemplates(projectId));
     const adId = newAdId();
     const parameters = toParameters(ad);
 
@@ -142,7 +138,6 @@ export const getRenderTarget = createServerFn({ method: "GET" }).handler(
   },
 );
 
-// Every render of one ad
 export const getAdRenders = createServerFn({ method: "GET" })
   .validator((adId: string) => {
     // Rejects ids like ".." before they reach the API

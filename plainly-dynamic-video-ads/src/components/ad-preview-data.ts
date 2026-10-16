@@ -1,20 +1,9 @@
-// ============================================================================
-// HAND-MADE PREVIEW DATA, SPECIFIC TO OUR TEMPLATE
-//
-// Plainly does not give you a live preview of a template. We made this one
-// ourselves for this example: we rendered the "Dynamic Video Ads" template
-// once per format, went through the videos frame by frame, and wrote down
-// when things happen and where they sit. The numbers below are those
-// measurements, and AdPreview plays them back in HTML.
-//
-// None of this comes from Plainly or from the After Effects project. It
-// does not update when the template changes, and it does not work for any
-// other template. If you build your own app and want a preview like this,
-// you need your own solution: measure your template the same way, export
-// it with a tool such as Bodymovin/Lottie, show a rendered sample video, or
-// skip the preview. Treat this file as an example of the idea, not as
-// something to reuse.
-// ============================================================================
+// Hand-made preview data for this one template. Plainly has no live preview,
+// so we rendered the template once per format and measured the videos frame
+// by frame. AdPreview plays these numbers back in HTML. They don't follow
+// template changes and fit no other template. For your own app, measure your
+// template the same way, export it with Bodymovin/Lottie, show a rendered
+// sample video, or skip the preview.
 
 import type { Format } from "@/lib/ad";
 

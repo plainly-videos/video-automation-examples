@@ -1,6 +1,23 @@
 import { LoaderCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { isFinished, type Render, stateLabel } from "@/lib/ad";
+import {
+  type AdSummary,
+  adStatus,
+  isFinished,
+  type Render,
+  stateLabel,
+} from "@/lib/ad";
+
+const BADGE_VARIANT = {
+  done: "default",
+  rendering: "secondary",
+  failed: "destructive",
+} as const;
+
+export function AdStatusBadge({ summary }: { summary: AdSummary }) {
+  const status = adStatus(summary);
+  return <Badge variant={BADGE_VARIANT[status.tone]}>{status.label}</Badge>;
+}
 
 export function RenderBadge({ render }: { render?: Render }) {
   if (!render) return <Badge variant="destructive">Not created</Badge>;

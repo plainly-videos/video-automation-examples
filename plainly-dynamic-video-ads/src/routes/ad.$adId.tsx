@@ -8,10 +8,12 @@ import { ArrowLeft, Pencil } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AdFrames } from "@/components/ad-frames";
 import { ApiRequest } from "@/components/api-request";
-import { BADGE_VARIANT, formatDate } from "@/components/recent-ads";
-import { RenderBadge, RenderFrame } from "@/components/render-frame";
+import {
+  AdStatusBadge,
+  RenderBadge,
+  RenderFrame,
+} from "@/components/render-frame";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -22,7 +24,6 @@ import {
 } from "@/components/ui/card";
 import {
   type Ad,
-  adStatus,
   FORMATS,
   groupAds,
   isAdFinished,
@@ -32,7 +33,7 @@ import {
   type RenderTarget,
 } from "@/lib/ad";
 import { getAdRenders } from "@/lib/plainly";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import { products } from "@/products";
 
 const POLL_INTERVAL_MS = 5000;
@@ -96,7 +97,6 @@ function AdRenders({ adId, initial }: { adId: string; initial: Render[] }) {
   const latest = latestPerFormat(renders);
   // The loader throws notFound for an ad without renders, so there is one
   const [summary] = groupAds(renders);
-  const status = adStatus(summary);
   // The request each render was made with, even if .env changed since
   const projectId = renders.find((render) => render.projectId)?.projectId;
   const target: RenderTarget | undefined = projectId
@@ -128,7 +128,7 @@ function AdRenders({ adId, initial }: { adId: string; initial: Render[] }) {
           <div className="grid gap-1">
             <h1 className="flex items-center gap-2 text-xl font-semibold">
               Ad <code>{adId.slice(0, 8)}</code>
-              <Badge variant={BADGE_VARIANT[status.tone]}>{status.label}</Badge>
+              <AdStatusBadge summary={summary} />
             </h1>
             {/* Server and browser can format dates in different time zones */}
             <p

@@ -39,7 +39,7 @@ const tween = (t: number, from: number, length = MOVE) => {
   return x < 0.5 ? 4 * x ** 3 : 1 - (-2 * x + 2) ** 3 / 2;
 };
 
-// Seconds into the video. Uses the page clock, so all frames play in sync
+// Seconds into the video
 function useClock() {
   const [t, setT] = useState(STILL);
   useEffect(() => {
@@ -293,8 +293,7 @@ function AdPreview({ ad, format, t }: { ad: Ad; format: Format; t: number }) {
   );
 }
 
-// One clock for all three formats. It lives here, so only the frames
-// re-render on every tick, not the API request below them
+// One clock for the three frames. Ticking here re-renders only them
 function Previews({ ad }: { ad: Ad }) {
   const t = useClock();
   return (
