@@ -2,10 +2,10 @@
 
 This example demonstrates how to build a complete end-to-end video generation workflow with webhook handling using [Plainly Videos REST API](https://www.plainlyvideos.com/). 
 
-## What this App does?
+## What this app does
 
 **Non-technical view:**
-Create professional sports matchup videos automatically! Simply select two teams from a dropdown menu, and the app generates a custom video preview showing the upcoming game with team logos, and names.
+Create professional sports matchup videos automatically! Simply select two teams from a dropdown menu, and the app generates a custom video preview showing the upcoming game with team logos and names.
 
 **Technical view:**
 This is a full-stack web application that demonstrates programmatic video generation through API integration. Users create matchup requests via a form interface, which triggers video rendering jobs through the Plainly Videos API. The app uses webhooks to receive real-time notifications when videos are complete, automatically updating the database.
@@ -17,7 +17,7 @@ By working through this example, you'll understand how to:
 - **🎬 Video generation**: Integrate with Plainly Videos API to programmatically create videos.
 - **🔄 Webhook handling**: Set up an endpoint to receive and process webhook notifications, in order to track video render jobs and their statuses.
 - **🌐 Development workflow**: Use tunneling for local webhook development and testing.
-- **🏗️ Full-stack architecture**: Build a complete app with form handling, API routes, and data persistence.
+- **🏗️ Full-stack architecture**: Build a complete app with form handling, API routes and data persistence.
 
 ## Prerequisites
 

@@ -1,13 +1,13 @@
 # Dynamic video ads example
 
-This example demonstrates dynamic creative for video advertising with [Plainly Videos](https://www.plainlyvideos.com/): one After Effects template produces many ad variants with a different hook, products, prices and call to action, and every variant renders in 16:9, 9:16 and 1:1, ready for each ad platform.
+This example demonstrates dynamic creative for video advertising with [Plainly Videos](https://www.plainlyvideos.com/). One After Effects template produces multiple ad variants, each with its own hook, products, prices and call to action, and every variant renders in 16:9, 9:16 and 1:1, one for each type of ad placement.
 
-The template is a collection ad: one video opens with a hook, shows three products from one category, such as tech or clothes, one slide each, and ends with a call to action. An ad is that one video, rendered once per format.
+The template is a collection ad. The video opens with a hook and ends with a call to action, with three products from one category, such as tech or clothes, shown one per slide in between. So one ad is the same video, rendered once per format.
 
-## What this App does?
+## What this app does
 
 **Non-technical view:**
-Write a hook, pick a category and the three products the ad shows, adjust their names and prices, set the button text and a call to action, and watch a live preview in all three formats. Click one button and get the same ad as a wide, a tall and a square video.
+Write a hook and pick a category, which fills the ad with three products. Swap any of them or edit their names and prices, then add the button text and a call to action while a live preview shows the ad in all three formats. Click one button and get the finished ad as three videos, one per format.
 
 **Technical view:**
 A TanStack Start app that reads the project's templates from `GET /api/v2/projects/{projectId}`, picks one template per aspect ratio by its resolution, and sends three `POST /api/v2/renders` requests to `https://api.plainlyvideos.com`, one per format. Every render is tagged with custom attributes, and the app finds them again with `POST /api/v2/renders/attributes`. No database, no webhooks and no local storage are needed.
@@ -17,9 +17,9 @@ A TanStack Start app that reads the project's templates from `GET /api/v2/projec
 
 ## What you'll learn
 
-- **🎯 One ad, many formats**: Fan out one set of parameters to one render per aspect ratio.
-- **🧩 Template discovery**: Find the right template for each format from the project, instead of configuring template ids.
-- **🏷️ Attribute filtering**: Tag renders with your own data and query them later, for both a single ad and a list of recent ads.
+- **🎯 One ad, multiple formats**: Render the same parameters once per aspect ratio, each with its own template.
+- **🧩 Template discovery**: Match each format to a template in the project by its resolution, so there are no template ids to configure.
+- **🏷️ Attribute filtering**: Tag renders with your own data and query them later, to load a single ad or list recent ones.
 - **🔐 Server functions**: Keep your Plainly Videos API key on the server with TanStack Start server functions.
 
 ## Prerequisites

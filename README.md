@@ -34,15 +34,15 @@ Simply choose an example that matches your use case and follow the `README.md` f
    * **Tech Stack**: Next.js, PostgreSQL, Prisma, TypeScript, Tailwind CSS
 
 2. **[MCP AI Crypto Video Agent](mcp-ai-crypto-video-agent/)**
-   * **Purpose**: Showcases an AI-powered video generation agent that creates cryptocurrency-related videos.
+   * **Purpose**: Showcases an OpenAI agent that pulls live coin data from one MCP server and renders a crypto performance video through the Plainly Videos MCP server.
    * **What it shows**:
-      - Integrating with AI services to generate video content dynamically.
-      - Using the Plainly Videos API to render videos based on AI-generated scripts and assets.
-      - Automating the entire video creation process from content generation to rendering.
+      - Connecting one agent to a local and a remote MCP server.
+      - Picking a Plainly Videos project and submitting a render through MCP tool calls, with no Plainly API code in the app.
+      - Shaping the agent's behavior with plain-language instructions and keeping chat history between turns.
    * **Tech Stack**: Node.js, TypeScript
 
 3. **[Batch render](plainly-batch-render/)**
-   * **Purpose**: Demonstrates rendering multiple After Effects videos in a single request using the Plainly Videos Batch Renders API.
+   * **Purpose**: Demonstrates rendering multiple After Effects videos in a single request using the Plainly Videos Batch Renders API, through an app that turns every scheduled NBA game into its own matchup video.
    * **What it shows**:
       - Creating many renders with one Batch Renders API request.
       - Polling a batch's renders until they are finished, without webhooks or a database.
@@ -50,7 +50,7 @@ Simply choose an example that matches your use case and follow the `README.md` f
    * **Tech Stack**: TanStack Start, TypeScript, Tailwind CSS, shadcn/ui
 
 4. **[Dynamic video ads](plainly-dynamic-video-ads/)**
-   * **Purpose**: Demonstrates dynamic creative for video advertising, where one template produces many ad variants with different headlines, offers, pricing, and visuals. Every variant renders in multiple aspect ratios, like 16:9, 9:16, and 1:1, ready for each ad platform.
+   * **Purpose**: Demonstrates dynamic creative for video advertising, through a collection ad builder app where you set the hook, products, prices and call to action, and get the same ad rendered in 16:9, 9:16 and 1:1, one for each type of ad placement.
    * **What it shows**:
       - Rendering one ad in three aspect ratios with three single render requests.
       - Finding the template for each format from the project's templates.

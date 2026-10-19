@@ -2,7 +2,7 @@
 
 This example demonstrates how to render multiple After Effects videos in a single request using the [Plainly Videos](https://www.plainlyvideos.com/) Batch Renders API.
 
-## What this App does?
+## What this app does
 
 **Non-technical view:**
 Drag NBA teams from the Western and Eastern Conference lists into tonight's game night, click one button, and get a matchup video for every game. Videos appear in a grid as soon as they are ready.
