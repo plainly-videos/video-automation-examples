@@ -37,7 +37,7 @@ export type Template = {
   resolution?: { width?: number; height?: number };
 };
 
-// One template per format, matched by the size of its rendered composition.
+// One template per format, matched by the aspect ratio of its resolution.
 // The first match wins, other templates in the project are ignored.
 export function findTemplates(
   templates: Template[],

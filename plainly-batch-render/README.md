@@ -2,10 +2,10 @@
 
 This example demonstrates how to render multiple After Effects videos in a single request using the [Plainly Videos](https://www.plainlyvideos.com/) Batch Renders API.
 
-## What this App does?
+## What this app does
 
 **Non-technical view:**
-Drag NBA teams from the Western and Eastern Conference lists into tonight's game night, click one button, and get a matchup video for every game. Videos appear in a grid as soon as they are ready.
+Click NBA teams in the Western and Eastern Conference lists to add them to tonight's game night, click one button, and get a matchup video for every game. A grid shows the progress of every video, and each video appears there within a few seconds of being ready.
 
 **Technical view:**
 A TanStack Start app that sends one `POST /api/v2/batch` request to `https://api.plainlyvideos.com` containing a batch data entry per scheduled game. The batch id is kept in the URL, and the page polls `GET /api/v2/batch/{batchId}/renders` until every render is finished. No database and no webhooks are needed.
@@ -15,14 +15,14 @@ A TanStack Start app that sends one `POST /api/v2/batch` request to `https://api
 - **📦 Batch rendering**: Create many renders with a single Plainly Videos API request.
 - **🏷️ Custom attributes**: Tag every render with your own data and use it to match renders back to games.
 - **🔁 Polling**: Track a batch's progress without webhooks or a database.
-- **🔐 Server functions**: Keep your Plainly Videos API key on the server with TanStack Start server functions.
+- **🔐 Server functions**: Keep your Plainly Videos API key on the server with TanStack Start server functions and a server-only helper.
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) (v24 or later, run `nvm use` to pick it up from `.nvmrc`)
+- [Node.js](https://nodejs.org/) (v24 or later; run `nvm use` to pick it up from `.nvmrc`)
 - [pnpm](https://pnpm.io/) package manager (v12 or later)
 
-## Getting Started
+## Getting started
 
 1. Clone the repository:
 
@@ -30,18 +30,20 @@ A TanStack Start app that sends one `POST /api/v2/batch` request to `https://api
     git clone https://github.com/plainly-videos/video-automation-examples.git
     cd video-automation-examples/plainly-batch-render
     ```
+
 2. Install dependencies:
 
     ```bash
     pnpm install --frozen-lockfile
     ```
+
 3. Upload the After Effects project used in this example to Plainly Videos:
-   - Download the example project from [here](../after-effects-projects/Sports%20Matchup.zip).
-   - Go to [Upload form](https://app.plainlyvideos.com/dashboard/projects/create) and upload the project.
-   - Once the upload is done, auto-generate a template with prefix option:
+   - Download the [example project](../after-effects-projects/Sports%20Matchup.zip).
+   - Go to the [upload form](https://app.plainlyvideos.com/dashboard/projects/create) and upload the project.
+   - Once the upload is done, auto-generate a template with the prefix option:
       - Set the target composition to `editRender`.
-      - Click on "Generate".
-      - This will generate a template with few parameters from layers.
+      - Click **Generate**.
+      - This will generate a template with a few parameters from layers.
 
    <p align="center">
      <img src="../plainly-render-and-webhook/.assets/auto-generate-template.png" alt="Plainly Videos auto-generate template" width="500" />
@@ -53,7 +55,7 @@ A TanStack Start app that sends one `POST /api/v2/batch` request to `https://api
     cp .env.example .env
     ```
 
-    Update `.env` with your API key from [Plainly Videos settings](https://app.plainlyvideos.com/dashboard/user/settings/general) and the project `ID` from the project you just uploaded.
+    Update `.env` with your API key from [Plainly Videos settings](https://app.plainlyvideos.com/dashboard/user/settings/general) and the id of the project you just uploaded.
 
     ```properties
     # Plainly API key, from https://app.plainlyvideos.com/dashboard/user/settings/general
@@ -62,6 +64,7 @@ A TanStack Start app that sends one `POST /api/v2/batch` request to `https://api
     # ID of the Sports Matchup project you uploaded to Plainly
     PLAINLY_PROJECT_ID=your_plainly_project_id
     ```
+
 5. Start the development server:
 
     ```bash
@@ -72,11 +75,11 @@ A TanStack Start app that sends one `POST /api/v2/batch` request to `https://api
 
 ## Usage
 
-Open your browser and navigate to http://localhost:3000. Click teams in the conference lists on the left and right to put them into the next open game night slot in the middle, and click a placed team to send it back. Any two teams can play each other, but every team plays only once per night. Click the button to create a batch from all complete games. The page then shows a grid with one card per game, and each card turns into a video preview once its render is finished.
+Open your browser and navigate to http://localhost:3000. Click teams in the Western and Eastern Conference lists to put them into the first open slot on the Game night board, and click a placed team to send it back. Any two teams can play each other, but every team plays only once per night. Click **Render N videos** (N is the number of complete games) to create a batch from all of them. The board is cleared and a grid appears below it with one card per render (one per game). Each card shows its render state and turns into a video preview once its render is done (a failed render shows **Render failed** and an expired one **Output expired**).
 
-The batch id is stored in the URL (`/batch/<id>`), so you can refresh the page or share the link and still see the same batch.
+The batch id is stored in the URL (`/batch/<id>`), so you can refresh the page or bookmark the link and still see the same batch (the link only works on an instance that uses the same Plainly API key).
 
-Every batch you create is also saved in your browser's localStorage and listed under **Recent batches**, so you can reopen an earlier batch with one click.
+Every batch you create is also saved in your browser's localStorage (the 20 most recent) and listed under **Recent batches**, so you can reopen an earlier batch with one click.
 
 <p align="center"><img src=".assets/app.png" alt="Plainly Videos batch render example UI" width="500" /></p>
 
@@ -85,7 +88,7 @@ Every batch you create is also saved in your browser's localStorage and listed u
 A batch request has a `projectId` and a `batchData` array. Every entry in `batchData` holds the `parameters` for one render, so two games produce two renders. Each entry also carries custom `attributes`: Plainly Videos echoes them back on every render in the batch, which is how the app matches a render to its game.
 
 > [!WARNING]
-> Here attributes only match the renders of one known batch back to its games. Do not use them as a way to store or look up your data: keep your own records, save each render id next to the data it belongs to and update its status from webhooks, as the [Render and webhook example](../plainly-render-and-webhook/) does.
+> In this example, attributes are only used to match the renders of one known batch back to its games. Do not use them as a way to store or look up your data: keep your own records, link each render to the record it belongs to (for example with webhook `passthrough` data) and update its status from webhooks, as the [Render and webhook example](../plainly-render-and-webhook/) does.
 
 Batch creation is synchronous and all-or-nothing: the API responds only after all renders are created, and if the request fails, no renders are created. The response contains the batch `id`.
 
@@ -208,6 +211,8 @@ const IN_PROGRESS_STATES = ["PENDING", "THROTTLED", "QUEUED", "IN_PROGRESS"];
 // Anything else (DONE, INVALID, FAILED, CANCELLED) is final
 export const isFinished = (render: Pick<Render, "state">) =>
   !IN_PROGRESS_STATES.includes(render.state);
+
+// ...
 
 // Batch creation is synchronous, so an empty list will never fill up: stop polling
 export const isBatchFinished = (renders: Pick<Render, "state">[]) =>

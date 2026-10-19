@@ -1,23 +1,23 @@
 # Render and webhook handling example
 
-This example demonstrates how to build a complete end-to-end video generation workflow with webhook handling using [Plainly Videos REST API](https://www.plainlyvideos.com/). 
+This example demonstrates how to build a complete end-to-end video generation workflow with webhook handling using the [Plainly Videos REST API](https://www.plainlyvideos.com/).
 
-## What this App does?
+## What this app does
 
 **Non-technical view:**
-Create professional sports matchup videos automatically! Simply select two teams from a dropdown menu, and the app generates a custom video preview showing the upcoming game with team logos, and names.
+Create sports matchup videos automatically! Simply pick two teams (from a short list of NBA teams) in the Team A and Team B dropdowns, and the app renders a custom matchup video with the two teams' names and logos.
 
 **Technical view:**
-This is a full-stack web application that demonstrates programmatic video generation through API integration. Users create matchup requests via a form interface, which triggers video rendering jobs through the Plainly Videos API. The app uses webhooks to receive real-time notifications when videos are complete, automatically updating the database.
+This is a full-stack web application that demonstrates programmatic video generation through API integration. Users create matchup requests via a form interface, which triggers video rendering jobs through the Plainly Videos API. The app uses webhooks to receive real-time notifications when videos are complete or fail, automatically updating the database; the table reflects the new status on refresh.
 
 ## What you'll learn
 
 By working through this example, you'll understand how to:
 
-- **🎬 Video generation**: Integrate with Plainly Videos API to programmatically create videos.
+- **🎬 Video generation**: Integrate with the Plainly Videos API to programmatically create videos.
 - **🔄 Webhook handling**: Set up an endpoint to receive and process webhook notifications, in order to track video render jobs and their statuses.
 - **🌐 Development workflow**: Use tunneling for local webhook development and testing.
-- **🏗️ Full-stack architecture**: Build a complete app with form handling, API routes, and data persistence.
+- **🏗️ Full-stack architecture**: Build a complete app with form handling, API routes and data persistence.
 
 ## Prerequisites
 
@@ -25,7 +25,7 @@ By working through this example, you'll understand how to:
 - [pnpm](https://pnpm.io/) package manager (v12 or later)
 - [Docker](https://www.docker.com/), including [Docker Compose](https://docs.docker.com/compose/), for running a local PostgreSQL instance
 
-## Getting Started
+## Getting started
 
 1. Clone the repository:
 
@@ -39,12 +39,12 @@ By working through this example, you'll understand how to:
     pnpm install --frozen-lockfile
     ```
 3. Upload the After Effects project used in this example to Plainly Videos:
-   - Download the example project from [here](../after-effects-projects/Sports%20Matchup.zip).
-   - Go to [Upload form](https://app.plainlyvideos.com/dashboard/projects/create) and upload the project.
-   - Once the upload is done, auto-generate a template with prefix option:
+   - Download the [example project](../after-effects-projects/Sports%20Matchup.zip).
+   - Go to the [upload form](https://app.plainlyvideos.com/dashboard/projects/create) and upload the project.
+   - Once the upload is done, auto-generate a template with the prefix option:
       - Set the target composition to `editRender`.
-      - Click on "Generate".
-      - This will generate a template with few parameters from layers.
+      - Click **Generate**.
+      - This will generate a template with a few parameters from layers.
 
 
    <p align="center">
@@ -57,8 +57,8 @@ By working through this example, you'll understand how to:
     cp .env.example .env.local
     ```
 
-    Update `.env.local` with your API key from [Plainly Videos settings](https://app.plainlyvideos.com/dashboard/user/settings/general) and the project `ID` from the project you just uploaded.
-    
+    Update `.env.local` with your API key from [Plainly Videos settings](https://app.plainlyvideos.com/dashboard/user/settings/general) and the id of the project you just uploaded.
+
     ```properties
     # DB connection string, update if you change postgres settings in docker-compose
     DATABASE_URL=postgres://postgres:password@localhost:5432/plainly_render_webhook
@@ -77,17 +77,19 @@ By working through this example, you'll understand how to:
 
     This command will:
     - Start a PostgreSQL database in a Docker container
-    - Generate and push Prisma schema
+    - Generate the Prisma client and push the schema to the database
     - Create a unique `tunnel` URL to expose your local server for webhook handling
     - Start the Next.js development server
 
-    The output will show your unique `tunnel` URL, and app started message:
+    Among the output you'll see your unique `tunnel` URL and the Next.js startup message (abridged):
 
-    ```bash
-    🌐 Tunnel URL: https://abc123.loca.lt
-    📨 Webhook URL: https://abc123.loca.lt/api/webhook
+    ```text
+    ✅ Tunnel created: https://floppy-emus-hug.loca.lt
 
-      ▲ Next.js 16.0.10
+    🌐 Tunnel URL: https://floppy-emus-hug.loca.lt
+    📨 Webhook URL: https://floppy-emus-hug.loca.lt/api/webhook
+
+      ▲ Next.js 16.4.0
       - Local:        http://localhost:3000
       - Network:      http://192.168.0.109:3000
       - Environments: .env.local
@@ -100,9 +102,9 @@ By working through this example, you'll understand how to:
 
 Open your browser and navigate to http://localhost:3000 to access the app. You should see a simple form where you can select two teams and generate a matchup video.
 
-A table below the form will show all the match ups created so far, along with their current status and a preview of the rendered video once it's complete. 
+A table below the form lists all matchups with their status (`pending`, `completed`, `failed`) and, once complete, a `Preview` link to the rendered video (`Expired` after the link expires). While a render is pending, click `Refresh` in that row to see updates.
 
-At the bottom, your Webhook status should be set to `configured` with the `tunnel` URL.
+Below the table, the Webhook Status card should show `Configured` along with the webhook endpoint (your `tunnel` URL followed by `/api/webhook`).
 
 <p align="center">
   <img src=".assets/app.png" alt="Plainly Videos render and webhook example UI" width="500" />
@@ -113,7 +115,7 @@ At the bottom, your Webhook status should be set to `configured` with the `tunne
 When a new matchup video is created, it will be saved in the PostgreSQL database first. The `id` of a new row will be referenced in a `matchupId` variable for later use in the webhook handling.
 
 ```ts
-  // ./src/actions/renders.ts
+  // ./src/actions/render.ts
   // Save matchup details to the database with an initial status of 'pending'
   const { id: matchupId } = await prisma.matchup.create({
     data: {
@@ -126,18 +128,19 @@ When a new matchup video is created, it will be saved in the PostgreSQL database
   });
 ```
 
-After a new entity was persisted successfully, we'll send a new video render request to the Plainly Videos API. 
+After the new entity is persisted successfully, we send a new video render request to the Plainly Videos API. If the API rejects the request, the matchup is marked `failed` and the form shows an error.
 
-Besides the render parameters that provide dynamic data for the video, we also include a `webhook` object in the request body to specify where to send the status updates. The `matchupId` is set as `passthrough` data, so we can identify to which matchup the webhook notification belongs to. 
+Besides the render parameters that provide dynamic data for the video, we also include a `webhook` object in the request body to specify where to send the status updates. The `matchupId` is set as `passthrough` data, so we can identify which matchup the webhook notification belongs to.
 
-We'll also enable `onFailure` and `onInvalid` webhook options to receive notifications in case the render fails, or the provided data is invalid.
+We'll also enable `onFailure` and `onInvalid` webhook options to receive notifications in case the render fails or the provided data is invalid. Both cases are recorded as `failed` in this example.
 
 ```ts
-  // ./src/actions/renders.ts
+  // ./src/actions/render.ts
   // Construct the request body for the Plainly Videos API
   const body = {
     projectId, // Project ID for the Plainly Videos project
-    parameters: { // render parameters
+    // render parameters
+    parameters: {
       plainlyEditTeam1: rawFormData.team1,
       plainlyEditLogo1: rawFormData.team1logo,
       plainlyEditTeam2: rawFormData.team2,
@@ -164,22 +167,22 @@ We'll also enable `onFailure` and `onInvalid` webhook options to receive notific
 
 ### Webhook handling
 
-When the video rendering is complete, Plainly Videos will send a webhook notification to the specified URL in a form of a `POST` request. The app has the API route `/api/webhook` set up to handle these webhook notification and update the corresponding matchup status in the database. 
+When the video rendering is complete, Plainly Videos will send a webhook notification to the specified URL in the form of a `POST` request. The app has the API route `/api/webhook` set up to handle these webhook notifications and update the corresponding matchup status in the database.
 
-If the render was successful, we will receive `success: true` along with the `output` URL and `expirationDate` of the rendered video. If the render failed, we will receive the `error` details instead. Based on the status, we'll update the database entry accordingly.
- 
-In order to know what entry in the database needs to be updated, we'll use `passthrough` value from the webhook body. It should point to the `matchupId` that we sent previously in the render request.
+If the render was successful, we will receive `success: true` along with the `output` URL and `expirationDate` of the rendered video. If the render failed, the payload contains `error` details instead (this example doesn't store them). We set the status to `completed` or `failed` and save the `output` URL and `expirationDate` when present.
+
+In order to know which entry in the database needs to be updated, we'll use the `passthrough` value from the webhook body. It should point to the `matchupId` that we sent previously in the render request.
 
 ```ts
 // ./src/app/api/webhook/route.ts
 export async function POST(request: NextRequest) {
   try {
-    // Here you can see the example webhook payloads
+    // Here you can see the example webhook payloads that Plainly sends
     // https://help.plainlyvideos.com/docs/user-guide/rendering/video-delivery#webhook-delivery
     const body = await request.json();
     const { passthrough, output, success, expirationDate } = body;
 
-    // Update matchup in DB based on the passthrough data
+    // Update matchup in DB based on the passthrough data, as in /actions/render.ts we set it to the matchup ID
     await prisma.matchup.updateMany({
       where: { id: Number(passthrough) },
       data: {
@@ -196,7 +199,10 @@ export async function POST(request: NextRequest) {
 
     // Return a 500 status code to indicate a server-side error
     // This will force Plainly to retry the webhook delivery
-    return NextResponse.json({ message: "Error processing webhook" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Error processing webhook" },
+      { status: 500 },
+    );
   }
 }
 ```
@@ -204,6 +210,6 @@ export async function POST(request: NextRequest) {
 ## Useful commands
 
  - `pnpm dev:full` - Starts the app in development mode with the webhook tunnel setup.
- - `pnpm start:full` - Builds and starts the app in preview mode with the webhook tunnel setup.
- - `pnpm db:stop` - Stops PostgreSQL instance by executing a docker-compose stop.
- - `pnpm db:remove` - Stops PostgreSQL instance and removes any data in the database.
+ - `pnpm start:full` - Starts the database, pushes the schema, opens a tunnel, then builds and starts the app in production mode.
+ - `pnpm db:stop` - Stops and removes the PostgreSQL container by running `docker compose down` (data is kept in the `db-data` volume).
+ - `pnpm db:remove` - Stops the PostgreSQL instance and removes any data in the database.
