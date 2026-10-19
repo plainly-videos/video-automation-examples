@@ -7,18 +7,18 @@ The template is a collection ad. The video opens with a hook and ends with a cal
 ## What this app does
 
 **Non-technical view:**
-Write a hook and pick a category, which fills the ad with three products. Swap any of them or edit their names and prices, then add the button text and a call to action while a live preview shows the ad in all three formats. Click one button and get the finished ad as three videos, one per format.
+Write a hook, button text and a call to action, and pick a category, which fills the ad with three products. Swap any of them or edit their names and prices while a live preview shows the ad in all three formats. Click one button to render the ad in all three formats, one video per format.
 
 **Technical view:**
-A TanStack Start app that reads the project's templates from `GET /api/v2/projects/{projectId}`, picks one template per aspect ratio by its resolution, and sends three `POST /api/v2/renders` requests to `https://api.plainlyvideos.com`, one per format. Every render is tagged with custom attributes, and the app finds them again with `POST /api/v2/renders/attributes`. No database, no webhooks and no local storage are needed.
+A TanStack Start app that reads the project's templates from `GET /api/v2/projects/{projectId}`, picks one template per format by the aspect ratio of its resolution, and sends three `POST /api/v2/renders` requests to `https://api.plainlyvideos.com`, one per format. Every render is tagged with custom attributes, and the app finds them again with `POST /api/v2/renders/attributes`. No database, no webhooks and no local storage are needed.
 
 > [!WARNING]
-> Finding renders by custom attributes keeps this example short, but do not copy it into a real app. Every render in the organization can carry the same attributes, the lookup is a paginated search, and older renders drop out of the results. Keep your own records instead: save each render id next to the data it belongs to and update its status from webhooks, as the [Render and webhook example](../plainly-render-and-webhook/) does.
+> Finding renders by custom attributes keeps this example short, but do not copy it into a real app. Every render in the organization can carry the same attributes, the lookup is a paginated search and older renders drop out of the results. Keep your own records instead: save each ad in your database, send its id with the render (for example as webhook `passthrough`) and update its status from webhooks, as the [Render and webhook example](../plainly-render-and-webhook/) does.
 
 ## What you'll learn
 
 - **🎯 One ad, multiple formats**: Render the same parameters once per aspect ratio, each with its own template.
-- **🧩 Template discovery**: Match each format to a template in the project by its resolution, so there are no template ids to configure.
+- **🧩 Template discovery**: Match each format to a template in the project by the aspect ratio of its resolution, so there are no template ids to configure.
 - **🏷️ Attribute filtering**: Tag renders with your own data and query them later, to load a single ad or list recent ones.
 - **🔐 Server functions**: Keep your Plainly Videos API key on the server with TanStack Start server functions.
 
@@ -85,15 +85,15 @@ Open http://localhost:3000. Pick a category, which fills the three slides with i
 
 <p align="center"><img src=".assets/app.png" alt="Dynamic video ads editor with the live preview" width="500" /></p>
 
-Click **Render 3 formats**. The app opens `/ad/<id>`, where each format turns into a video once its render is finished. The page also shows the ad's values and the exact API request each render was made with. Click **Edit as new ad** to open the form prefilled with this ad.
+Click **Render 3 formats**. The app opens `/ad/<id>`, where each format turns into a video once its render is done, or shows that it failed, with the error message when Plainly gives one. The page also shows the ad's values and the API request for each format, rebuilt from the newest render's parameters and each format's template id. Click **Edit as new ad** to open the form prefilled with this ad.
 
 <p align="center"><img src=".assets/ad.png" alt="Ad page with the rendered 16:9, 9:16 and 1:1 videos" width="500" /></p>
 
-The latest ads made with this app are listed under **Recent ads**, so you can reopen an earlier ad with one click. The list comes from Plainly, so it shows ads created by anyone in your organization.
+Up to 20 of the latest ads are listed under **Recent ads** on every page, so you can reopen an earlier ad with one click. The list comes from Plainly's attribute search, so it includes ads from any render tagged by this example, from anyone in your organization, including ones made with a copied curl.
 
 ### Find the template for each format
 
-Template ids are not configured. The app reads the project and matches each template to a format by the size of its rendered composition:
+Template ids are not configured. The app reads the project and matches each template to a format by the aspect ratio of its resolution (the first match wins):
 
 ```ts
 // ./src/lib/ad.ts
@@ -110,7 +110,7 @@ export function findTemplates(
 }
 ```
 
-Rendering needs all three, so `templatesByFormat` throws `Project has no 9:16 template` when one is missing. The API request card uses `findTemplates` directly and keeps a placeholder for a missing format.
+Rendering needs all three, so `templatesByFormat` throws `Project has no 9:16 template` when one is missing. On the form page, the API request card uses `findTemplates` directly and keeps a placeholder for a missing format.
 
 ### Render one ad in three formats
 
@@ -163,7 +163,7 @@ Every request carries custom attributes. Plainly stores them on the render, whic
 
 ### Find renders by attribute
 
-`POST /api/v2/renders/attributes` returns the renders whose attributes match. The ad page filters by `adId`; the recent ads list filters by `example`. `sort=createdDate,desc` puts the newest renders first, so a full page leaves out the oldest ones:
+`POST /api/v2/renders/attributes` returns the renders whose attributes match. The ad page and Edit as new ad filter by `adId`; the recent ads list filters by `example`, and reloads an ad by `adId` when the page is full and that ad looks incomplete. `sort=createdDate,desc` puts the newest renders first, so a full page leaves out the oldest ones:
 
 ```ts
 // ./src/lib/plainly.ts
@@ -179,7 +179,7 @@ While any format is still rendering, the ad page calls this again every 5 second
 ### Good to know
 
 - The preview is made by hand for this template: its timings and layouts were measured on rendered videos (see `src/components/ad-preview-data.ts`). Plainly does not provide it, so other templates need their own preview, or none.
-- Product images must be public URLs, because Plainly downloads them while rendering. The example uses placeholder photos from [Unsplash](https://unsplash.com/). Add products or categories in `src/products.ts`.
+- Product images must be public URLs, because Plainly downloads them while rendering. The example uses placeholder photos from [Unsplash](https://unsplash.com/). Add products or categories in `src/products.ts`; each category needs at least three products.
 - To render many ads at once, use the Batch Renders API; see the [Batch render example](../plainly-batch-render/).
 - Prefer webhooks over polling in production. See [webhook delivery](https://help.plainlyvideos.com/docs/user-guide/rendering/video-delivery#webhook-delivery) and the [Render and webhook example](../plainly-render-and-webhook/).
 

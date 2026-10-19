@@ -1,6 +1,6 @@
 # Video Automation Examples
 
-A collection of code examples for automating video creation with [Plainly Videos](https://plainlyvideos.com), a video automation platform that renders Adobe After Effects projects natively in the cloud. Each example shows a practical way to use the [Plainly Videos REST API](https://app.plainlyvideos.com/api-reference.html).
+A collection of code examples for automating video creation with [Plainly Videos](https://plainlyvideos.com), a video automation platform that renders Adobe After Effects projects natively in the cloud. Each example shows a practical way to use the [Plainly Videos REST API](https://app.plainlyvideos.com/api-reference.html) or the Plainly Videos MCP server.
 
 ## What is Plainly Videos?
 
@@ -28,21 +28,21 @@ Simply choose an example that matches your use case and follow the `README.md` f
    * **Purpose**: Demonstrates a complete video rendering workflow, from creating render jobs via the Plainly Videos API to receiving webhook notifications and tracking render status in a database. Renders are triggered from a web form, so this also works as a form-to-video example.
    * **What it shows**:
       - Creating video render jobs via the Plainly Videos API.
-      - Setting up webhook endpoints to receive render completion notifications.
+      - Setting up a webhook endpoint to receive render completion and failure notifications.
       - Database integration to track render status and results.
-      - User interface for managing video generation requests.
-   * **Tech stack**: Next.js, PostgreSQL, Prisma, TypeScript, Tailwind CSS, shadcn/ui
+      - A web form for submitting renders and a table showing each render's status and video link.
+   * **Tech stack**: Next.js, PostgreSQL (Docker), Prisma, localtunnel, TypeScript, Tailwind CSS, shadcn/ui
 
 2. **[MCP AI crypto video agent](mcp-ai-crypto-video-agent/)**
    * **Purpose**: Showcases an OpenAI agent that pulls live coin data from one MCP server and renders a crypto performance video through the Plainly Videos MCP server.
    * **What it shows**:
       - Connecting one agent to a local and a remote MCP server.
       - Picking a Plainly Videos project and submitting a render through MCP tool calls, with no Plainly API code in the app.
-      - Shaping the agent's behavior with plain-language instructions and keeping chat history between turns.
-   * **Tech stack**: Node.js, TypeScript, OpenAI Agents SDK
+      - Shaping the agent's behavior with plain-language instructions and keeping context between turns by replaying the earlier messages as text in each new prompt.
+   * **Tech stack**: Node.js, TypeScript, OpenAI Agents SDK, MCP
 
 3. **[Batch render](plainly-batch-render/)**
-   * **Purpose**: Demonstrates rendering multiple After Effects videos in a single request using the Plainly Videos Batch Renders API, through an app that turns every scheduled NBA game into its own matchup video.
+   * **Purpose**: Demonstrates rendering multiple After Effects videos in a single request using the Plainly Videos Batch Renders API, through an app where you pair NBA teams into a night of games and get one matchup video per game.
    * **What it shows**:
       - Creating many renders with one Batch Renders API request.
       - Polling a batch's renders until they are finished, without webhooks or a database.
@@ -55,7 +55,7 @@ Simply choose an example that matches your use case and follow the `README.md` f
       - Rendering one ad in three aspect ratios with three separate render requests.
       - Matching each format to a project template by its resolution.
       - Tagging renders with custom attributes and finding them again with the attribute filter.
-   * **Tech stack**: TanStack Start, TypeScript, Tailwind CSS, shadcn/ui
+   * **Tech stack**: TanStack Start, TanStack Form, Zod, TypeScript, Tailwind CSS, shadcn/ui
 
 ## Contributing
 
