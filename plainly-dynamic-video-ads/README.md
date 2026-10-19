@@ -2,7 +2,7 @@
 
 This example demonstrates dynamic creative for video advertising with [Plainly Videos](https://www.plainlyvideos.com/). One After Effects template produces multiple ad variants, each with its own hook, products, prices and call to action, and every variant renders in 16:9, 9:16 and 1:1, one for each type of ad placement.
 
-The template is a collection ad. The video opens with a hook and ends with a call to action, with three products from one category, such as tech or clothes, shown one per slide in between. So one ad is the same video, rendered once per format.
+The template is a collection ad. The video opens with a hook and ends with a call to action, with three products from one category, such as tech or clothes, shown one per slide in between. Each ad is the same video, rendered once per format.
 
 ## What this app does
 
@@ -27,7 +27,7 @@ A TanStack Start app that reads the project's templates from `GET /api/v2/projec
 - [Node.js](https://nodejs.org/) (v24 or later, run `nvm use` to pick it up from `.nvmrc`)
 - [pnpm](https://pnpm.io/) package manager (v12 or later)
 
-## Getting Started
+## Getting started
 
 1. Clone the repository:
 
@@ -41,19 +41,19 @@ A TanStack Start app that reads the project's templates from `GET /api/v2/projec
     pnpm install --frozen-lockfile
     ```
 3. Upload the After Effects project used in this example to Plainly Videos:
-   - Download the example project from [here](../after-effects-projects/Dynamic%20Video%20Ads.zip). It has one composition per format: `editRender16x9` (1920×1080), `editRender9x16` (1080×1920) and `editRender1x1` (1080×1080).
-   - Go to [Upload form](https://app.plainlyvideos.com/dashboard/projects/create) and upload the project.
+   - Download the [example project](../after-effects-projects/Dynamic%20Video%20Ads.zip). It has one composition per format: `editRender16x9` (1920×1080), `editRender9x16` (1080×1920) and `editRender1x1` (1080×1080).
+   - Go to the [upload form](https://app.plainlyvideos.com/dashboard/projects/create) and upload the project.
    - Once the upload is done, auto-generate the templates with the prefix option:
       - Leave the target composition empty.
-      - Set the prefixes to `edit`, which includes all compositions and layers whose name starts with `edit`.
+      - Set the prefix to `edit`, which includes all compositions and layers whose names start with `edit`.
       - Check **Strip prefix**, so the layer `editHook` becomes the parameter `Hook`. The app sends the parameter names without the prefix.
-      - Click on "Generate".
+      - Click **Generate**.
 
    <p align="center">
      <img src=".assets/auto-generate-template.png" alt="Plainly Videos auto-generate template" width="500" />
    </p>
 
-   - This generates three templates, `Render16x9`, `Render9x16` and `Render1x1`, each with the parameters `Hook`, `ButtonCTA`, `CTA`, `Product1`-`Product3`, `Price1`-`Price3` (text) and `Image1`-`Image3` (image). The video opens with the hook, shows one slide per product with a button and ends with the call to action. `Logo` and `ButtonSwitch` are generated too, the app leaves them at their defaults.
+   - This generates three templates, `Render16x9`, `Render9x16` and `Render1x1`, each with the parameters `Hook`, `ButtonCTA`, `CTA`, `Product1`-`Product3`, `Price1`-`Price3` (text) and `Image1`-`Image3` (image). The video opens with the hook, shows one slide per product with a button and ends with the call to action. `Logo` and `ButtonSwitch` are generated too; the app leaves them at their defaults.
 
 4. Set up environment variables:
 
@@ -61,13 +61,14 @@ A TanStack Start app that reads the project's templates from `GET /api/v2/projec
     cp .env.example .env
     ```
 
-    Update `.env` with your API key from [Plainly Videos settings](https://app.plainlyvideos.com/dashboard/user/settings/general) and the project `ID` from the project you just uploaded. Template ids are not needed, the app finds them.
+    Update `.env` with your API key from [Plainly Videos settings](https://app.plainlyvideos.com/dashboard/user/settings/general) and the id of the project you just uploaded. Template ids are not needed; the app finds them.
 
     ```properties
     # Plainly API key, from https://app.plainlyvideos.com/dashboard/user/settings/general
     PLAINLY_API_KEY=your_plainly_api_key
 
-    # ID of the Dynamic video ads project you uploaded to Plainly
+    # ID of the Dynamic video ads project you uploaded to Plainly.
+    # It needs one template per format: 1920x1080 (16:9), 1080x1920 (9:16) and 1080x1080 (1:1)
     PLAINLY_PROJECT_ID=your_plainly_project_id
     ```
 5. Start the development server:
@@ -80,7 +81,7 @@ A TanStack Start app that reads the project's templates from `GET /api/v2/projec
 
 ## Usage
 
-Open http://localhost:3000. Pick a category, which fills the three slides with its products. Swap any slide for another product of the same category, which fills in its name and price, edit any field, and check the preview of all three formats on the right. The preview plays the ad in HTML, close to the video; the final look comes from the After Effects template.
+Open http://localhost:3000. Pick a category, which fills the three slides with its products. Swap any slide for another product of the same category, which fills in its name and price. Edit any field and check the preview of all three formats on the right. The preview plays the ad in HTML, close to the video; the final look comes from the After Effects template.
 
 <p align="center"><img src=".assets/app.png" alt="Dynamic video ads editor with the live preview" width="500" /></p>
 
@@ -88,7 +89,7 @@ Click **Render 3 formats**. The app opens `/ad/<id>`, where each format turns in
 
 <p align="center"><img src=".assets/ad.png" alt="Ad page with the rendered 16:9, 9:16 and 1:1 videos" width="500" /></p>
 
-Every ad made with this app is listed under **Recent ads**, so you can reopen an earlier ad with one click. The list comes from Plainly, so it shows ads created by everyone using the same API key.
+The latest ads made with this app are listed under **Recent ads**, so you can reopen an earlier ad with one click. The list comes from Plainly, so it shows ads created by anyone in your organization.
 
 ### Find the template for each format
 
@@ -113,7 +114,7 @@ Rendering needs all three, so `templatesByFormat` throws `Project has no 9:16 te
 
 ### Render one ad in three formats
 
-The `createAd` server function sends three single render requests with the same parameters and a different template. `Promise.allSettled` lets one format fail without losing the others:
+The `createAd` server function sends three single render requests with the same parameters and one template per format. `Promise.allSettled` lets one format fail without losing the others:
 
 ```ts
 // ./src/lib/plainly.ts
@@ -162,7 +163,7 @@ Every request carries custom attributes. Plainly stores them on the render, whic
 
 ### Find renders by attribute
 
-`POST /api/v2/renders/attributes` returns the renders whose attributes match. The ad page filters by `adId`, the recent ads list filters by `example`. `sort=createdDate,desc` puts the newest renders first, so a full page leaves out the oldest ones:
+`POST /api/v2/renders/attributes` returns the renders whose attributes match. The ad page filters by `adId`; the recent ads list filters by `example`. `sort=createdDate,desc` puts the newest renders first, so a full page leaves out the oldest ones:
 
 ```ts
 // ./src/lib/plainly.ts
@@ -177,9 +178,9 @@ While any format is still rendering, the ad page calls this again every 5 second
 
 ### Good to know
 
-- The preview is made by hand for this template: its timings and layouts were measured on rendered videos, see `src/components/ad-preview-data.ts`. Plainly does not provide it, so other templates need their own preview, or none.
+- The preview is made by hand for this template: its timings and layouts were measured on rendered videos (see `src/components/ad-preview-data.ts`). Plainly does not provide it, so other templates need their own preview, or none.
 - Product images must be public URLs, because Plainly downloads them while rendering. The example uses placeholder photos from [Unsplash](https://unsplash.com/). Add products or categories in `src/products.ts`.
-- To render many ads at once, use the Batch Renders API, see the [Batch render example](../plainly-batch-render/).
+- To render many ads at once, use the Batch Renders API; see the [Batch render example](../plainly-batch-render/).
 - Prefer webhooks over polling in production. See [webhook delivery](https://help.plainlyvideos.com/docs/user-guide/rendering/video-delivery#webhook-delivery) and the [Render and webhook example](../plainly-render-and-webhook/).
 
 ## Useful commands

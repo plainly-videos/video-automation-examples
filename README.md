@@ -1,18 +1,18 @@
 # Video Automation Examples
 
-A collection of code examples for automating video creation with [Plainly Videos](https://plainlyvideos.com), a video automation platform that renders Adobe After Effects projects natively in the cloud. Each example shows a practical way to use the [Plainly REST API](https://app.plainlyvideos.com/api-reference.html).
+A collection of code examples for automating video creation with [Plainly Videos](https://plainlyvideos.com), a video automation platform that renders Adobe After Effects projects natively in the cloud. Each example shows a practical way to use the [Plainly Videos REST API](https://app.plainlyvideos.com/api-reference.html).
 
-### What is Plainly Videos?
+## What is Plainly Videos?
 
-Plainly Videos is a cloud-based video automation platform that enables developers to render Adobe After Effects templates natively in the cloud using Plainly's powerful REST API, web app, or native integrations.
+Plainly Videos is a cloud-based video automation platform that enables developers to render Adobe After Effects templates natively in the cloud using Plainly's powerful REST API, web app or native integrations.
 
-### Who is this repository for?
+## Who is this repository for?
 
 - **Developers** looking to integrate video generation into their applications and workflows.
 - **Product teams** wanting to add automated video creation features.
 - **Anyone** interested in learning how to work with the Plainly Videos API.
 
-## Documentation & Resources
+## Documentation & resources
 
 Before diving into the examples, we recommend checking out these resources:
 
@@ -31,15 +31,15 @@ Simply choose an example that matches your use case and follow the `README.md` f
       - Setting up webhook endpoints to receive render completion notifications.
       - Database integration to track render status and results.
       - User interface for managing video generation requests.
-   * **Tech Stack**: Next.js, PostgreSQL, Prisma, TypeScript, Tailwind CSS
+   * **Tech stack**: Next.js, PostgreSQL, Prisma, TypeScript, Tailwind CSS, shadcn/ui
 
-2. **[MCP AI Crypto Video Agent](mcp-ai-crypto-video-agent/)**
+2. **[MCP AI crypto video agent](mcp-ai-crypto-video-agent/)**
    * **Purpose**: Showcases an OpenAI agent that pulls live coin data from one MCP server and renders a crypto performance video through the Plainly Videos MCP server.
    * **What it shows**:
       - Connecting one agent to a local and a remote MCP server.
       - Picking a Plainly Videos project and submitting a render through MCP tool calls, with no Plainly API code in the app.
       - Shaping the agent's behavior with plain-language instructions and keeping chat history between turns.
-   * **Tech Stack**: Node.js, TypeScript
+   * **Tech stack**: Node.js, TypeScript, OpenAI Agents SDK
 
 3. **[Batch render](plainly-batch-render/)**
    * **Purpose**: Demonstrates rendering multiple After Effects videos in a single request using the Plainly Videos Batch Renders API, through an app that turns every scheduled NBA game into its own matchup video.
@@ -47,29 +47,29 @@ Simply choose an example that matches your use case and follow the `README.md` f
       - Creating many renders with one Batch Renders API request.
       - Polling a batch's renders until they are finished, without webhooks or a database.
       - Showing finished videos in a grid.
-   * **Tech Stack**: TanStack Start, TypeScript, Tailwind CSS, shadcn/ui
+   * **Tech stack**: TanStack Start, TypeScript, Tailwind CSS, shadcn/ui
 
 4. **[Dynamic video ads](plainly-dynamic-video-ads/)**
    * **Purpose**: Demonstrates dynamic creative for video advertising, through a collection ad builder app where you set the hook, products, prices and call to action, and get the same ad rendered in 16:9, 9:16 and 1:1, one for each type of ad placement.
    * **What it shows**:
-      - Rendering one ad in three aspect ratios with three single render requests.
-      - Finding the template for each format from the project's templates.
+      - Rendering one ad in three aspect ratios with three separate render requests.
+      - Matching each format to a project template by its resolution.
       - Tagging renders with custom attributes and finding them again with the attribute filter.
-   * **Tech Stack**: TanStack Start, TypeScript, Tailwind CSS, shadcn/ui
+   * **Tech stack**: TanStack Start, TypeScript, Tailwind CSS, shadcn/ui
 
 ## Contributing
 
 Found an issue or want to contribute a new example? We welcome contributions! Please feel free to:
-- Report bugs or issues
-- Suggest new example scenarios
-- Submit pull requests with improvements
-- Share your own integration patterns
+- Report bugs or issues.
+- Suggest new example scenarios.
+- Submit pull requests with improvements.
+- Share your own integration patterns.
 
 ## Support
 
 Need help? Here's how to get support:
 - 📖 Check the [Help center](https://help.plainlyvideos.com/) first.
-- 📧 Open a [new issue](https://github.com/plainly-videos/video-automation-examples/issues/new).
+- 🐛 Open a [new issue](https://github.com/plainly-videos/video-automation-examples/issues/new).
 
 ---
 

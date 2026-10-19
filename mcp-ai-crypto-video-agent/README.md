@@ -1,4 +1,4 @@
-# MCP AI Crypto Video Agent
+# MCP AI crypto video agent
 
 Generate a short crypto performance video using a real OpenAI agent that
 talks with you and orchestrates MCP tools for data fetching and rendering.
@@ -18,10 +18,10 @@ talks with you and orchestrates MCP tools for data fetching and rendering.
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) (v20 or later, run `nvm use` to pick it up from `.nvmrc`)
+- [Node.js](https://nodejs.org/) (v20 or later; run `nvm use` to pick it up from `.nvmrc`)
 - [pnpm](https://pnpm.io/) package manager
 - OpenAI API key
-- Smithery API key (Free Crypto Coin Data)
+- Smithery API key (for the free coin price MCP server)
 - Plainly Videos API key
 
 ## Getting started
@@ -34,35 +34,39 @@ talks with you and orchestrates MCP tools for data fetching and rendering.
     ```
 
 2. Install dependencies:
-   - `pnpm install --frozen-lockfile`
+
+    ```bash
+    pnpm install --frozen-lockfile
+    ```
+
 3. Upload the After Effects project used in this example to Plainly Videos:
-    - Download the example project from [here](../after-effects-projects/Crypto%202025.zip).
-    - Go to [Upload form](https://app.plainlyvideos.com/dashboard/projects/create) and upload the project.
-    - Once the upload is done, auto-generate a template with prefix option:
-        - Set the prefixes to `edit`, which will include all compositions starting with `edit` and their parameters.
-        - Click on "Generate".
-        - This will generate a template with few parameters from layers.
+    - Download the [example project](../after-effects-projects/Crypto%202025.zip).
+    - Go to the [upload form](https://app.plainlyvideos.com/dashboard/projects/create) and upload the project.
+    - Once the upload is done, auto-generate a template with the prefix option:
+        - Set the prefix to `edit`, which will include all compositions starting with `edit` and their parameters.
+        - Click **Generate**.
+        - This will generate a template with a few parameters from layers.
 
     <p align="center">
       <img src=".assets/auto-generate-template.png" alt="Plainly Videos auto-generate template" width="500" />
     </p>
 
 4. Set up environment variables:
-   
-   ```bash
+
+    ```bash
     cp .env.example .env.local
     ```
 
-    Update `.env.local` with your OpenAI API key, Smithery API key from [Smithery account settings](https://smithery.ai/account/api-keys) and Plainly Videos API key from [Plainly Videos settings](https://app.plainlyvideos.com/dashboard/user/settings/general).
+    Update `.env.local` with your OpenAI API key from [OpenAI platform](https://platform.openai.com/api-keys), Smithery API key from [Smithery account settings](https://smithery.ai/account/api-keys) and Plainly Videos API key from [Plainly Videos settings](https://app.plainlyvideos.com/dashboard/user/settings/general).
 
     ```properties
-    # Smithery API Key
+    # Smithery API key
     SMITHERY_API_KEY=your_smithery_api_key
 
-    # Plainly API Key
+    # Plainly Videos API key
     PLAINLY_API_KEY=your_plainly_api_key
 
-    # OpenAI API Key
+    # OpenAI API key
     OPENAI_API_KEY=your_openai_api_key
     ```
 
@@ -88,6 +92,6 @@ specify the coin, and confirm the data or image choices it proposes. Type
 ## Scripts
 
 - `pnpm start` - run the interactive agent
-- `pnpm build` - type check with TypeScript
+- `pnpm build` - compile TypeScript to `dist/`
 - `pnpm biome` - lint and format check
-- `pnpm biome:fix` - auto-fix lint issues
+- `pnpm biome:fix` - auto-fix lint and format issues
