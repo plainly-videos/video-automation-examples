@@ -7,7 +7,7 @@ talks with you and orchestrates MCP tools for data fetching and rendering.
 
 **Non-technical view**: Ask the agent for a video about a coin, like Bitcoin or Solana. It's told to use the current price, the 24-hour and 7-day change and the date, to suggest what the video could show if you ask, and to ask whether you have a coin image before using one from CoinGecko. It then submits the render, and you can ask it to check the status. These steps come from the agent's prompt, so the model may not follow them exactly every time.
 
-**Technical view**: A Node.js command-line app built with the OpenAI Agents SDK. It connects to two MCP servers and gives one agent the tools from both. The Plainly Videos MCP server runs locally, started by the app with npx, and a free coin price MCP server is hosted on Smithery. The agent is instructed to look for a suitable crypto project in your Plainly account and fill its parameters with live coin data before submitting the render. All of that happens through MCP tool calls, so the app has no Plainly or crypto API code of its own.
+**Technical view**: A Node.js command-line app built with the OpenAI Agents SDK. It connects to two MCP servers and gives one agent the tools from both. The Plainly Videos MCP server runs locally, started by the app with npx, and CoinGecko's free public MCP server is reached over HTTP with no API key. The agent is instructed to look for a suitable crypto project in your Plainly account and fill its parameters with live coin data before submitting the render. All of that happens through MCP tool calls, so the app has no Plainly or crypto API code of its own.
 
 ## What you'll learn
 
@@ -18,10 +18,9 @@ talks with you and orchestrates MCP tools for data fetching and rendering.
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) (v20 or later; run `nvm use` to pick it up from `.nvmrc`)
-- [pnpm](https://pnpm.io/) package manager (v10; the exact version is pinned in `package.json`)
+- [Node.js](https://nodejs.org/) (v24 or later; run `nvm use` to pick it up from `.nvmrc`)
+- [pnpm](https://pnpm.io/) package manager (v12 or later)
 - OpenAI API key
-- Smithery API key (for the free coin price MCP server)
 - Plainly Videos API key
 
 ## Getting started
@@ -57,12 +56,9 @@ talks with you and orchestrates MCP tools for data fetching and rendering.
     cp .env.example .env.local
     ```
 
-    Update `.env.local` with your OpenAI API key from [OpenAI platform](https://platform.openai.com/api-keys), Smithery API key from [Smithery account settings](https://smithery.ai/account/api-keys) and Plainly Videos API key from [Plainly Videos settings](https://app.plainlyvideos.com/dashboard/user/settings/general).
+    Update `.env.local` with your OpenAI API key from [OpenAI platform](https://platform.openai.com/api-keys) and Plainly Videos API key from [Plainly Videos settings](https://app.plainlyvideos.com/dashboard/user/settings/general).
 
     ```properties
-    # Smithery API key
-    SMITHERY_API_KEY=your_smithery_api_key
-
     # Plainly Videos API key
     PLAINLY_API_KEY=your_plainly_api_key
 
@@ -84,7 +80,7 @@ answer its questions, such as whether you have your own coin image. Type
 
 ## How it works
 
-- Connects to the MCP servers (crypto data + Plainly Videos).
+- Connects to the MCP servers (CoinGecko crypto data + Plainly Videos).
 - Runs an OpenAI agent that chats with you and uses MCP tools to gather data.
 - Following its prompt, the agent looks up a suitable Plainly project and fills its parameters from your input and the coin data.
 - Submits a render. You can ask for status updates if the render ID is in the conversation.

@@ -47,23 +47,14 @@ async function main() {
 		return;
 	}
 
-	if (!process.env.SMITHERY_API_KEY) {
-		console.error(chalk.red("❌ SMITHERY_API_KEY not found in environment"));
-		console.error(chalk.gray("   Add it to .env.local file"));
-		process.exitCode = 1;
-		return;
-	}
-
-	const smitheryUrl = "https://server.smithery.ai";
 	const servers: Array<MCPServerStdio | MCPServerStreamableHttp> = [];
 	const rl = readline.createInterface({ input: stdin, output: stdout });
 	rl.on("SIGINT", () => rl.close());
 
-	const cryptoUrl = new URL(`${smitheryUrl}/@Liam8/free-coin-price-mcp/mcp`);
-	cryptoUrl.searchParams.set("api_key", process.env.SMITHERY_API_KEY);
+	// CoinGecko's public MCP server, free and keyless (shared rate limits)
 	const cryptoServer = new MCPServerStreamableHttp({
-		name: "Crypto MCP Server",
-		url: cryptoUrl.toString(),
+		name: "CoinGecko MCP Server",
+		url: "https://mcp.api.coingecko.com/mcp",
 	});
 
 	const plainlyServer = new MCPServerStdio({
