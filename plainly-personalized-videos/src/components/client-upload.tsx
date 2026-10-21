@@ -1,5 +1,6 @@
 import { Upload } from "lucide-react";
 import { useState } from "react";
+import { decodeCsv } from "@/lib/recipients";
 import { cn } from "@/lib/utils";
 
 const SAMPLE_CSV = "/sample-clients.csv";
@@ -13,7 +14,7 @@ export function ClientUpload({
   const [dragging, setDragging] = useState(false);
 
   const readFile = async (file: File | undefined) => {
-    if (file) onLoad(await file.text());
+    if (file) onLoad(decodeCsv(await file.arrayBuffer()));
   };
 
   const loadSample = async () => {

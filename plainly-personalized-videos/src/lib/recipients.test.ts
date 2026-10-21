@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { checkRecipient, readClients } from "@/lib/recipients";
+import { checkRecipient, decodeCsv, readClients } from "@/lib/recipients";
 
 const emma = {
   name: "Emma Johnson",
@@ -94,4 +94,12 @@ test("readClients fails when there are more valid clients than one batch takes",
   expect(readClients(csv).error).toBe(
     "Too many clients: 101 valid rows, at most 100 per batch.",
   );
+});
+
+test("decodeCsv reads UTF-8 and falls back to Excel's Windows-1252 export", () => {
+  // "Zo\u00eb" as UTF-8 bytes, then as Windows-1252 bytes (Excel's "CSV (Comma delimited)")
+  const utf8 = new Uint8Array([0x5a, 0x6f, 0xc3, 0xab]);
+  const windows1252 = new Uint8Array([0x5a, 0x6f, 0xeb]);
+  expect(decodeCsv(utf8.buffer)).toBe("Zo\u00eb");
+  expect(decodeCsv(windows1252.buffer)).toBe("Zo\u00eb");
 });

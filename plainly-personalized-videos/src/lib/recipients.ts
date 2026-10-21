@@ -47,6 +47,16 @@ export function checkRecipient(recipient: Recipient): string | undefined {
   }
 }
 
+// Excel on Windows saves "CSV (Comma delimited)" as Windows-1252, not UTF-8.
+// Read as UTF-8 that would turn "Zoë" into "Zo\uFFFD", right into the video
+export function decodeCsv(bytes: ArrayBuffer): string {
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    return new TextDecoder("windows-1252").decode(bytes);
+  }
+}
+
 // Reads a CRM or spreadsheet export. Headers are matched loosely (any order,
 // any case, extra spaces), extra columns are ignored
 export function readClients(csvText: string): {
