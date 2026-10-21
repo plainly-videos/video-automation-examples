@@ -25,6 +25,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import {
+  type FontFields,
+  replaceVersions,
+  type VersionFields,
+} from "@/lib/form";
+import {
   type Font,
   LANGUAGES,
   LIMITS,
@@ -41,10 +46,6 @@ import {
 } from "@/lib/localization";
 import { translate } from "@/lib/openai";
 import { createLocalization } from "@/lib/plainly";
-
-// Font fields are text inputs, empty means the template fonts
-type FontFields = { url: string; name: string };
-type VersionFields = { language: string; copy: Copy; font: FontFields };
 
 export type Initial = { copy: Copy; design: Design; languages: string[] };
 
@@ -119,8 +120,8 @@ export function Localizer({
     setTranslating(true);
     try {
       const translated = await translateFn({ data: { copy, languages } });
-      form.setFieldValue(
-        "versions",
+      replaceVersions(
+        form,
         languages.map((language) => ({
           language,
           copy: translated[language],
