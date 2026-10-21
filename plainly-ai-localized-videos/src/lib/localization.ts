@@ -65,19 +65,39 @@ export const fontSchema = z.object({
   name: z.string().trim().max(100).optional(),
 });
 
-// A public https URL, or a file inside the uploaded project
+// Plainly reads media parameters starting with this from the uploaded project
+export const PROJECT_FOLDER = "(Footage)/";
+export const isProjectFile = (value: string) =>
+  value.startsWith(PROJECT_FOLDER);
+
+const httpsUrl = z.url({ protocol: /^https$/ });
+
+// A file inside the uploaded project, or a public https URL. The prefix picks
+// which one, so the form and the server check the same thing
 const media = (label: string) =>
   z
     .string()
     .trim()
-    .refine(
-      (value) =>
-        z.url({ protocol: /^https$/ }).safeParse(value).success ||
-        (value.startsWith("(Footage)/") && !value.includes("..")),
-      `${label} must be an https:// URL or a (Footage)/ path`,
-    );
+    .superRefine((value, ctx) => {
+      if (isProjectFile(value)) {
+        const path = value.slice(PROJECT_FOLDER.length);
+        if (!path || path.includes("..")) {
+          ctx.addIssue({
+            code: "custom",
+            message: `${label} needs a file path`,
+          });
+        }
+      } else if (!httpsUrl.safeParse(value).success) {
+        ctx.addIssue({
+          code: "custom",
+          message: `${label} must be an https:// URL`,
+        });
+      }
+    });
 
-const color = z.string().regex(/^#[0-9a-f]{6}$/i, "Pick a color");
+const color = z
+  .string()
+  .regex(/^#[0-9a-f]{6}$/i, `Use a hex color like ${COLORS.button}`);
 
 export const designSchema = z.object({
   productImage: media("Product image"),

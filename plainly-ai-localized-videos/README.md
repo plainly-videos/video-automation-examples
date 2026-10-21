@@ -85,7 +85,7 @@ A TanStack Start app with two server functions doing the work. The first sends t
 
 ## Usage
 
-Open http://localhost:3000. Write the ad in English and watch the preview next to the form. The product image and logo default to the files inside the uploaded project, so the example works without any URLs; paste an `https://` URL to use your own. Pick the languages and click **Translate with ChatGPT**.
+Open http://localhost:3000. Write the ad in English and watch the preview next to the form. The product image and logo default to the files inside the uploaded project, so the example works without any URLs. To use your own, switch the source next to the field from **Project** to **URL** and paste an `https://` link. Colors can be picked or typed as `#RRGGBB`. Pick the languages and click **Translate with ChatGPT**.
 
 Each language gets a card with its own preview and text. Every field counts characters against the limit for that language, and text that is too long turns red and blocks rendering until you shorten it. ChatGPT is asked to stay within the limits but doesn't always manage, so check the counters. Japanese, Chinese and Korean cards come with a font already set, under **Font**.
 

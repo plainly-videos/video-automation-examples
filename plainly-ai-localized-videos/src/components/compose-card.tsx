@@ -1,5 +1,5 @@
 import { Languages } from "lucide-react";
-import { ColorInput, TextInput } from "@/components/form-inputs";
+import { ColorInput, MediaInput, TextInput } from "@/components/form-inputs";
 import { PlayingPreview } from "@/components/localized-preview";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -14,10 +14,9 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import type { Localizer } from "@/components/use-localizer";
 import { LANGUAGES, LIMITS } from "@/lib/languages";
-import { copySchema, designSchema } from "@/lib/localization";
+import { copySchema, DEFAULT_DESIGN, designSchema } from "@/lib/localization";
 
 const english = copySchema("latin").shape;
-const MEDIA_HINT = "An https:// URL, or a file in the uploaded project";
 
 // Step 1: the English ad, its images and colors, and the languages to translate into
 export function ComposeCard({
@@ -79,10 +78,16 @@ export function ComposeCard({
               />
             )}
           </form.Field>
-          <form.Field name="design.colorBackground">
+          <form.Field
+            name="design.colorBackground"
+            validators={{ onChange: designSchema.shape.colorBackground }}
+          >
             {(field) => <ColorInput field={field} label="Background" />}
           </form.Field>
-          <form.Field name="design.colorButton">
+          <form.Field
+            name="design.colorButton"
+            validators={{ onChange: designSchema.shape.colorButton }}
+          >
             {(field) => <ColorInput field={field} label="Button color" />}
           </form.Field>
           <form.Field
@@ -90,10 +95,10 @@ export function ComposeCard({
             validators={{ onChange: designSchema.shape.productImage }}
           >
             {(field) => (
-              <TextInput
+              <MediaInput
                 field={field}
                 label="Product image"
-                description={MEDIA_HINT}
+                projectFile={DEFAULT_DESIGN.productImage}
                 className="col-span-full"
               />
             )}
@@ -103,10 +108,10 @@ export function ComposeCard({
             validators={{ onChange: designSchema.shape.logo }}
           >
             {(field) => (
-              <TextInput
+              <MediaInput
                 field={field}
                 label="Logo"
-                description={MEDIA_HINT}
+                projectFile={DEFAULT_DESIGN.logo}
                 className="col-span-full"
               />
             )}

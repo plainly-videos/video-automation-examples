@@ -7,6 +7,7 @@ import {
   designSchema,
   fontSchema,
   localizationSchema,
+  PROJECT_FOLDER,
   renderBody,
   toCurl,
   toParameters,
@@ -145,6 +146,34 @@ test("designSchema rejects non-hex colors and unknown media", () => {
   expect(
     designSchema.safeParse({ ...design, logo: "../secret.png" }).success,
   ).toBe(false);
+});
+
+// The message tells the person what is wrong for the source they picked
+const logoError = (logo: string) =>
+  designSchema.shape.logo.safeParse(logo).error?.issues[0]?.message;
+
+test("a project file needs a path without ..", () => {
+  expect(logoError(`${PROJECT_FOLDER}logo.png`)).toBeUndefined();
+  expect(logoError(PROJECT_FOLDER)).toBe("Logo needs a file path");
+  expect(logoError(`${PROJECT_FOLDER}../logo.png`)).toBe(
+    "Logo needs a file path",
+  );
+});
+
+test("a URL must be https", () => {
+  expect(logoError("https://example.com/logo.png")).toBeUndefined();
+  expect(logoError("http://example.com/logo.png")).toBe(
+    "Logo must be an https:// URL",
+  );
+  expect(logoError("")).toBe("Logo must be an https:// URL");
+});
+
+test("colors are #RRGGBB", () => {
+  const colorError = (color: string) =>
+    designSchema.shape.colorButton.safeParse(color).error?.issues[0]?.message;
+  expect(colorError("#e97314")).toBeUndefined();
+  expect(colorError("E97314")).toBe("Use a hex color like #E97314");
+  expect(colorError("#E9731")).toBe("Use a hex color like #E97314");
 });
 
 test("toCurl escapes apostrophes", () => {
