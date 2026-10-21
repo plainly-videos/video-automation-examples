@@ -19,7 +19,7 @@ A TanStack Start app that parses the CSV with [papaparse](https://www.papaparse.
 
 - **📄 CSV to batch**: Each CSV row becomes one `batchData` entry, so one Batch API request creates one render per recipient.
 - **✅ Row validation before rendering**: Bad rows are shown with the reason and skipped; only good rows are sent.
-- **🔗 Mapping results back to recipients**: Every render carries its client in custom attributes, so the results table needs nothing but Plainly.
+- **🔗 Mapping results back to recipients**: Every render carries its client in custom attributes, so the results page needs nothing but Plainly.
 - **🏷️ Per-recipient file name**: Each entry sets `attachmentFileName`, so every video saves under the client's name.
 - **🖼️ Per-recipient thumbnail**: `options.thumbnails` gives every client a still of their own video, used as a clickable image in the email.
 - **🆓 Free draft renders**: `settingsTemplate: DRAFT` renders at half resolution without using video minutes.
@@ -93,13 +93,15 @@ Open http://localhost:3000. Drop your client list onto the upload area, pick it 
 | `company` | `Northwind` | Required, at most 22 characters |
 | `headshot` | `https://randomuser.me/api/portraits/women/44.jpg` | Required, a public `http(s)` image URL |
 
-Every row shows up in the table. Rows that break a rule turn red with the reason and are skipped; the sample has one on purpose, a client without a headshot. Up to 100 clients fit in one campaign.
+Files are read as UTF-8, with a fallback to Windows-1252, so a "CSV (Comma delimited)" export from Excel on Windows keeps names like `Zoë` intact.
 
-Name the campaign (it also names every video file) and leave **Draft preview (free)** on for the first run. Click **Render N drafts**. The page switches to `/?batch=<id>`, and each client's row turns into a video as its render finishes. Check every face and name, then click **New campaign**, load the file again, turn off Draft preview and click **Render N videos** for the final, full resolution videos.
+Every row shows up in the table. Rows that break a rule are greyed out, with the reason in a red badge, and are skipped; the sample has one on purpose, a client without a headshot. Up to 100 clients fit in one campaign.
+
+Name the campaign (it also names every video file) and leave **Draft preview (free)** on for the first run. Click **Render N drafts**. The page switches to `/?batch=<id>`, and each client gets a card that turns into their video as its render finishes. A failed render shows the error reason instead. Check every face and name, then click **New campaign**, load the file again, turn off Draft preview and click **Render N videos** for the final, full resolution videos.
 
 <p align="center"><img src=".assets/app.png" alt="Campaign page with one greeting video per client" width="500" /></p>
 
-For each client, **Copy link** copies the video URL. **Copy for email** copies the client's thumbnail linked to their video; paste it into a Gmail message and the client sees a picture of their own greeting that opens the video.
+For each client, **Copy link** copies the video URL. **Copy for email** copies the client's thumbnail linked to their video; paste it into a Gmail message and the client sees a picture of their own greeting that opens the video. The browser only allows copying on `https` or `localhost`, so opening the dev server by its network IP shows **Copy failed**.
 
 <p align="center"><img src=".assets/video.png" alt="Thumbnail of one personalized greeting" width="500" /></p>
 
@@ -196,7 +198,7 @@ The campaign page filters by `batchRenderId` as well and calls this every 5 seco
 ### Good to know
 
 - Headshots must be public URLs, because Plainly downloads them while rendering. The sample uses portraits from [randomuser.me](https://randomuser.me/).
-- Video links expire. The draft renders made while building this example expired 7 days after rendering; send the links before the `expirationDate` on the render.
+- Video links expire. The draft renders made while building this example expired 7 days after rendering; send the links before the `expirationDate` on the render. Expired videos show as **Expired**, without copy buttons.
 - The template shrinks long names to fit, but a title or company longer than one line of the badge runs into the line below. 22 characters fit, so the app rejects longer ones. A character count is only an estimate: very wide letters can still wrap.
 - The thumbnail and draft settings are not specific to batches; single `POST /api/v2/renders` requests take the same `outputFormat` and `options`.
 - Prefer webhooks over polling in production. See [webhook delivery](https://help.plainlyvideos.com/docs/user-guide/rendering/video-delivery#webhook-delivery) and the [Render and webhook example](../plainly-render-and-webhook/).
@@ -207,4 +209,5 @@ The campaign page filters by `batchRenderId` as well and calls this every 5 seco
 - `pnpm build` and `pnpm preview` - Builds the app and serves the production build.
 - `pnpm test` - Runs the unit tests.
 - `pnpm coverage` - Runs the unit tests with a coverage report.
-- `pnpm lint` - Checks the code with Biome.
+- `pnpm typecheck` - Checks the types with TypeScript.
+- `pnpm lint` - Checks the code with Biome. `pnpm lint:fix` applies the safe fixes.
