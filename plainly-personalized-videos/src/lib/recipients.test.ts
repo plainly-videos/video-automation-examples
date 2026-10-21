@@ -36,7 +36,7 @@ test("readClients maps headers in any order, case and spacing, and ignores extra
 });
 
 test("readClients handles a BOM, CRLF, quoted commas, blank and comma-only lines", () => {
-  const csv = `﻿${header}\r\n Emma Johnson ,Head of Marketing,"Northwind, Inc.",${emma.headshot}\r\n,,,\r\n\r\n`;
+  const csv = `\uFEFF${header}\r\n Emma Johnson ,Head of Marketing,"Northwind, Inc.",${emma.headshot}\r\n,,,\r\n\r\n`;
   expect(readClients(csv)).toEqual({
     rows: [{ ...emma, company: "Northwind, Inc." }],
   });
@@ -67,7 +67,7 @@ test("readClients fails an empty file", () => {
     rows: [],
     error: "The CSV file is empty.",
   });
-  expect(readClients("﻿\n")).toEqual({
+  expect(readClients("\uFEFF\n")).toEqual({
     rows: [],
     error: "The CSV file is empty.",
   });

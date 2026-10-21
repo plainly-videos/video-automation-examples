@@ -47,7 +47,8 @@ export function readClients(csvText: string): {
       header: true,
       // Skips blank lines and lines of only commas, which spreadsheets leave behind
       skipEmptyLines: "greedy",
-      transformHeader: (header) => header.replace(/^﻿/, "").trim().toLowerCase(),
+      // trim() also drops the BOM that Excel puts before the first header
+      transformHeader: (header) => header.trim().toLowerCase(),
     },
   );
 
