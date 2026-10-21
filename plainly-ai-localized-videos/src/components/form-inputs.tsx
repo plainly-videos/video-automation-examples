@@ -93,7 +93,7 @@ export function TextInput({
   );
 }
 
-const SOURCES = { project: "Project", url: "URL" };
+const SOURCES = { project: "Project file", url: "URL" };
 
 // An image from the uploaded project or from a URL. The value keeps the
 // (Footage)/ prefix for project files, so the source is not stored separately
