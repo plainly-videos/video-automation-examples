@@ -24,7 +24,7 @@ import {
   ItemGroup,
   ItemTitle,
 } from "@/components/ui/item";
-import type { LocalizationSummary } from "@/lib/localization";
+import type { LocalizationSummary } from "@/lib/renders";
 import { formatDate } from "@/lib/utils";
 
 export function RecentLocalizations({

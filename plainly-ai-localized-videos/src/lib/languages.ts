@@ -51,14 +51,14 @@ export const LANGUAGES: Language[] = [
 export const languageOf = (code: string) =>
   [SOURCE, ...LANGUAGES].find((language) => language.code === code);
 
-// Characters that fit, measured on renders of the template. The headline must
-// stay on one line, the subheadline on two, longer text runs into the product
+// Characters that fit, measured on renders of the template. The headline and
+// the subheadline both fit on two lines, longer text runs into the product
 export const LIMITS: Record<
   Script,
   { headline: number; subheadline: number; cta: number }
 > = {
-  latin: { headline: 22, subheadline: 80, cta: 20 },
-  cjk: { headline: 9, subheadline: 36, cta: 8 },
+  latin: { headline: 34, subheadline: 80, cta: 20 },
+  cjk: { headline: 18, subheadline: 36, cta: 8 },
 };
 
 // The template's default colors, read off a render

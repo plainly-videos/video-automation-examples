@@ -5,8 +5,8 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { RecentLocalizations } from "@/components/recent-localizations";
-import type { LocalizationSummary } from "@/lib/localization";
 import { listLocalizations } from "@/lib/plainly";
+import type { LocalizationSummary } from "@/lib/renders";
 import appCss from "../styles.css?url";
 
 export const Route = createRootRoute({

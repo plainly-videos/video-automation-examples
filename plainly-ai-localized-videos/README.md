@@ -87,7 +87,7 @@ A TanStack Start app with two server functions doing the work. The first sends t
 
 Open http://localhost:3000. Write the ad in English and watch the preview next to the form. The product image and logo default to the files inside the uploaded project, so the example works without any URLs; paste an `https://` URL to use your own. Pick the languages and click **Translate with ChatGPT**.
 
-Each language gets a card with its own preview and text. Every field counts characters against the limit for that language, and text that is too long turns red and blocks rendering until you shorten it. ChatGPT is asked to stay within the limits but doesn't always manage, as the German subheadline below shows. Japanese, Chinese and Korean cards come with a font already filled in.
+Each language gets a card with its own preview and text. Every field counts characters against the limit for that language, and text that is too long turns red and blocks rendering until you shorten it. ChatGPT is asked to stay within the limits but doesn't always manage, so check the counters. Japanese, Chinese and Korean cards come with a font already set, under **Font**.
 
 <p align="center"><img src=".assets/app.png" alt="Review step with a preview per language" width="500" /></p>
 
@@ -114,7 +114,7 @@ const response = await openai().responses.parse({
 return parseTranslation(languages, response.output_parsed);
 ```
 
-The instructions ask for ad copy rather than a literal translation, and list each language's character limits. The limits were measured on renders of the template: the headline must stay on one line and the subheadline on two, or the text runs into the product. Japanese, Chinese and Korean characters are about twice as wide as Latin ones, so their limits are lower (see `src/lib/languages.ts`).
+The instructions ask for ad copy rather than a literal translation, and list each language's character limits. The limits were measured on renders of the template: the headline and the subheadline each fit on two lines, longer text runs into the product. Japanese, Chinese and Korean characters are about twice as wide as Latin ones, so their limits are lower (see `src/lib/languages.ts`).
 
 ### Render one video per language
 

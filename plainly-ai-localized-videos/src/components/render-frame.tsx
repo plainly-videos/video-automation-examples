@@ -6,7 +6,7 @@ import {
   localizationStatus,
   type Render,
   stateLabel,
-} from "@/lib/localization";
+} from "@/lib/renders";
 
 const BADGE_VARIANT = {
   done: "default",

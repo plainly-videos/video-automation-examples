@@ -22,7 +22,7 @@ export const LAYOUT = {
     top: 15.6,
     headline: 7.9,
     subheadline: 2.85,
-    width: 92,
+    width: 83,
     subWidth: 60,
   },
   bottle: { left: 35.2, top: 38.7, width: 30.5 },

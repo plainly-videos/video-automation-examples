@@ -21,14 +21,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { languageOf } from "@/lib/languages";
+import { getLocalization } from "@/lib/plainly";
 import {
   expectedLanguages,
   groupLocalizations,
   isLocalizationFinished,
   latestPerLanguage,
   type Render,
-} from "@/lib/localization";
-import { getLocalization } from "@/lib/plainly";
+} from "@/lib/renders";
 import { cn, formatDate } from "@/lib/utils";
 
 const POLL_INTERVAL_MS = 5000;

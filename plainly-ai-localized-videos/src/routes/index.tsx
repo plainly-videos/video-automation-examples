@@ -1,13 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { type Initial, Localizer } from "@/components/localizer";
+import { Localizer } from "@/components/localizer";
+import type { Initial } from "@/lib/form";
+import { DEFAULT_COPY, DEFAULT_DESIGN } from "@/lib/localization";
+import { getLocalization, getRenderTarget } from "@/lib/plainly";
 import {
-  DEFAULT_COPY,
-  DEFAULT_DESIGN,
   fromRenders,
   isLocalizationId,
   newLocalizationId,
-} from "@/lib/localization";
-import { getLocalization, getRenderTarget } from "@/lib/plainly";
+} from "@/lib/renders";
 
 const DEFAULT: Initial = {
   copy: DEFAULT_COPY,

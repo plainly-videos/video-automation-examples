@@ -1,15 +1,13 @@
 import { notFound } from "@tanstack/react-router";
 import { createServerFn, createServerOnlyFn } from "@tanstack/react-start";
+import { EXAMPLE, localizationSchema, renderBody } from "@/lib/localization";
 import {
-  EXAMPLE,
   groupLocalizations,
   isLocalizationId,
-  localizationSchema,
   newLocalizationId,
   type Render,
-  renderBody,
   toRender,
-} from "@/lib/localization";
+} from "@/lib/renders";
 
 const PLAINLY_API = "https://api.plainlyvideos.com/api/v2";
 

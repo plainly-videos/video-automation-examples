@@ -1,18 +1,14 @@
-import {
-  type CSSProperties,
-  useEffect,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import type { CSSProperties } from "react";
+import { useClock } from "@/components/preview-clock";
 import {
   BOTTLE_IN,
   BUTTON_IN,
   HEADLINE_ZOOM,
   LAYOUT,
-  LENGTH,
   STILL,
   SUBHEADLINE_IN,
 } from "@/components/preview-data";
+import { useFont } from "@/components/preview-font";
 import type { Font } from "@/lib/languages";
 import type { Copy, Design } from "@/lib/localization";
 
@@ -21,78 +17,6 @@ const clamp = (x: number) => Math.min(1, Math.max(0, x));
 // Eased progress, 0 to 1, of a change that starts at `from`
 const easeOut = (t: number, from: number, length: number) =>
   1 - (1 - clamp((t - from) / length)) ** 3;
-
-// Seconds into the video. One animation frame loop for every preview on the
-// page, it runs while any of them is mounted
-const clock = { t: STILL, frame: 0, listeners: new Set<() => void>() };
-
-function subscribe(listener: () => void) {
-  clock.listeners.add(listener);
-  if (
-    clock.listeners.size === 1 &&
-    !matchMedia("(prefers-reduced-motion: reduce)").matches
-  ) {
-    clock.frame = requestAnimationFrame(function tick(now) {
-      clock.t = (now / 1000) % LENGTH;
-      for (const notify of clock.listeners) notify();
-      clock.frame = requestAnimationFrame(tick);
-    });
-  }
-  return () => {
-    clock.listeners.delete(listener);
-    if (clock.listeners.size === 0) cancelAnimationFrame(clock.frame);
-  };
-}
-
-export const useClock = () =>
-  useSyncExternalStore(
-    subscribe,
-    () => clock.t,
-    () => STILL,
-  );
-
-// One FontFace per URL and weight, shared by every preview on the page
-const fonts = new Map<string, Promise<string>>();
-
-function loadFont({ url, name }: Font) {
-  const key = `${url}#${name ? 700 : 400}`;
-  let family = fonts.get(key);
-  if (!family) {
-    const id = `preview-font-${fonts.size}`;
-    // A variable font draws its default weight, Thin for Noto. Bold is close
-    // to what the PostScript name picks in the render
-    family = new FontFace(id, `url(${url})`, { weight: name ? "700" : "400" })
-      .load()
-      .then((face) => {
-        document.fonts.add(face);
-        return id;
-      });
-    // A failed URL can be fixed and tried again
-    family.catch(() => fonts.delete(key));
-    fonts.set(key, family);
-  }
-  return family;
-}
-
-// Loads a font from its URL, like Plainly does for the render. Undefined until
-// it is ready, or when it fails, then the template fonts stay
-function useFont(font?: Font) {
-  const [family, setFamily] = useState<string>();
-  const url = font?.url;
-  const name = font?.name;
-  useEffect(() => {
-    setFamily(undefined);
-    if (!url) return;
-    let active = true;
-    loadFont({ url, name })
-      .then((id) => active && setFamily(id))
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
-  }, [url, name]);
-  return family;
-}
 
 // Media inside the project can't load in the browser, the preview shows the
 // same files from /public instead
@@ -186,7 +110,7 @@ export function LocalizedPreview({
           style={{ top: cq(text.top), maxWidth: cq(text.width) }}
         >
           <p
-            className="uppercase leading-[1.15]"
+            className="uppercase leading-none"
             style={{
               ...fontOf("var(--font-anton)"),
               fontSize: cq(text.headline),
