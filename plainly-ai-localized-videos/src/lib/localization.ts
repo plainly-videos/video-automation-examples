@@ -298,11 +298,12 @@ export function latestPerLanguage(renders: Render[]): Record<string, Render> {
 }
 
 // The languages the localization was made with. Renders made outside the app
-// may miss the attribute, then the languages that are there count
+// may miss the attribute or send something else than text, then the languages
+// that are there count
 export function expectedLanguages(renders: Render[]): string[] {
   const listed = renders.reduce<Render | undefined>(
     (found, render) =>
-      render.attributes?.languages
+      typeof render.attributes?.languages === "string"
         ? found
           ? newest(found, render)
           : render

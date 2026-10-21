@@ -317,3 +317,15 @@ test("fromRenders falls back to defaults for odd values", () => {
   expect(restored.design.colorButton).toBe(DEFAULT_DESIGN.colorButton);
   expect(restored.design.logo).toBe(DEFAULT_DESIGN.logo);
 });
+
+test("groupLocalizations survives a languages attribute that is not text", () => {
+  const odd = render("en", "DONE", "2026-10-21T10:00:00Z", {
+    // A copied curl can send any JSON value as an attribute
+    attributes: {
+      localizationId: ID,
+      language: "en",
+      languages: ["en", "de"] as unknown as string,
+    },
+  });
+  expect(groupLocalizations([odd])[0].languages).toEqual(["en"]);
+});
