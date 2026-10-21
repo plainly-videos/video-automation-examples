@@ -177,14 +177,16 @@ test("toCampaigns groups renders by batch, newest first, and skips renders witho
   ]);
 });
 
-test("emailSnippet links the thumbnail to the video and escapes the name", () => {
+test("emailSnippet links the thumbnail to the video, adds a caption and escapes the name", () => {
   const { html, text } = emailSnippet({
     output: "https://v/x.mp4?a=1&b=2",
     thumbnail: "https://v/x.png",
     name: `Emma "<b>" & co`,
   });
-  expect(text).toBe("https://v/x.mp4?a=1&b=2");
+  expect(text).toBe(
+    "Click the picture to watch your holiday greeting.\nhttps://v/x.mp4?a=1&b=2",
+  );
   expect(html).toBe(
-    '<a href="https://v/x.mp4?a=1&amp;b=2"><img src="https://v/x.png" alt="Holiday video for Emma &quot;&lt;b&gt;&quot; &amp; co" width="480"></a>',
+    '<a href="https://v/x.mp4?a=1&amp;b=2"><img src="https://v/x.png" alt="Holiday video for Emma &quot;&lt;b&gt;&quot; &amp; co" width="480"></a><p>Click the picture to watch your holiday greeting.</p>',
   );
 });

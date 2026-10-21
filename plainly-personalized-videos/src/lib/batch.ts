@@ -170,6 +170,8 @@ const escapeHtml = (value: string) =>
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
 
+const EMAIL_CAPTION = "Click the picture to watch your holiday greeting.";
+
 // Thumbnail linked to the video, for pasting into Gmail. Referenced by URL:
 // Plainly storage sends no CORS headers, so the browser can't copy the image
 export function emailSnippet({
@@ -182,7 +184,7 @@ export function emailSnippet({
   name: string;
 }) {
   return {
-    html: `<a href="${escapeHtml(output)}"><img src="${escapeHtml(thumbnail)}" alt="Holiday video for ${escapeHtml(name)}" width="480"></a>`,
-    text: output,
+    html: `<a href="${escapeHtml(output)}"><img src="${escapeHtml(thumbnail)}" alt="Holiday video for ${escapeHtml(name)}" width="480"></a><p>${EMAIL_CAPTION}</p>`,
+    text: `${EMAIL_CAPTION}\n${output}`,
   };
 }

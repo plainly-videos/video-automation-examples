@@ -1,5 +1,7 @@
+import { X } from "lucide-react";
 import type { ReactNode } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -18,6 +20,7 @@ export type ClientsTableRow = {
   company?: string;
   status: ReactNode;
   invalid?: boolean;
+  onRemove?: () => void;
 };
 
 export function Headshot({ src, name }: { src?: string; name?: string }) {
@@ -47,6 +50,9 @@ export function ClientsTable({ clients }: { clients: ClientsTableRow[] }) {
           <TableHead>Title</TableHead>
           <TableHead>Company</TableHead>
           <TableHead>Status</TableHead>
+          <TableHead className="w-10">
+            <span className="sr-only">Remove</span>
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -62,6 +68,18 @@ export function ClientsTable({ clients }: { clients: ClientsTableRow[] }) {
             <TableCell>{client.title}</TableCell>
             <TableCell>{client.company}</TableCell>
             <TableCell>{client.status}</TableCell>
+            <TableCell>
+              {client.onRemove && (
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={`Remove ${client.name ?? "row"}`}
+                  onClick={client.onRemove}
+                >
+                  <X />
+                </Button>
+              )}
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>

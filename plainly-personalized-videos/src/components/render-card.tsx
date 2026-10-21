@@ -89,7 +89,7 @@ export function RenderCard({ render }: { render: Render }) {
                     thumbnail,
                     name: render.attributes?.name ?? "you",
                   });
-                  // Gmail pastes the HTML as a clickable picture, plain text editors get the link
+                  // Gmail pastes the HTML as a clickable picture, plain text editors get the caption and link
                   return navigator.clipboard.write([
                     new ClipboardItem({
                       "text/html": new Blob([html], { type: "text/html" }),

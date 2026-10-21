@@ -32,7 +32,7 @@ export function CampaignForm() {
   const [rows, setRows] = useState<ClientRow[]>([]);
   const [fileError, setFileError] = useState<string>();
   const [campaign, setCampaign] = useState(DEFAULT_CAMPAIGN);
-  const [draft, setDraft] = useState(true);
+  const [draft, setDraft] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string>();
 
@@ -116,8 +116,8 @@ export function CampaignForm() {
             <FieldContent>
               <FieldLabel htmlFor="draft">Draft preview (free)</FieldLabel>
               <FieldDescription>
-                Half resolution, no video minutes used. Check every video, then
-                turn it off for the final render.
+                Half resolution, no video minutes used. Turn it on to check
+                every video before the final render.
               </FieldDescription>
             </FieldContent>
           </Field>
@@ -131,6 +131,7 @@ export function CampaignForm() {
               title: row.title,
               company: row.company,
               invalid: Boolean(row.error),
+              onRemove: () => setRows(rows.filter((_, i) => i !== index)),
               status: row.error ? (
                 <Badge variant="destructive">{row.error}</Badge>
               ) : (

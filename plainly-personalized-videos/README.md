@@ -19,7 +19,6 @@ A TanStack Start app that parses the CSV with [papaparse](https://www.papaparse.
 
 - **📄 CSV to batch**: Each CSV row becomes one `batchData` entry, so one Batch API request creates one render per recipient.
 - **✅ Row validation before rendering**: Bad rows are shown with the reason and skipped; only good rows are sent.
-- **🔗 Mapping results back to recipients**: Every render carries its client in custom attributes, so the results page needs nothing but Plainly.
 - **🏷️ Per-recipient file name**: Each entry sets `attachmentFileName`, so every video saves under the client's name.
 - **🖼️ Per-recipient thumbnail**: `options.thumbnails` gives every client a still of their own video, used as a clickable image in the email.
 - **🆓 Free draft renders**: `settingsTemplate: DRAFT` renders at half resolution without using video minutes.
@@ -95,13 +94,13 @@ Open http://localhost:3000. Drop your client list onto the upload area, pick it 
 
 Files are read as UTF-8, with a fallback to Windows-1252, so a "CSV (Comma delimited)" export from Excel on Windows keeps names like `Zoë` intact.
 
-Every row shows up in the table. Rows that break a rule are greyed out, with the reason in a red badge, and are skipped; the sample has one on purpose, a client without a headshot. Up to 100 clients fit in one campaign.
+Every row shows up in the table. Rows that break a rule are greyed out, with the reason in a red badge, and are skipped; the sample has one on purpose, a client without a headshot. The **×** at the end of a row removes it from the campaign. Up to 100 clients fit in one campaign.
 
-Name the campaign (it also names every video file) and leave **Draft preview (free)** on for the first run. Click **Render N drafts**. The page switches to `/?batch=<id>`, and each client gets a card that turns into their video as its render finishes. A failed render shows the error reason instead. Check every face and name, then click **New campaign**, load the file again, turn off Draft preview and click **Render N videos** for the final, full resolution videos.
+Name the campaign (it also names every video file) and turn on **Draft preview (free)** for the first run. Click **Render N drafts**. The page switches to `/?batch=<id>`, and each client gets a card that turns into their video as its render finishes. A failed render shows the error reason instead. Check every face and name, then click **New campaign**, load the file again, turn off Draft preview and click **Render N videos** for the final, full resolution videos.
 
 <p align="center"><img src=".assets/app.png" alt="Campaign page with one greeting video per client" width="500" /></p>
 
-For each client, **Copy link** copies the video URL. **Copy for email** copies the client's thumbnail linked to their video; paste it into a Gmail message and the client sees a picture of their own greeting that opens the video. The browser only allows copying on `https` or `localhost`, so opening the dev server by its network IP shows **Copy failed**.
+For each client, **Copy link** copies the video URL. **Copy for email** copies the client's thumbnail linked to their video, with the caption "Click the picture to watch your holiday greeting." under it; paste it into a Gmail message and the client sees a picture of their own greeting that opens the video. Plain text editors get the caption and the video link. The browser only allows copying on `https` or `localhost`, so opening the dev server by its network IP shows **Copy failed**.
 
 <p align="center"><img src=".assets/video.png" alt="Thumbnail of one personalized greeting" width="500" /></p>
 
