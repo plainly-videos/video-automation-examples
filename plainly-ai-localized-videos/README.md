@@ -1,0 +1,192 @@
+# Dynamic video ads example
+
+This example demonstrates dynamic creative for video advertising with [Plainly Videos](https://www.plainlyvideos.com/). One After Effects template produces multiple ad variants, each with its own hook, products, prices and call to action, and every variant renders in 16:9, 9:16 and 1:1, one for each type of ad placement.
+
+The template is a collection ad. The video opens with a hook and ends with a call to action, with three products from one category, such as tech or clothes, shown one per slide in between. Each ad is the same video, rendered once per format.
+
+## What this app does
+
+**Non-technical view:**
+Write a hook, button text and a call to action, and pick a category, which fills the ad with three products. Swap any of them or edit their names and prices while a live preview shows the ad in all three formats. Click one button to render the ad in all three formats, one video per format.
+
+**Technical view:**
+A TanStack Start app that reads the project's templates from `GET /api/v2/projects/{projectId}`, picks one template per format by the aspect ratio of its resolution, and sends three `POST /api/v2/renders` requests to `https://api.plainlyvideos.com`, one per format. Every render is tagged with custom attributes, and the app finds them again with `POST /api/v2/renders/attributes`. No database, no webhooks and no local storage are needed.
+
+> [!WARNING]
+> Finding renders by custom attributes keeps this example short, but do not copy it into a real app. Every render in the organization can carry the same attributes, the lookup is a paginated search and older renders drop out of the results. Keep your own records instead: save each ad in your database, send its id with the render (for example as webhook `passthrough`) and update its status from webhooks, as the [Render and webhook example](../plainly-render-and-webhook/) does.
+
+## What you'll learn
+
+- **🎯 One ad, multiple formats**: Render the same parameters once per aspect ratio, each with its own template.
+- **🧩 Template discovery**: Match each format to a template in the project by the aspect ratio of its resolution, so there are no template ids to configure.
+- **🏷️ Attribute filtering**: Tag renders with your own data and query them later, to load a single ad or list recent ones.
+- **🔐 Server functions**: Keep your Plainly Videos API key on the server with TanStack Start server functions.
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) (v24 or later, run `nvm use` to pick it up from `.nvmrc`)
+- [pnpm](https://pnpm.io/) package manager (v12 or later)
+
+## Getting started
+
+1. Clone the repository:
+
+    ```bash
+    git clone https://github.com/plainly-videos/video-automation-examples.git
+    cd video-automation-examples/plainly-dynamic-video-ads
+    ```
+2. Install dependencies:
+
+    ```bash
+    pnpm install --frozen-lockfile
+    ```
+3. Upload the After Effects project used in this example to Plainly Videos:
+   - Download the [example project](../after-effects-projects/Dynamic%20Video%20Ads.zip). It has one composition per format: `editRender16x9` (1920×1080), `editRender9x16` (1080×1920) and `editRender1x1` (1080×1080).
+   - Go to the [upload form](https://app.plainlyvideos.com/dashboard/projects/create) and upload the project.
+   - Once the upload is done, auto-generate the templates with the prefix option:
+      - Leave the target composition empty.
+      - Set the prefix to `edit`, which includes all compositions and layers whose names start with `edit`.
+      - Check **Strip prefix**, so the layer `editHook` becomes the parameter `Hook`. The app sends the parameter names without the prefix.
+      - Click **Generate**.
+
+   <p align="center">
+     <img src=".assets/auto-generate-template.png" alt="Plainly Videos auto-generate template" width="500" />
+   </p>
+
+   - This generates three templates, `Render16x9`, `Render9x16` and `Render1x1`, each with the parameters `Hook`, `ButtonCTA`, `CTA`, `Product1`-`Product3`, `Price1`-`Price3` (text) and `Image1`-`Image3` (image). The video opens with the hook, shows one slide per product with a button and ends with the call to action. `Logo` and `ButtonSwitch` are generated too; the app leaves them at their defaults.
+
+4. Set up environment variables:
+
+    ```bash
+    cp .env.example .env
+    ```
+
+    Update `.env` with your API key from [Plainly Videos settings](https://app.plainlyvideos.com/dashboard/user/settings/general) and the id of the project you just uploaded. Template ids are not needed; the app finds them.
+
+    ```properties
+    # Plainly API key, from https://app.plainlyvideos.com/dashboard/user/settings/general
+    PLAINLY_API_KEY=your_plainly_api_key
+
+    # ID of the Dynamic video ads project you uploaded to Plainly.
+    # It needs one template per format: 1920x1080 (16:9), 1080x1920 (9:16) and 1080x1080 (1:1)
+    PLAINLY_PROJECT_ID=your_plainly_project_id
+    ```
+5. Start the development server:
+
+    ```bash
+    pnpm dev
+    ```
+
+    The app is available at http://localhost:3000.
+
+## Usage
+
+Open http://localhost:3000. Pick a category, which fills the three slides with its products. Swap any slide for another product of the same category, which fills in its name and price. Edit any field and check the preview of all three formats on the right. The preview plays the ad in HTML, close to the video; the final look comes from the After Effects template.
+
+<p align="center"><img src=".assets/app.png" alt="Dynamic video ads editor with the live preview" width="500" /></p>
+
+Click **Render 3 formats**. The app opens `/ad/<id>`, where each format turns into a video once its render is done, or shows that it failed, with the error message when Plainly gives one. The page also shows the ad's values and the API request for each format, rebuilt from the newest render's parameters and each format's template id. Click **Edit as new ad** to open the form prefilled with this ad.
+
+<p align="center"><img src=".assets/ad.png" alt="Ad page with the rendered 16:9, 9:16 and 1:1 videos" width="500" /></p>
+
+Up to 20 of the latest ads are listed under **Recent ads** on every page, so you can reopen an earlier ad with one click. The list comes from Plainly's attribute search, so it includes ads from any render tagged by this example, from anyone in your organization, including ones made with a copied curl.
+
+### Find the template for each format
+
+Template ids are not configured. The app reads the project and matches each template to a format by the aspect ratio of its resolution (the first match wins):
+
+```ts
+// ./src/lib/ad.ts
+export function findTemplates(
+  templates: Template[],
+): Partial<Record<Format, string>> {
+  const found: Partial<Record<Format, string>> = {};
+  for (const format of FORMATS) {
+    found[format] = templates.find(
+      (t) => formatOf(t.resolution) === format,
+    )?.id;
+  }
+  return found;
+}
+```
+
+Rendering needs all three, so `templatesByFormat` throws `Project has no 9:16 template` when one is missing. On the form page, the API request card uses `findTemplates` directly and keeps a placeholder for a missing format.
+
+### Render one ad in three formats
+
+The `createAd` server function sends three single render requests with the same parameters and one template per format. `Promise.allSettled` lets one format fail without losing the others:
+
+```ts
+// ./src/lib/plainly.ts
+const results = await Promise.allSettled(
+  FORMATS.map((format) =>
+    createRender(
+      renderBody({
+        projectId,
+        templateId: templates[format],
+        adId,
+        format,
+        parameters,
+      }),
+    ),
+  ),
+);
+```
+
+Every request carries custom attributes. Plainly stores them on the render, which is how the app finds it again:
+
+```json
+{
+  "projectId": "your-project-id",
+  "templateId": "template-id-of-the-9:16-composition",
+  "parameters": {
+    "Hook": "New season picks",
+    "ButtonCTA": "Shop now",
+    "CTA": "Shop the collection",
+    "Product1": "Wireless headphones",
+    "Price1": "$129",
+    "Image1": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1080&q=80",
+    "Product2": "Bluetooth speaker",
+    "Price2": "$89",
+    "Image2": "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=1080&q=80",
+    "Product3": "Smartwatch",
+    "Price3": "$249",
+    "Image3": "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=1080&q=80"
+  },
+  "attributes": {
+    "example": "dynamic-video-ads",
+    "adId": "7f3c9a1e-2b4d-4e8f-9a6b-1c2d3e4f5a6b",
+    "format": "9:16"
+  }
+}
+```
+
+### Find renders by attribute
+
+`POST /api/v2/renders/attributes` returns the renders whose attributes match. The ad page and Edit as new ad filter by `adId`; the recent ads list filters by `example`, and reloads an ad by `adId` when the page is full and that ad looks incomplete. `sort=createdDate,desc` puts the newest renders first, so a full page leaves out the oldest ones:
+
+```ts
+// ./src/lib/plainly.ts
+const query = `size=${size}&sort=createdDate,desc`;
+const res = await plainlyFetch(`/renders/attributes?${query}`, {
+  method: "POST",
+  body: JSON.stringify({ filters: [{ key, value }] }),
+});
+```
+
+While any format is still rendering, the ad page calls this again every 5 seconds.
+
+### Good to know
+
+- The preview is made by hand for this template: its timings and layouts were measured on rendered videos (see `src/components/ad-preview-data.ts`). Plainly does not provide it, so other templates need their own preview, or none.
+- Product images must be public URLs, because Plainly downloads them while rendering. The example uses placeholder photos from [Unsplash](https://unsplash.com/). Add products or categories in `src/products.ts`; each category needs at least three products.
+- To render many ads at once, use the Batch Renders API; see the [Batch render example](../plainly-batch-render/).
+- Prefer webhooks over polling in production. See [webhook delivery](https://help.plainlyvideos.com/docs/user-guide/rendering/video-delivery#webhook-delivery) and the [Render and webhook example](../plainly-render-and-webhook/).
+
+## Useful commands
+
+- `pnpm dev` - Starts the app in development mode.
+- `pnpm build` and `pnpm preview` - Builds the app and serves the production build.
+- `pnpm test` - Runs the unit tests.
+- `pnpm coverage` - Runs the unit tests with a coverage report.
+- `pnpm lint` - Checks the code with Biome.
