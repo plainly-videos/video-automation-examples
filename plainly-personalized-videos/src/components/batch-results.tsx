@@ -1,8 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
+import { CircleAlert, Info, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
-import { ClientsTable } from "@/components/clients-table";
-import { RenderCell } from "@/components/render-cell";
+import { RenderCard } from "@/components/render-card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -14,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import {
   type Campaign,
   isBatchFinished,
@@ -76,29 +76,41 @@ export function BatchResults({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex flex-wrap items-center gap-2 text-xl font-semibold">
           {campaign.name}
           {campaign.draft && <Badge variant="secondary">Draft</Badge>}
         </CardTitle>
         <CardDescription>
-          {finished}/{renders.length} finished
+          {done
+            ? `${renders.length} ${renders.length === 1 ? "video" : "videos"}`
+            : `Rendering, ${finished} of ${renders.length} finished`}
         </CardDescription>
         <CardAction>
           <Link to="/" className={buttonVariants({ variant: "outline" })}>
-            <ArrowLeft />
-            New campaign
+            <Plus />
+            <span className="max-sm:sr-only">New campaign</span>
           </Link>
         </CardAction>
+        {!done && (
+          <Progress
+            value={finished}
+            max={renders.length}
+            aria-label="Videos finished"
+            className="col-span-full mt-3"
+          />
+        )}
       </CardHeader>
       <CardContent className="grid gap-4">
         {pollFailed && (
           <Alert>
+            <CircleAlert />
             <AlertTitle>Could not refresh the campaign</AlertTitle>
             <AlertDescription>Retrying in a few seconds.</AlertDescription>
           </Alert>
         )}
         {campaign.draft && done && (
           <Alert>
+            <Info />
             <AlertTitle>These are drafts</AlertTitle>
             <AlertDescription>
               Drafts are half resolution. Turn off Draft preview and render
@@ -106,17 +118,11 @@ export function BatchResults({
             </AlertDescription>
           </Alert>
         )}
-        <ClientsTable
-          clients={[...renders].sort(byCsvOrder).map((render) => ({
-            key: render.id,
-            headshot: render.attributes?.headshot,
-            // Renders always carry their client, unless they were changed by hand in Plainly
-            name: render.attributes?.name ?? "Unknown client",
-            title: render.attributes?.title,
-            company: render.attributes?.company,
-            video: <RenderCell render={render} />,
-          }))}
-        />
+        <div className="grid gap-4 sm:grid-cols-2">
+          {[...renders].sort(byCsvOrder).map((render) => (
+            <RenderCard key={render.id} render={render} />
+          ))}
+        </div>
       </CardContent>
     </Card>
   );

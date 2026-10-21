@@ -35,40 +35,37 @@ export function PastCampaigns({
   error?: string;
 }) {
   return (
-    <Card>
+    <Card size="sm" className="lg:sticky lg:top-8">
       <CardHeader>
         <CardTitle>Past campaigns</CardTitle>
-        <CardDescription>
-          Campaigns made with this app, newest first.
-        </CardDescription>
+        <CardDescription>Made with this app, newest first.</CardDescription>
       </CardHeader>
-      <CardContent className="max-h-96 overflow-y-auto">
+      <CardContent className="max-h-[calc(100svh-12rem)] overflow-y-auto">
         {error ? (
           <Alert variant="destructive">
             <AlertTitle>Could not load past campaigns</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         ) : campaigns.length === 0 ? (
-          <Empty>
+          <Empty className="p-4">
             <EmptyHeader>
               <EmptyMedia variant="icon">
                 <Gift />
               </EmptyMedia>
               <EmptyTitle>No campaigns yet</EmptyTitle>
               <EmptyDescription>
-                Render a client list above, it will show up here.
+                Rendered campaigns show up here.
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : (
-          <ItemGroup className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          <ItemGroup className="-mx-2.5 w-auto gap-1">
             {campaigns.map((campaign) => (
               <Item
                 key={campaign.id}
-                variant="outline"
-                size="sm"
+                size="xs"
                 // The router marks the link of the campaign on screen with data-status="active"
-                className="data-[status=active]:border-primary data-[status=active]:bg-muted"
+                className="data-[status=active]:bg-muted"
                 render={<Link to="/" search={{ batch: campaign.id }} />}
               >
                 <ItemContent className="min-w-0">

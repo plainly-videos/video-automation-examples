@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Table,
   TableBody,
@@ -15,11 +16,27 @@ export type ClientsTableRow = {
   name?: string;
   title?: string;
   company?: string;
-  video: ReactNode;
+  status: ReactNode;
   invalid?: boolean;
 };
 
-// The same table before rendering (CSV rows) and after (one render per client)
+// Round headshot, or the client's initials when there is none to show
+export function Headshot({ src, name }: { src?: string; name?: string }) {
+  const initials = name
+    ?.split(/\s+/)
+    .map((word) => word[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+  return (
+    <Avatar size="lg">
+      {src && <AvatarImage src={src} alt="" />}
+      <AvatarFallback>{initials}</AvatarFallback>
+    </Avatar>
+  );
+}
+
+// The client list as read from the CSV, before rendering
 export function ClientsTable({ clients }: { clients: ClientsTableRow[] }) {
   return (
     <Table>
@@ -31,32 +48,22 @@ export function ClientsTable({ clients }: { clients: ClientsTableRow[] }) {
           <TableHead>Name</TableHead>
           <TableHead>Title</TableHead>
           <TableHead>Company</TableHead>
-          <TableHead>Video</TableHead>
+          <TableHead>Status</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {clients.map((client) => (
           <TableRow
             key={client.key}
-            className={cn(client.invalid && "text-destructive")}
+            className={cn(client.invalid && "text-muted-foreground")}
           >
             <TableCell>
-              {client.headshot ? (
-                <img
-                  src={client.headshot}
-                  alt=""
-                  className="size-8 rounded-full object-cover"
-                />
-              ) : (
-                <span className="block size-8 rounded-full bg-muted" />
-              )}
+              <Headshot src={client.headshot} name={client.name} />
             </TableCell>
             <TableCell className="font-medium">{client.name}</TableCell>
-            <TableCell className="max-w-48 whitespace-normal">
-              {client.title}
-            </TableCell>
+            <TableCell>{client.title}</TableCell>
             <TableCell>{client.company}</TableCell>
-            <TableCell>{client.video}</TableCell>
+            <TableCell>{client.status}</TableCell>
           </TableRow>
         ))}
       </TableBody>

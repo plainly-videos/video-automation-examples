@@ -1,4 +1,4 @@
-import { Upload } from "lucide-react";
+import { FileText, Upload } from "lucide-react";
 import { useState } from "react";
 import { decodeCsv } from "@/lib/recipients";
 import { cn } from "@/lib/utils";
@@ -12,14 +12,19 @@ export function ClientUpload({
   onLoad: (csvText: string) => void;
 }) {
   const [dragging, setDragging] = useState(false);
+  // Name of the loaded file, so the drop zone can say what's in it
+  const [loaded, setLoaded] = useState<string>();
 
   const readFile = async (file: File | undefined) => {
-    if (file) onLoad(decodeCsv(await file.arrayBuffer()));
+    if (!file) return;
+    onLoad(decodeCsv(await file.arrayBuffer()));
+    setLoaded(file.name);
   };
 
   const loadSample = async () => {
     const res = await fetch(SAMPLE_CSV);
     onLoad(await res.text());
+    setLoaded("sample-clients.csv");
   };
 
   return (
@@ -36,20 +41,30 @@ export function ClientUpload({
           readFile(event.dataTransfer.files[0]);
         }}
         className={cn(
-          "flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground transition-colors hover:bg-muted/50 has-focus-visible:ring-3 has-focus-visible:ring-ring/50",
+          "flex cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed p-8 text-center text-sm text-muted-foreground transition-colors hover:bg-muted/50 has-focus-visible:ring-3 has-focus-visible:ring-ring/50",
           dragging && "border-primary bg-muted",
         )}
       >
-        <Upload className="size-6" />
-        <span>
-          <span className="font-medium text-foreground">
-            Drop your client list here
-          </span>{" "}
-          or click to pick a CSV file
+        <span className="flex size-10 items-center justify-center rounded-full ring-1 ring-foreground/10">
+          {loaded ? (
+            <FileText className="size-5" />
+          ) : (
+            <Upload className="size-5" />
+          )}
         </span>
-        <span>
-          Columns: <code>name, title, company, headshot</code>
-        </span>
+        {loaded ? (
+          <span className="grid gap-1">
+            <span className="font-medium text-foreground">{loaded}</span>
+            Drop or click to pick another file
+          </span>
+        ) : (
+          <span>
+            <span className="font-medium text-foreground">
+              Drop your client list here
+            </span>{" "}
+            or click to pick a CSV file
+          </span>
+        )}
         <input
           type="file"
           accept=".csv,text/csv"

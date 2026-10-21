@@ -1,4 +1,10 @@
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+} from "@/components/ui/navigation-menu";
 import appCss from "../styles.css?url";
 
 export const Route = createRootRoute({
@@ -18,7 +24,7 @@ export const Route = createRootRoute({
   shellComponent: RootDocument,
 });
 
-const footerLinks = [
+const links = [
   {
     href: "https://help.plainlyvideos.com/",
     icon: "/file.svg",
@@ -27,12 +33,12 @@ const footerLinks = [
   {
     href: "https://github.com/plainly-videos/video-automation-examples/tree/master/plainly-personalized-videos",
     icon: "/github-142-svgrepo-com.svg",
-    label: "View on GitHub",
+    label: "GitHub",
   },
   {
     href: "https://app.plainlyvideos.com/",
     icon: "/globe.svg",
-    label: "Go to app.plainlyvideos.com →",
+    label: "Open Plainly",
   },
 ];
 
@@ -42,44 +48,58 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="font-sans antialiased">
-        <div className="mx-auto flex min-h-svh max-w-6xl flex-col items-center gap-10 px-4 py-12">
-          <img
-            src="/plainly-logo-black.png"
-            alt="Plainly Videos logo"
-            width={160}
-            height={32}
-            className="dark:hidden"
-          />
-          <img
-            src="/plainly-logo-white.png"
-            alt="Plainly Videos logo"
-            width={160}
-            height={32}
-            className="hidden dark:block"
-          />
-          <main className="flex w-full flex-col gap-8">{children}</main>
-          <footer className="mt-auto flex flex-wrap items-center justify-center gap-6 text-sm">
-            {footerLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-              >
-                <img
-                  aria-hidden
-                  src={link.icon}
-                  alt=""
-                  width={16}
-                  height={16}
-                />
-                {link.label}
-              </a>
-            ))}
-          </footer>
-        </div>
+      <body className="min-h-svh font-sans antialiased">
+        <header className="border-b bg-background">
+          <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
+            <div className="flex items-center gap-3">
+              <img
+                src="/plainly-logo-black.png"
+                alt="Plainly Videos logo"
+                width={83}
+                height={24}
+                className="dark:hidden"
+              />
+              <img
+                src="/plainly-logo-white.png"
+                alt="Plainly Videos logo"
+                width={83}
+                height={24}
+                className="hidden dark:block"
+              />
+              <span className="hidden border-l pl-3 text-sm text-muted-foreground sm:inline">
+                Personalized videos
+              </span>
+            </div>
+            <NavigationMenu>
+              <NavigationMenuList>
+                {links.map((link) => (
+                  <NavigationMenuItem key={link.href}>
+                    <NavigationMenuLink
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={link.label}
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      <img
+                        aria-hidden
+                        src={link.icon}
+                        alt=""
+                        width={16}
+                        height={16}
+                        className="dark:invert"
+                      />
+                      <span className="hidden sm:inline">{link.label}</span>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                ))}
+              </NavigationMenuList>
+            </NavigationMenu>
+          </div>
+        </header>
+        <main className="mx-auto grid max-w-6xl items-start gap-6 px-4 py-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
+          {children}
+        </main>
         <Scripts />
       </body>
     </html>

@@ -1,9 +1,10 @@
 import { useNavigate } from "@tanstack/react-router";
-import { LoaderCircle } from "lucide-react";
+import { Check, CircleAlert } from "lucide-react";
 import { useState } from "react";
 import { ClientUpload } from "@/components/client-upload";
 import { ClientsTable } from "@/components/clients-table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,8 +21,9 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
-import { DEFAULT_CAMPAIGN } from "@/lib/batch";
+import { DEFAULT_CAMPAIGN, fileName } from "@/lib/batch";
 import { createBatch } from "@/lib/plainly";
 import { type ClientRow, readClients } from "@/lib/recipients";
 
@@ -72,7 +74,9 @@ export function CampaignForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Personalized holiday greetings</CardTitle>
+        <CardTitle className="text-xl font-semibold">
+          Personalized holiday greetings
+        </CardTitle>
         <CardDescription>
           Upload your client list and get one video per client, with their name,
           title, company and headshot.
@@ -82,11 +86,12 @@ export function CampaignForm() {
         <ClientUpload onLoad={loadCsv} />
         {fileError && (
           <Alert variant="destructive">
+            <CircleAlert />
             <AlertTitle>Can't use this file</AlertTitle>
             <AlertDescription>{fileError}</AlertDescription>
           </Alert>
         )}
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className="grid gap-6 rounded-lg bg-muted/50 p-4 sm:grid-cols-2">
           <Field>
             <FieldLabel htmlFor="campaign">Campaign name</FieldLabel>
             <Input
@@ -98,7 +103,7 @@ export function CampaignForm() {
             />
             <FieldDescription>
               Also names each video file, like{" "}
-              <code>Holiday-greetings-2026-Emma-Johnson.mp4</code>.
+              {fileName(campaign, valid[0]?.name ?? "Emma Johnson")}.mp4.
             </FieldDescription>
           </Field>
           <Field orientation="horizontal">
@@ -121,22 +126,32 @@ export function CampaignForm() {
               title: row.title,
               company: row.company,
               invalid: Boolean(row.error),
-              video: row.error ?? (
-                <span className="text-muted-foreground">Ready</span>
+              status: row.error ? (
+                <Badge variant="destructive">{row.error}</Badge>
+              ) : (
+                <Badge variant="secondary">
+                  <Check />
+                  Ready
+                </Badge>
               ),
             }))}
           />
         )}
         {submitError && (
           <Alert variant="destructive">
+            <CircleAlert />
             <AlertTitle>Could not start the render</AlertTitle>
             <AlertDescription>{submitError}</AlertDescription>
           </Alert>
         )}
       </CardContent>
-      <CardFooter className="justify-end">
+      <CardFooter className="justify-between gap-4">
+        <span className="text-muted-foreground">
+          {rows.length > 0 &&
+            `${valid.length} ready${rows.length > valid.length ? `, ${rows.length - valid.length} skipped` : ""}`}
+        </span>
         <Button onClick={render} disabled={!canRender}>
-          {submitting && <LoaderCircle className="animate-spin" />}
+          {submitting && <Spinner />}
           Render {valid.length} {draft ? "drafts" : "videos"}
         </Button>
       </CardFooter>
