@@ -4,6 +4,7 @@ import {
   Link,
   useRouter,
 } from "@tanstack/react-router";
+import { CampaignForm } from "@/components/campaign-form";
 import { PastCampaigns } from "@/components/past-campaigns";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -52,7 +53,7 @@ function Home() {
           {result.campaign.name}: {result.renders.length} renders
         </p>
       ) : (
-        <p>Campaign form</p>
+        <CampaignForm />
       )}
       <PastCampaigns campaigns={campaigns} error={campaignsError} />
     </>
