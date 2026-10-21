@@ -42,6 +42,9 @@ export function BatchResults({
   const [pollFailed, setPollFailed] = useState(false);
 
   useEffect(() => {
+    // A loader reload of the same campaign keeps this mounted with new data
+    setRenders(initial);
+    setPollFailed(false);
     if (isBatchFinished(initial)) return;
     let active = true;
     let timer: ReturnType<typeof setTimeout>;

@@ -47,6 +47,12 @@ export function CampaignForm() {
     setSubmitError(undefined);
   };
 
+  const loadFailed = (message: string) => {
+    setRows([]);
+    setFileError(message);
+    setSubmitError(undefined);
+  };
+
   const render = async () => {
     setSubmitting(true);
     setSubmitError(undefined);
@@ -82,7 +88,7 @@ export function CampaignForm() {
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-6">
-        <ClientUpload onLoad={loadCsv} />
+        <ClientUpload onLoad={loadCsv} onError={loadFailed} />
         {fileError && (
           <Alert variant="destructive">
             <CircleAlert />

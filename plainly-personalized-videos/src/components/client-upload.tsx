@@ -7,8 +7,10 @@ const SAMPLE_CSV = "/sample-clients.csv";
 
 export function ClientUpload({
   onLoad,
+  onError,
 }: {
   onLoad: (csvText: string) => void;
+  onError: (message: string) => void;
 }) {
   const [dragging, setDragging] = useState(false);
   const [loaded, setLoaded] = useState<string>();
@@ -20,9 +22,17 @@ export function ClientUpload({
   };
 
   const loadSample = async () => {
-    const res = await fetch(SAMPLE_CSV);
-    onLoad(await res.text());
-    setLoaded("sample-clients.csv");
+    try {
+      const res = await fetch(SAMPLE_CSV);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      onLoad(await res.text());
+      setLoaded("sample-clients.csv");
+    } catch (err) {
+      setLoaded(undefined);
+      onError(
+        `Could not load the sample CSV (${err instanceof Error ? err.message : String(err)})`,
+      );
+    }
   };
 
   return (
