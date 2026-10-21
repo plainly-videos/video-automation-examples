@@ -4,6 +4,7 @@ import {
   Link,
   useRouter,
 } from "@tanstack/react-router";
+import { BatchResults } from "@/components/batch-results";
 import { CampaignForm } from "@/components/campaign-form";
 import { PastCampaigns } from "@/components/past-campaigns";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -49,9 +50,11 @@ function Home() {
   return (
     <>
       {result ? (
-        <p>
-          {result.campaign.name}: {result.renders.length} renders
-        </p>
+        <BatchResults
+          key={result.campaign.id}
+          campaign={result.campaign}
+          renders={result.renders}
+        />
       ) : (
         <CampaignForm />
       )}
