@@ -57,6 +57,15 @@ Simply choose an example that matches your use case and follow the `README.md` f
       - Tagging renders with custom attributes and finding them again with the attribute filter.
    * **Tech stack**: TanStack Start, TanStack Form, Zod, TypeScript, Tailwind CSS, shadcn/ui
 
+5. **[Personalized videos](plainly-personalized-videos/)**
+   * **Purpose**: Demonstrates rendering a unique video per recipient, with the name, company, and other personal details filled into the same template, through an app where a sales rep uploads a client list as a CSV and gets a holiday greeting video for every client.
+   * **What it shows**:
+      - Turning CSV rows into one Batch Renders API request, with each row checked before rendering.
+      - Giving every recipient their own file name and thumbnail, and copying a clickable thumbnail into an email.
+      - Rendering free drafts first, then the final videos.
+      - Naming campaigns with the batch reference and finding their renders with the attribute filter.
+   * **Tech stack**: TanStack Start, papaparse, TypeScript, Tailwind CSS, shadcn/ui
+
 ## Contributing
 
 Found an issue or want to contribute a new example? We welcome contributions! Please feel free to:
