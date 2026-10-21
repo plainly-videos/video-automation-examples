@@ -11,6 +11,10 @@ export const RECIPIENT_COLUMNS = [
 // through a lot of render minutes at once
 export const MAX_RECIPIENTS = 100;
 
+// Longest title or company that fits on one line of the badge in the video,
+// found with draft renders of the Christmas Greetings template
+export const MAX_BADGE_LENGTH = 22;
+
 export type Recipient = Record<(typeof RECIPIENT_COLUMNS)[number], string>;
 
 export type ClientRow = Recipient & { error?: string };
@@ -29,6 +33,14 @@ function isHttpUrl(value: string) {
 export function checkRecipient(recipient: Recipient): string | undefined {
   for (const column of RECIPIENT_COLUMNS) {
     if (!recipient[column].trim()) return `Missing ${column}`;
+  }
+  // The template's badge wraps longer text, and the two lines run into each other.
+  // ponytail: a character count only approximates the width, wide letters can still wrap
+  if (recipient.title.trim().length > MAX_BADGE_LENGTH) {
+    return `Title is too long (max ${MAX_BADGE_LENGTH} characters)`;
+  }
+  if (recipient.company.trim().length > MAX_BADGE_LENGTH) {
+    return `Company is too long (max ${MAX_BADGE_LENGTH} characters)`;
   }
   if (!isHttpUrl(recipient.headshot.trim())) {
     return "Headshot must be an http(s) URL";

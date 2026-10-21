@@ -30,6 +30,22 @@ test("checkRecipient names the first problem", () => {
   }
 });
 
+test("checkRecipient keeps title and company to one line in the video", () => {
+  // 22 characters fit on one line of the badge, longer ones wrap into each other
+  expect(
+    checkRecipient({ ...emma, title: "Senior Vice President," }),
+  ).toBeUndefined();
+  expect(checkRecipient({ ...emma, title: "Head of Global Partners" })).toBe(
+    "Title is too long (max 22 characters)",
+  );
+  expect(
+    checkRecipient({ ...emma, company: "International Business" }),
+  ).toBeUndefined();
+  expect(
+    checkRecipient({ ...emma, company: "International Business Machines" }),
+  ).toBe("Company is too long (max 22 characters)");
+});
+
 test("readClients maps headers in any order, case and spacing, and ignores extra columns", () => {
   const csv = ` Headshot ,NAME,Company,title,email\n${emma.headshot},Emma Johnson,Northwind,Head of Marketing,e@x.com`;
   expect(readClients(csv)).toEqual({ rows: [emma] });
