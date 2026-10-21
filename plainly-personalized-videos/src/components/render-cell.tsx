@@ -13,19 +13,28 @@ function CopyButton({
   icon: React.ReactNode;
   copy: () => Promise<void>;
 }) {
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<"copied" | "failed">();
   return (
     <Button
       variant="outline"
       size="sm"
       onClick={async () => {
-        await copy();
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        try {
+          await copy();
+          setCopied("copied");
+        } catch {
+          // The clipboard only exists on https and localhost, and can be denied
+          setCopied("failed");
+        }
+        setTimeout(() => setCopied(undefined), 2000);
       }}
     >
-      {copied ? <Check /> : icon}
-      {copied ? "Copied" : label}
+      {copied === "copied" ? <Check /> : icon}
+      {copied === "copied"
+        ? "Copied"
+        : copied === "failed"
+          ? "Copy failed"
+          : label}
     </Button>
   );
 }
@@ -40,7 +49,14 @@ export function RenderCell({ render }: { render: Render }) {
     );
   }
   if (render.state !== "DONE") {
-    return <span className="text-destructive">Failed</span>;
+    // The message can be null, the code is always there
+    const reason = render.error?.message ?? render.error?.code;
+    return (
+      <span className="grid gap-1 text-destructive">
+        Failed
+        {reason && <span className="text-xs whitespace-normal">{reason}</span>}
+      </span>
+    );
   }
   if (render.expired || !render.output) {
     return <span className="text-muted-foreground">Expired</span>;

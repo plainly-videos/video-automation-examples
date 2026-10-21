@@ -29,6 +29,8 @@ export type Render = {
   thumbnailUris?: string[];
   expired?: boolean;
   outputFormat?: { settingsTemplate?: string | null } | null;
+  // Why a render failed, for example a headshot Plainly could not download
+  error?: { code?: string; message?: string | null } | null;
 };
 
 export type Campaign = {
