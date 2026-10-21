@@ -5,14 +5,12 @@ import { cn } from "@/lib/utils";
 
 const SAMPLE_CSV = "/sample-clients.csv";
 
-// Drop zone and file picker for the client list, plus the sample file
 export function ClientUpload({
   onLoad,
 }: {
   onLoad: (csvText: string) => void;
 }) {
   const [dragging, setDragging] = useState(false);
-  // Name of the loaded file, so the drop zone can say what's in it
   const [loaded, setLoaded] = useState<string>();
 
   const readFile = async (file: File | undefined) => {

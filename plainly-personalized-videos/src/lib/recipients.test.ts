@@ -31,7 +31,6 @@ test("checkRecipient names the first problem", () => {
 });
 
 test("checkRecipient keeps title and company to one line in the video", () => {
-  // 22 characters fit on one line of the badge, longer ones wrap into each other
   expect(
     checkRecipient({ ...emma, title: "Senior Vice President," }),
   ).toBeUndefined();

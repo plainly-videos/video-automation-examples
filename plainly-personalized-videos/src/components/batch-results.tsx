@@ -29,9 +29,8 @@ const byCsvOrder = (a: Render, b: Render) =>
   (a.attributes?.batchRenderDataEntryNo ?? 0) -
   (b.attributes?.batchRenderDataEntryNo ?? 0);
 
-// Polls the campaign until every render is finished. Polling happens here instead
-// of re-running the route loader, so a failed poll keeps the last renders on screen
-// instead of swapping them for the error component.
+// Polls here instead of re-running the route loader, so a failed poll keeps
+// the last renders on screen instead of swapping them for the error component
 export function BatchResults({
   campaign,
   renders: initial,

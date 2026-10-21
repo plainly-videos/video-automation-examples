@@ -13,7 +13,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { emailSnippet, isFinished, type Render, stateLabel } from "@/lib/batch";
 import { cn } from "@/lib/utils";
 
-// Copies, then says so for a moment
 function CopyButton({
   label,
   icon,
@@ -67,7 +66,6 @@ export function RenderCard({ render }: { render: Render }) {
             name={render.attributes?.name}
           />
           <div className="min-w-0">
-            {/* Renders always carry their client, unless they were changed by hand in Plainly */}
             <p className="truncate font-medium">
               {render.attributes?.name ?? "Unknown client"}
             </p>
@@ -108,7 +106,6 @@ export function RenderCard({ render }: { render: Render }) {
   );
 }
 
-// The video once it's done, otherwise a placeholder of the same size saying why not
 function RenderMedia({ render }: { render: Render }) {
   const placeholder = (
     icon: React.ReactNode,
@@ -133,7 +130,7 @@ function RenderMedia({ render }: { render: Render }) {
     return placeholder(<Spinner />, stateLabel(render.state), "bg-muted");
   }
   if (render.state !== "DONE") {
-    // The message can be null, the code is always there
+    // message can be null, code is always set
     const reason = render.error?.message ?? render.error?.code;
     return placeholder(
       <CircleAlert />,

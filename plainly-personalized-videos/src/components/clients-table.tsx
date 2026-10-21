@@ -20,7 +20,6 @@ export type ClientsTableRow = {
   invalid?: boolean;
 };
 
-// Round headshot, or the client's initials when there is none to show
 export function Headshot({ src, name }: { src?: string; name?: string }) {
   const initials = name
     ?.split(/\s+/)
@@ -36,7 +35,6 @@ export function Headshot({ src, name }: { src?: string; name?: string }) {
   );
 }
 
-// The client list as read from the CSV, before rendering
 export function ClientsTable({ clients }: { clients: ClientsTableRow[] }) {
   return (
     <Table>

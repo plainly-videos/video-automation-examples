@@ -4,8 +4,7 @@ import {
   type Recipient,
 } from "@/lib/recipients";
 
-// Tags every render, so the app only ever lists its own renders,
-// never batches made in the Plainly app or by other tools
+// Tags every render, so the app lists only its own
 export const EXAMPLE = "personalized-videos";
 export const DEFAULT_CAMPAIGN = "Holiday greetings 2026";
 // The frame where the client's headshot, title and name are all on screen
@@ -29,7 +28,6 @@ export type Render = {
   thumbnailUris?: string[];
   expired?: boolean;
   outputFormat?: { settingsTemplate?: string | null } | null;
-  // Why a render failed, for example a headshot Plainly could not download
   error?: { code?: string; message?: string | null } | null;
 };
 
@@ -56,7 +54,7 @@ export const isFinished = (render: Pick<Render, "state">) =>
 export const isBatchFinished = (renders: Pick<Render, "state">[]) =>
   renders.every(isFinished);
 
-// IN_PROGRESS -> "In progress", for people instead of the API
+// IN_PROGRESS -> "In progress"
 export const stateLabel = (state: string) =>
   state.charAt(0) + state.slice(1).toLowerCase().replaceAll("_", " ");
 
@@ -67,7 +65,7 @@ export const isBatchId = (id: string) =>
 export const isDraft = (render: Pick<Render, "outputFormat">) =>
   render.outputFormat?.settingsTemplate === "DRAFT";
 
-// Renders come back one by one, a campaign is all renders of one batch
+// A campaign is all renders of one batch
 export function toCampaigns(renders: Render[]): Campaign[] {
   const campaigns = new Map<string, Campaign>();
   for (const render of renders) {
@@ -102,8 +100,7 @@ const slug = (text: string) =>
     .replace(/[^A-Za-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 
-// Plainly adds the extension. The video still plays in the browser,
-// this only names the file when the client saves it
+// Name of the saved file, Plainly adds the extension
 export const fileName = (campaign: string, name: string) =>
   [slug(campaign), slug(name)].filter(Boolean).join("-") || "video";
 
@@ -144,7 +141,6 @@ export function pickBatchInput(input: unknown): BatchInput {
 }
 
 // One batch data entry per client, each entry becomes its own render
-// https://help.plainlyvideos.com/docs/developer-guide/batch-renders-api
 export function toBatchRequest(input: BatchInput, projectId: string) {
   return {
     projectId,
@@ -174,9 +170,8 @@ const escapeHtml = (value: string) =>
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
 
-// Pasted into Gmail, the HTML shows the client's thumbnail linked to their video.
-// The image is referenced by URL: Plainly storage sends no CORS headers,
-// so the browser cannot copy the picture itself
+// Thumbnail linked to the video, for pasting into Gmail. Referenced by URL:
+// Plainly storage sends no CORS headers, so the browser can't copy the image
 export function emailSnippet({
   output,
   thumbnail,

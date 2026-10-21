@@ -12,7 +12,6 @@ import { MAX_RECIPIENTS } from "@/lib/recipients";
 
 const PLAINLY_API = "https://api.plainlyvideos.com/api/v2";
 
-// Env vars are read per request and never reach the browser
 const plainlyFetch = createServerOnlyFn(
   async (path: string, init?: RequestInit) => {
     const apiKey = process.env.PLAINLY_API_KEY;
@@ -54,8 +53,7 @@ const getProjectId = createServerOnlyFn(() => {
 });
 
 // Finds this example's renders by custom attributes, so no database is needed.
-// Every filter has to match, and the `example` one keeps out renders made
-// anywhere else. Newest first, so a full page leaves out the oldest renders
+// Newest first, so a full page leaves out the oldest renders
 const filterRenders = createServerOnlyFn(
   async (filters: { key: string; value: string }[], size: number) => {
     const query = `size=${size}&sort=createdDate,desc`;
@@ -71,7 +69,6 @@ const filterRenders = createServerOnlyFn(
   },
 );
 
-// Creates one render per client in a single request
 // https://help.plainlyvideos.com/docs/developer-guide/batch-renders-api
 export const createBatch = createServerFn({ method: "POST" })
   .validator(pickBatchInput)
@@ -107,7 +104,6 @@ export const getBatch = createServerFn({ method: "GET" })
     return { campaign, renders };
   });
 
-// Campaigns made with this app, newest first
 export const listCampaigns = createServerFn({ method: "GET" }).handler(
   async () => {
     // ponytail: reads the newest 1000 renders (at least 10 full campaigns),

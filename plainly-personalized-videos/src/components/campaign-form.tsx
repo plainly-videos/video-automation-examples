@@ -55,7 +55,6 @@ export function CampaignForm() {
         data: {
           campaign,
           draft,
-          // Only the rows that passed the checks, without their error field
           recipients: valid.map(({ name, title, company, headshot }) => ({
             name,
             title,

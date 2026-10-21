@@ -13,8 +13,8 @@ import { type Campaign, isBatchId } from "@/lib/batch";
 import { getBatch, listCampaigns } from "@/lib/plainly";
 
 export const Route = createFileRoute("/")({
-  // The open campaign lives in the URL, so a reload or a shared link brings it back
-  // An invalid id is set to undefined, leaving it out would keep the raw value
+  // The open campaign lives in the URL, so reloads and shared links keep it.
+  // An invalid id must be set to undefined, leaving it out keeps the raw value
   validateSearch: (search: Record<string, unknown>): { batch?: string } => ({
     batch:
       typeof search.batch === "string" && isBatchId(search.batch)
@@ -24,8 +24,7 @@ export const Route = createFileRoute("/")({
   loaderDeps: ({ search }) => ({ batch: search.batch }),
   loader: async ({ deps }) => {
     const [campaigns, result] = await Promise.all([
-      // A failed list must not hide the form or the open campaign,
-      // so the error is shown in the card instead
+      // A failed list shows in its card instead of hiding the whole page
       listCampaigns().then(
         (campaigns): { campaigns: Campaign[]; campaignsError?: string } => ({
           campaigns,

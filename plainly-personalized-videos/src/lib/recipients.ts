@@ -29,7 +29,7 @@ function isHttpUrl(value: string) {
   }
 }
 
-// Returns the first problem with a client, or undefined when it can be rendered
+// First problem with a client, if any
 export function checkRecipient(recipient: Recipient): string | undefined {
   for (const column of RECIPIENT_COLUMNS) {
     if (!recipient[column].trim()) return `Missing ${column}`;
