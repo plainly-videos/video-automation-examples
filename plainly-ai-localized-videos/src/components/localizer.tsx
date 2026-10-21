@@ -5,7 +5,8 @@ import { Card } from "@/components/ui/card";
 import { useLocalizer } from "@/components/use-localizer";
 import { type Initial, toLocalization } from "@/lib/form";
 
-// Write in English, translate, review, render. One form across both steps
+// Write in English, translate, review, render. One form across both steps,
+// without a <form> element, so Enter in a field never starts the renders
 export function Localizer({
   initial,
   localizationId,
@@ -20,13 +21,7 @@ export function Localizer({
   const { form } = localizer;
 
   return (
-    <form
-      className="grid gap-6"
-      onSubmit={(e) => {
-        e.preventDefault();
-        form.handleSubmit();
-      }}
-    >
+    <div className="grid gap-6">
       <ComposeCard localizer={localizer} />
       <ReviewCard localizer={localizer} />
       <Card>
@@ -40,6 +35,6 @@ export function Localizer({
           )}
         </form.Subscribe>
       </Card>
-    </form>
+    </div>
   );
 }

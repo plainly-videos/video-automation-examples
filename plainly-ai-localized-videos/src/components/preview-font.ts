@@ -3,12 +3,13 @@ import type { Font } from "@/lib/languages";
 
 // One FontFace per URL and weight, shared by every preview on the page
 const fonts = new Map<string, Promise<string>>();
+let nextId = 0;
 
 function loadFont({ url, name }: Font) {
   const key = `${url}#${name ? 700 : 400}`;
   let family = fonts.get(key);
   if (!family) {
-    const id = `preview-font-${fonts.size}`;
+    const id = `preview-font-${nextId++}`;
     // A variable font draws its default weight, Thin for Noto. Bold is close
     // to what the PostScript name picks in the render
     family = new FontFace(id, `url(${url})`, { weight: name ? "700" : "400" })

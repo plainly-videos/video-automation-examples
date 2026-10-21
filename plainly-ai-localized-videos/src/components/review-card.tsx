@@ -78,7 +78,8 @@ export function ReviewCard({
               >
                 {([canSubmit, submitting]) => (
                   <Button
-                    type="submit"
+                    type="button"
+                    onClick={() => form.handleSubmit()}
                     disabled={!canSubmit || submitting || translating}
                   >
                     {submitting && <Spinner />}

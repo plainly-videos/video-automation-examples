@@ -179,3 +179,12 @@ test("colors are #RRGGBB", () => {
 test("toCurl escapes apostrophes", () => {
   expect(toCurl(JSON.stringify({ a: "l'été" }))).toContain(`l'\\''été`);
 });
+
+test("localizationSchema sends the copy trimmed", () => {
+  const padded = { ...en, copy: { ...en.copy, cta: `  ${en.copy.cta} ` } };
+  const { versions } = localizationSchema.parse({
+    design,
+    versions: [padded, ja],
+  });
+  expect(versions[0].copy.cta).toBe(en.copy.cta);
+});

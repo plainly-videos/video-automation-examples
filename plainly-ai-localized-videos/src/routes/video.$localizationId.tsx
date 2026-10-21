@@ -83,8 +83,9 @@ function Videos({
         setRenders(next);
         setPollFailed(false);
         if (isLocalizationFinished(next)) {
-          // Refreshes the loaders, so Recent videos sees the final states
-          router.invalidate();
+          // Refreshes Recent videos with the final states. Only the root loader,
+          // a failed reload of this route would swap the videos for the error
+          router.invalidate({ filter: (m) => m.routeId === "__root__" });
           return;
         }
       } catch {

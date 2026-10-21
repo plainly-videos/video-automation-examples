@@ -115,9 +115,9 @@ export const localizationSchema = z
       z.object({
         language: z.string(),
         copy: z.object({
-          headline: z.string(),
-          subheadline: z.string(),
-          cta: z.string(),
+          headline: z.string().trim(),
+          subheadline: z.string().trim(),
+          cta: z.string().trim(),
         }),
         font: fontSchema.optional(),
       }),

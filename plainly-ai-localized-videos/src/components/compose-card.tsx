@@ -151,6 +151,8 @@ export function ComposeCard({
                       languages.includes(language.code) ? "default" : "outline"
                     }
                     aria-pressed={languages.includes(language.code)}
+                    // The translation writes the languages picked when it started
+                    disabled={translating}
                     onClick={() => toggleLanguage(language.code)}
                   >
                     {language.name}
