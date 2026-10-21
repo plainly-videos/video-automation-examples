@@ -1,4 +1,12 @@
-import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import {
+  createRootRoute,
+  HeadContent,
+  Outlet,
+  Scripts,
+} from "@tanstack/react-router";
+import { RecentLocalizations } from "@/components/recent-localizations";
+import type { LocalizationSummary } from "@/lib/localization";
+import { listLocalizations } from "@/lib/plainly";
 import appCss from "../styles.css?url";
 
 export const Route = createRootRoute({
@@ -16,7 +24,33 @@ export const Route = createRootRoute({
   }),
   notFoundComponent: () => <p>The requested page could not be found.</p>,
   shellComponent: RootDocument,
+  // Recent videos live in the layout, so they show under every page.
+  // A failed list must not break the form, so the error is shown in the card
+  loader: async (): Promise<{
+    localizations: LocalizationSummary[];
+    error?: string;
+  }> => {
+    try {
+      return { localizations: await listLocalizations() };
+    } catch (err) {
+      return {
+        localizations: [],
+        error: err instanceof Error ? err.message : String(err),
+      };
+    }
+  },
+  component: RootLayout,
 });
+
+function RootLayout() {
+  const { localizations, error } = Route.useLoaderData();
+  return (
+    <>
+      <Outlet />
+      <RecentLocalizations localizations={localizations} error={error} />
+    </>
+  );
+}
 
 const footerLinks = [
   {

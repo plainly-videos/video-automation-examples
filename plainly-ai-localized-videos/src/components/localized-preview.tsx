@@ -1,4 +1,9 @@
-import { type CSSProperties, useEffect, useState } from "react";
+import {
+  type CSSProperties,
+  useEffect,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import {
   BOTTLE_IN,
   BUTTON_IN,
@@ -17,19 +22,34 @@ const clamp = (x: number) => Math.min(1, Math.max(0, x));
 const easeOut = (t: number, from: number, length: number) =>
   1 - (1 - clamp((t - from) / length)) ** 3;
 
-// Seconds into the video. One clock for all previews on the page
-export function useClock() {
-  const [t, setT] = useState(STILL);
-  useEffect(() => {
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let id = requestAnimationFrame(function tick(now) {
-      setT((now / 1000) % LENGTH);
-      id = requestAnimationFrame(tick);
+// Seconds into the video. One animation frame loop for every preview on the
+// page, it runs while any of them is mounted
+const clock = { t: STILL, frame: 0, listeners: new Set<() => void>() };
+
+function subscribe(listener: () => void) {
+  clock.listeners.add(listener);
+  if (
+    clock.listeners.size === 1 &&
+    !matchMedia("(prefers-reduced-motion: reduce)").matches
+  ) {
+    clock.frame = requestAnimationFrame(function tick(now) {
+      clock.t = (now / 1000) % LENGTH;
+      for (const notify of clock.listeners) notify();
+      clock.frame = requestAnimationFrame(tick);
     });
-    return () => cancelAnimationFrame(id);
-  }, []);
-  return t;
+  }
+  return () => {
+    clock.listeners.delete(listener);
+    if (clock.listeners.size === 0) cancelAnimationFrame(clock.frame);
+  };
 }
+
+export const useClock = () =>
+  useSyncExternalStore(
+    subscribe,
+    () => clock.t,
+    () => STILL,
+  );
 
 // One FontFace per URL and weight, shared by every preview on the page
 const fonts = new Map<string, Promise<string>>();
@@ -83,6 +103,13 @@ const imageOf = (value: string, fallback: string) =>
 // character by character
 const words = (text: string) =>
   /\s/.test(text.trim()) ? text.split(/(\s+)/) : [...text];
+
+// A preview that plays, kept apart so only it re-renders on every frame
+export function PlayingPreview(
+  props: Omit<Parameters<typeof LocalizedPreview>[0], "t">,
+) {
+  return <LocalizedPreview {...props} t={useClock()} />;
+}
 
 // An HTML version of the video that plays the same 8 seconds. Close to the
 // template, the final look still comes from After Effects
