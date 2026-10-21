@@ -17,7 +17,7 @@ import { LANGUAGES, LIMITS } from "@/lib/languages";
 import { copySchema, designSchema } from "@/lib/localization";
 
 const english = copySchema("latin").shape;
-const MEDIA_HINT = "https:// URL or project file";
+const MEDIA_HINT = "An https:// URL, or a file in the uploaded project";
 
 // Step 1: the English ad, its images and colors, and the languages to translate into
 export function ComposeCard({
@@ -41,7 +41,7 @@ export function ComposeCard({
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-6 md:grid-cols-[1fr_14rem] lg:grid-cols-[1fr_16rem]">
-        <div className="grid content-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid content-start grid-cols-2 gap-4 lg:grid-cols-4">
           <form.Field
             name="copy.headline"
             validators={{ onChange: english.headline }}
@@ -68,15 +68,22 @@ export function ComposeCard({
               />
             )}
           </form.Field>
+          {/* The button text is short, the two colors fit next to it */}
           <form.Field name="copy.cta" validators={{ onChange: english.cta }}>
             {(field) => (
               <TextInput
                 field={field}
                 label="Button"
                 max={LIMITS.latin.cta}
-                className="col-span-full"
+                className="col-span-full lg:col-span-2"
               />
             )}
+          </form.Field>
+          <form.Field name="design.colorBackground">
+            {(field) => <ColorInput field={field} label="Background" />}
+          </form.Field>
+          <form.Field name="design.colorButton">
+            {(field) => <ColorInput field={field} label="Button color" />}
           </form.Field>
           <form.Field
             name="design.productImage"
@@ -87,6 +94,7 @@ export function ComposeCard({
                 field={field}
                 label="Product image"
                 description={MEDIA_HINT}
+                className="col-span-full"
               />
             )}
           </form.Field>
@@ -95,14 +103,13 @@ export function ComposeCard({
             validators={{ onChange: designSchema.shape.logo }}
           >
             {(field) => (
-              <TextInput field={field} label="Logo" description={MEDIA_HINT} />
+              <TextInput
+                field={field}
+                label="Logo"
+                description={MEDIA_HINT}
+                className="col-span-full"
+              />
             )}
-          </form.Field>
-          <form.Field name="design.colorBackground">
-            {(field) => <ColorInput field={field} label="Background" />}
-          </form.Field>
-          <form.Field name="design.colorButton">
-            {(field) => <ColorInput field={field} label="Button color" />}
           </form.Field>
         </div>
         <form.Subscribe selector={(state) => state.values}>
