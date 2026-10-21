@@ -65,7 +65,7 @@ export function LocalizedPreview({
 
   return (
     <div
-      className="@container relative aspect-square w-full overflow-hidden"
+      className="@container relative aspect-square w-full overflow-hidden rounded-lg"
       style={{ background }}
     >
       <div className="absolute inset-0" style={{ transform: `scale(${zoom})` }}>

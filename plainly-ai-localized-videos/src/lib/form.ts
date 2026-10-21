@@ -7,7 +7,8 @@ export type VersionFields = { language: string; copy: Copy; font: FontFields };
 
 // The compose step, filled from defaults or from an earlier video
 export type Initial = { copy: Copy; design: Design; languages: string[] };
-export type Values = Initial & { versions: VersionFields[] };
+// The English font is set in the review step, like the translations' fonts
+export type Values = Initial & { font: FontFields; versions: VersionFields[] };
 
 export const toFont = ({ url, name }: FontFields): Font | undefined =>
   url.trim()
@@ -24,11 +25,12 @@ export const fontFields = (font?: Font): FontFields => ({
 export const toLocalization = ({
   copy,
   design,
+  font,
   versions,
 }: Values): Localization => ({
   design,
   versions: [
-    { language: SOURCE.code, copy },
+    { language: SOURCE.code, copy, font: toFont(font) },
     ...versions.map(({ language, copy, font }) => ({
       language,
       copy,

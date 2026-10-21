@@ -34,16 +34,13 @@ export function ReviewCard({
             <CardHeader>
               <CardTitle>2. Review the translations</CardTitle>
               <CardDescription>
-                Fix anything that reads wrong or runs too long, then render.
-                Nothing is rendered before you click Render.
+                Fix anything that reads wrong or runs too long, English
+                included, then render. Nothing is rendered before you click
+                Render.
               </CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-4 xl:grid-cols-2">
-              <form.Subscribe selector={(state) => state.values}>
-                {({ copy, design }) => (
-                  <SourceCard copy={copy} design={design} />
-                )}
-              </form.Subscribe>
+            <CardContent className="grid gap-6 [&>section+section]:border-t [&>section+section]:pt-6">
+              <SourceCard form={form} />
               {versions.map((version, i) => (
                 <VersionCard key={version.language} form={form} index={i} />
               ))}

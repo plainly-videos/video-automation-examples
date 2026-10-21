@@ -1,4 +1,5 @@
 import type { AnyFieldApi } from "@tanstack/react-form";
+import { useId } from "react";
 import { ButtonGroup } from "@/components/ui/button-group";
 import {
   Field,
@@ -14,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { isProjectFile, PROJECT_FOLDER } from "@/lib/localization";
 import { cn } from "@/lib/utils";
 
@@ -39,8 +41,8 @@ function FieldFrame({
   aside?: React.ReactNode;
   children: (input: { id: string; invalid: boolean }) => React.ReactNode;
 }) {
-  // Field names like versions[0].copy.headline are not valid in a selector
-  const id = `field-${field.name.replace(/\W+/g, "-")}`;
+  // English shows up in both steps, so the field name alone is not unique
+  const id = useId();
   const invalid =
     (showErrors || field.state.meta.isTouched) && !field.state.meta.isValid;
 
@@ -61,11 +63,15 @@ function FieldFrame({
 
 export function TextInput({
   max,
+  multiline,
   ...frame
 }: FrameProps & {
   // Shows a counter. Longer text can still be typed, the error says why it
   // can't be rendered
   max?: number;
+  // Grows with the text instead of scrolling it. Still one line of copy, so
+  // line breaks turn into spaces
+  multiline?: boolean;
 }) {
   const { field } = frame;
   return (
@@ -79,16 +85,31 @@ export function TextInput({
         )
       }
     >
-      {({ id, invalid }) => (
-        <Input
-          id={id}
-          name={field.name}
-          value={field.state.value}
-          aria-invalid={invalid}
-          onBlur={field.handleBlur}
-          onChange={(e) => field.handleChange(e.target.value)}
-        />
-      )}
+      {({ id, invalid }) =>
+        multiline ? (
+          <Textarea
+            id={id}
+            name={field.name}
+            value={field.state.value}
+            rows={1}
+            aria-invalid={invalid}
+            onBlur={field.handleBlur}
+            onChange={(e) =>
+              field.handleChange(e.target.value.replace(/\r?\n/g, " "))
+            }
+            className="min-h-8 resize-none py-1.5"
+          />
+        ) : (
+          <Input
+            id={id}
+            name={field.name}
+            value={field.state.value}
+            aria-invalid={invalid}
+            onBlur={field.handleBlur}
+            onChange={(e) => field.handleChange(e.target.value)}
+          />
+        )
+      }
     </FieldFrame>
   );
 }

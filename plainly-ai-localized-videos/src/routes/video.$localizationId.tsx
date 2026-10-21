@@ -166,7 +166,7 @@ function Videos({
                   {languageOf(code)?.name ?? code}
                   <RenderBadge render={latest[code]} />
                 </figcaption>
-                <div className="flex aspect-square items-center justify-center overflow-hidden rounded-md bg-muted">
+                <div className="flex aspect-square items-center justify-center overflow-hidden rounded-lg bg-muted">
                   <RenderFrame render={latest[code]} />
                 </div>
               </figure>

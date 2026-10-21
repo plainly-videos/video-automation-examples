@@ -7,7 +7,7 @@ The template is a square product ad: a headline, a subheadline, a product image,
 ## What this app does
 
 **Non-technical view:**
-Write the headline, subheadline and button text in English, set the product image, logo and colors, and pick the languages. Click one button and ChatGPT translates the text into all of them. Each language gets a card with a live preview and its text, so you can fix anything that reads wrong or runs too long before rendering. Click **Render** and you get one video per language, English included.
+Write the headline, subheadline and button text in English, set the product image, logo and colors, and pick the languages. Click one button and ChatGPT translates the text into all of them. Each language gets a row with a live preview and its text, English included, so you can fix anything that reads wrong or runs too long before rendering. Click **Render** and you get one video per language, English included.
 
 **Technical view:**
 A TanStack Start app with two server functions doing the work. The first sends the English text to the OpenAI Responses API once, with a structured output schema that returns the headline, subheadline and button text for every language. The second sends one `POST /api/v2/renders` request per language to `https://api.plainlyvideos.com`. Languages the template fonts can't show get a font URL in the request's render `properties`. Every render is tagged with custom attributes, and the app finds them again with `POST /api/v2/renders/attributes`. No database, no webhooks and no local storage are needed.
@@ -87,7 +87,7 @@ A TanStack Start app with two server functions doing the work. The first sends t
 
 Open http://localhost:3000. Write the ad in English and watch the preview next to the form. The product image and logo default to the files inside the uploaded project, so the example works without any URLs. To use your own, switch the source next to the field from **Project file** to **URL** and paste an `https://` link. Colors can be picked or typed as `#RRGGBB`. Pick the languages and click **Translate with ChatGPT**.
 
-Each language gets a card with its own preview and text. Every field counts characters against the limit for that language, and text that is too long turns red and blocks rendering until you shorten it. ChatGPT is asked to stay within the limits but doesn't always manage, so check the counters. Japanese, Chinese and Korean cards come with a font already set, under **Font**.
+Each language gets a row with its own preview and text, English first, where you can still edit it. Every field counts characters against the limit for that language, and text that is too long turns red and blocks rendering until you shorten it. ChatGPT is asked to stay within the limits but doesn't always manage, so check the counters. Japanese, Chinese and Korean come with a font already set, under **Font**, and any other language, English included, can get one there too.
 
 <p align="center"><img src=".assets/app.png" alt="Review step with a preview per language" width="500" /></p>
 

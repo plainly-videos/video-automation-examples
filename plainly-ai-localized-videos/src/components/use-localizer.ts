@@ -27,7 +27,11 @@ export function useLocalizer(initial: Initial) {
   const navigate = useNavigate();
 
   const form = useForm({
-    defaultValues: { ...initial, versions: [] } as Values,
+    defaultValues: {
+      ...initial,
+      font: fontFields(),
+      versions: [],
+    } as Values,
     onSubmit: async ({ value }) => {
       setRenderError(undefined);
       try {
