@@ -127,13 +127,15 @@ All Plainly calls go through server functions with the `plainlyFetch` pattern fr
   "attributes": {
     "example": "ai-localized-videos",
     "localizationId": "<uuid>",
-    "language": "ja"
+    "language": "ja",
+    "languages": "en,de,ja"
   }
 }
 ```
 
 - `properties` is left out when the language has no font.
 - `localizationId` is generated on the server per Render click.
+- `languages` lists every language of the localization, so the results page knows which languages to expect and can show "Not created" for a failed create call.
 - Renders are sent with `Promise.allSettled`, same as dynamic ads. All failed: error shown on the review step. Otherwise go to `/video/<localizationId>`. Languages whose call failed show "Not created".
 - Color format: verify with a draft render what `ColorBackground` and `ColorButton` expect (hex string or something else).
 - Media defaults: `ProductImage` and `Logo` default to the project's own files (`(Footage)/01_ASSETS/Image/product.png`, `(Footage)/01_ASSETS/Image/logo.png`). The API accepts paths inside the uploaded project. The browser can't load those paths, so the preview uses copies of the same images in `public/`.
