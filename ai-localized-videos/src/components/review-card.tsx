@@ -1,4 +1,3 @@
-import { RefreshCw } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,7 +16,7 @@ import { languageOf } from "@/lib/languages";
 // Step 2: every translation with its preview, then render them all.
 // Shows up once there is a translation
 export function ReviewCard({
-  localizer: { form, translating, renderError, translateAll },
+  localizer: { form, translating, renderError },
 }: {
   localizer: Localizer;
 }) {
@@ -61,18 +60,9 @@ export function ReviewCard({
                     key={code}
                     className="mr-auto text-sm text-muted-foreground"
                   >
-                    Translate again to add {languageOf(code)?.name}.
+                    Translate with ChatGPT to add {languageOf(code)?.name}.
                   </p>
                 ))}
-              <Button
-                type="button"
-                variant="outline"
-                disabled={translating}
-                onClick={translateAll}
-              >
-                {translating ? <Spinner /> : <RefreshCw />}
-                Translate again
-              </Button>
               <form.Subscribe
                 selector={(state) => [state.canSubmit, state.isSubmitting]}
               >

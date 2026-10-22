@@ -66,7 +66,7 @@ Simply choose an example that matches your use case and follow the `README.md` f
       - Naming campaigns with the batch reference and finding their renders with the attribute filter.
    * **Tech stack**: TanStack Start, papaparse, TypeScript, Tailwind CSS, shadcn/ui
 
-6. **[AI localized videos](plainly-ai-localized-videos/)**
+6. **[AI localized videos](ai-localized-videos/)**
    * **Purpose**: Demonstrates generating the same video in multiple languages, with ChatGPT translating the on-screen text automatically, through an app where you write a product ad in English, review each translation next to a preview, and get one video per language.
    * **What it shows**:
       - Translating ad copy into many languages with one structured OpenAI call.

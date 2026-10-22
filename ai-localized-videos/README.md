@@ -35,7 +35,7 @@ A TanStack Start app with two server functions doing the work. The first sends t
 
     ```bash
     git clone https://github.com/plainly-videos/video-automation-examples.git
-    cd video-automation-examples/plainly-ai-localized-videos
+    cd video-automation-examples/ai-localized-videos
     ```
 2. Install dependencies:
 

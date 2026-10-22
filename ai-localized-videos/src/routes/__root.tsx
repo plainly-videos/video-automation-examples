@@ -59,7 +59,7 @@ const footerLinks = [
     label: "Learn",
   },
   {
-    href: "https://github.com/plainly-videos/video-automation-examples/tree/master/plainly-ai-localized-videos",
+    href: "https://github.com/plainly-videos/video-automation-examples/tree/master/ai-localized-videos",
     icon: "/github-142-svgrepo-com.svg",
     label: "View on GitHub",
   },
