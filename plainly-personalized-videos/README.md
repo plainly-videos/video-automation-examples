@@ -7,7 +7,7 @@ For example, imagine it's December, and a sales rep wants to thank each client w
 ## What this app does
 
 **Non-technical view:**
-Non-technical view: Drop a CSV of clients onto the page, with their name, job title, company and a headshot URL. The app checks every row and marks the ones it can't use. Name the campaign, click just one button, and every client gets a 7-second Christmas greeting with their face, name, title and company. Each finished video has a Copy link button and a Copy for email button, which pastes into Gmail as a clickable picture of the client's own video. Render free drafts first to check everything, then the final videos.
+Drop a CSV of clients onto the page, with their name, job title, company and a headshot URL. The app checks every row and marks the ones it can't use. Name the campaign, click just one button, and every client gets a 7-second Christmas greeting with their face, name, title and company. Each finished video has a Copy link button and a Copy for email button, which pastes into Gmail as a clickable picture of the client's own video. Render free drafts first to check everything, then the final videos.
 
 **Technical view:**
 A TanStack Start app that parses the CSV with [papaparse](https://www.papaparse.com/), turns each valid row into one `batchData` entry, and sends a single `POST /api/v2/batch` request to `https://api.plainlyvideos.com`. Each entry sets its own file name and attributes, and the batch asks for one thumbnail per video. The app finds the renders again with `POST /api/v2/renders/attributes`, filtered by its own `example` attribute and Plainly's `batchRenderId`, and polls until they are done. No database, no webhooks and no local storage are needed.
