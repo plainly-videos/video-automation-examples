@@ -6,11 +6,9 @@ The template is a collection ad. The video opens with a hook and ends with a cal
 
 ## What this app does
 
-**Non-technical view:**
-Write a hook, button text and a call to action, and pick a category, which fills the ad with three products. Swap any of them or edit their names and prices while a live preview shows the ad in all three formats. Click one button to render the ad in all three formats, one video per format.
+**Non-technical view:** Write a hook, button text and a call to action, and pick a category, which fills the ad with three products. Swap any of them or edit their names and prices while a live preview shows the ad in all three formats. Click one button to render the ad in all three formats, one video per format.
 
-**Technical view:**
-A TanStack Start app that reads the project's templates from `GET /api/v2/projects/{projectId}`, picks one template per format by the aspect ratio of its resolution, and sends three `POST /api/v2/renders` requests to `https://api.plainlyvideos.com`, one per format. Every render is tagged with custom attributes, and the app finds them again with `POST /api/v2/renders/attributes`. No database, no webhooks and no local storage are needed.
+**Technical view:** A TanStack Start app that reads the project's templates from `GET /api/v2/projects/{projectId}`, picks one template per format by the aspect ratio of its resolution, and sends three `POST /api/v2/renders` requests to `https://api.plainlyvideos.com`, one per format. Every render is tagged with custom attributes, and the app finds them again with `POST /api/v2/renders/attributes`. No database, no webhooks and no local storage are needed.
 
 > [!WARNING]
 > Finding renders by custom attributes keeps this example short, but do not copy it into a real app. Every render in the organization can carry the same attributes, the lookup is a paginated search and older renders drop out of the results. Keep your own records instead: save each ad in your database, send its id with the render (for example as webhook `passthrough`) and update its status from webhooks, as the [Render and webhook example](../plainly-render-and-webhook/) does.
