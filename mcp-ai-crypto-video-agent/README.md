@@ -5,9 +5,9 @@ talks with you and orchestrates MCP tools for data fetching and rendering.
 
 ## What this app does
 
-**Non-technical view**: Ask the agent for a video about a coin, like Bitcoin or Solana. It's told to use the current price, the 24-hour and 7-day change and the date, to suggest what the video could show if you ask, and to ask whether you have a coin image before using one from CoinGecko. It then submits the render, and you can ask it to check the status. These steps come from the agent's prompt, so the model may not follow them exactly every time.
+**Non-technical view:** Ask the agent for a video about a coin, like Bitcoin or Solana. It's told to use the current price, the 24-hour and 7-day change and the date, to suggest what the video could show if you ask, and to ask whether you have a coin image before using one from CoinGecko. It then submits the render, and you can ask it to check the status. These steps come from the agent's prompt, so the model may not follow them exactly every time.
 
-**Technical view**: A Node.js command-line app built with the OpenAI Agents SDK. It connects to two MCP servers and gives one agent the tools from both. The Plainly Videos MCP server runs locally, started by the app with npx, and CoinGecko's free public MCP server is reached over HTTP with no API key. The agent is instructed to look for a suitable crypto project in your Plainly account and fill its parameters with live coin data before submitting the render. All of that happens through MCP tool calls, so the app has no Plainly or crypto API code of its own.
+**Technical view:** A Node.js command-line app built with the OpenAI Agents SDK. It connects to two MCP servers and gives one agent the tools from both. The Plainly Videos MCP server runs locally, started by the app with npx, and CoinGecko's free public MCP server is reached over HTTP with no API key. The agent is instructed to look for a suitable crypto project in your Plainly account and fill its parameters with live coin data before submitting the render. All of that happens through MCP tool calls, so the app has no Plainly or crypto API code of its own.
 
 ## What you'll learn
 
