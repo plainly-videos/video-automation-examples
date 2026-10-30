@@ -4,11 +4,9 @@ This example demonstrates how to build a complete end-to-end video generation wo
 
 ## What this app does
 
-**Non-technical view:**
-Create sports matchup videos automatically! Simply pick two teams (from a short list of NBA teams) in the Team A and Team B dropdowns, and the app renders a custom matchup video with the two teams' names and logos.
+**Non-technical view:** Create sports matchup videos automatically! Simply pick two teams (from a short list of NBA teams) in the Team A and Team B dropdowns, and the app renders a custom matchup video with the two teams' names and logos.
 
-**Technical view:**
-This is a full-stack web application that demonstrates programmatic video generation through API integration. Users create matchup requests via a form interface, which triggers video rendering jobs through the Plainly Videos API. The app uses webhooks to receive real-time notifications when videos are complete or fail, automatically updating the database; the table reflects the new status on refresh.
+**Technical view:** This is a full-stack web application that demonstrates programmatic video generation through API integration. Users create matchup requests via a form interface, which triggers video rendering jobs through the Plainly Videos API. The app uses webhooks to receive real-time notifications when videos are complete or fail, automatically updating the database; the table reflects the new status on refresh.
 
 ## What you'll learn
 

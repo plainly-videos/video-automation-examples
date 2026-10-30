@@ -6,11 +6,9 @@ The template is a square product ad with a headline, a subheadline, a product im
 
 ## What this app does
 
-**Non-technical view:**
-Write the headline, subheadline and button text in English, set the product image, logo and colors, and pick the languages. Click one button and ChatGPT translates the text into all of them. Each language gets a row with a live preview and its text, English included, so you can fix anything that reads wrong or runs too long before rendering. Click **Render** and you get one video per language, English included.
+**Non-technical view:** Write the headline, subheadline and button text in English, set the product image, logo and colors, and pick the languages. Click one button and ChatGPT translates the text into all of them. Each language gets a row with a live preview and its text, English included, so you can fix anything that reads wrong or runs too long before rendering. Click **Render** and you get one video per language, English included.
 
-**Technical view:**
-A TanStack Start app with two server functions doing the work. The first sends the English text to the OpenAI Responses API once, with a structured output schema that returns the headline, subheadline and button text for every language. The second sends one `POST /api/v2/renders` request per language to `https://api.plainlyvideos.com`. Languages the template fonts can't show get a font URL in the request's render `properties`. Every render is tagged with custom attributes, and the app finds them again with `POST /api/v2/renders/attributes`. No database, no webhooks and no local storage are needed.
+**Technical view:** A TanStack Start app with two server functions doing the work. The first sends the English text to the OpenAI Responses API once, with a structured output schema that returns the headline, subheadline and button text for every language. The second sends one `POST /api/v2/renders` request per language to `https://api.plainlyvideos.com`. Languages the template fonts can't show get a font URL in the request's render `properties`. Every render is tagged with custom attributes, and the app finds them again with `POST /api/v2/renders/attributes`. No database, no webhooks and no local storage are needed.
 
 > [!WARNING]
 > Finding renders by custom attributes keeps this example short, but do not copy it into a real app. Every render in the organization can carry the same attributes, the lookup is a paginated search and older renders drop out of the results. Keep your own records instead: save each localization in your database, send its id with the render (for example as webhook `passthrough`) and update its status from webhooks, as the [Render and webhook example](../plainly-render-and-webhook/) does.

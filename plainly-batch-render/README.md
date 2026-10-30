@@ -4,11 +4,9 @@ This example demonstrates how to render multiple After Effects videos in a singl
 
 ## What this app does
 
-**Non-technical view:**
-Click NBA teams in the Western and Eastern Conference lists to add them to tonight's game night, click one button, and get a matchup video for every game. A grid shows the progress of every video, and each video appears there within a few seconds of being ready.
+**Non-technical view:** Click NBA teams in the Western and Eastern Conference lists to add them to tonight's game night, click one button, and get a matchup video for every game. A grid shows the progress of every video, and each video appears there within a few seconds of being ready.
 
-**Technical view:**
-A TanStack Start app that sends one `POST /api/v2/batch` request to `https://api.plainlyvideos.com` containing a batch data entry per scheduled game. The batch id is kept in the URL, and the page polls `GET /api/v2/batch/{batchId}/renders` until every render is finished. No database and no webhooks are needed.
+**Technical view:** A TanStack Start app that sends one `POST /api/v2/batch` request to `https://api.plainlyvideos.com` containing a batch data entry per scheduled game. The batch id is kept in the URL, and the page polls `GET /api/v2/batch/{batchId}/renders` until every render is finished. No database and no webhooks are needed.
 
 ## What you'll learn
 
