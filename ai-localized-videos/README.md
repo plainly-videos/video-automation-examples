@@ -2,7 +2,7 @@
 
 This example demonstrates generating the same video in multiple languages with [Plainly Videos](https://www.plainlyvideos.com/), with ChatGPT translating the on-screen text automatically. You write a product ad once in English, pick the languages you want, review every translation next to a preview, and get one rendered video per language.
 
-The template is a square product ad: a headline, a subheadline, a product image, a logo and a button, on a background color of your choice. The text is translated, the images and colors stay the same in every language. Japanese, Chinese and Korean get a different font per render, with no change to the After Effects project.
+The template is a square product ad with a headline, a subheadline, a product image, a logo and a button on a background color of your choice. Only the text gets translated, while the images and colors stay the same in every language. Japanese, Chinese and Korean use characters the template's fonts don't include, so the app switches them to a different font at render time, without any changes to the After Effects project.
 
 ## What this app does
 
@@ -17,9 +17,9 @@ A TanStack Start app with two server functions doing the work. The first sends t
 
 ## What you'll learn
 
-- **🌍 AI translation before rendering**: Translate the on-screen text into many languages with one OpenAI call that returns JSON in a fixed shape.
-- **👀 Review before render**: Show every translation with a preview and length checks, so nothing renders until a person approves it.
-- **🎬 One render per language**: Send the same template with different text, one single render request per language.
+- **🌍 AI translation**: Translate the on-screen text into multiple languages with one OpenAI call that returns JSON in a fixed shape.
+- **👀 Review before rendering**: Show every translation with a preview and length checks, so nothing renders until a person approves it.
+- **🎬 One render per language**: Send the same template with different text in one render request per language.
 - **🔤 Fonts per render**: Switch a text layer's font with render `properties`, so Japanese, Chinese and Korean render with the right glyphs.
 - **🏷️ Attribute filtering**: Tag renders with your own data and query them later, to load one localization or list recent ones.
 
